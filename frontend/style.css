@@ -1908,3 +1908,145 @@ input::placeholder {
   }
 }
 
+/* =================================================================== */
+/* GIT-AS-A-DATABASE REVISION HISTORY MODAL                            */
+/* =================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal-box.revision-modal {
+  background: #0f172a;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.15);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.mh-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mh-icon {
+  font-size: 26px;
+}
+.mh-title-row h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #fff;
+}
+.mh-title-row p {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.btn-close-modal {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.btn-close-modal:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+.modal-body {
+  padding: 18px 20px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+.rev-active-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.rev-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38BDF8;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+.git-revision-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rev-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+.rev-card:hover {
+  border-color: rgba(56, 189, 248, 0.3);
+  background: rgba(30, 41, 59, 0.8);
+}
+.rev-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.rev-commit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rev-sha {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.rev-msg {
+  font-size: 12.5px;
+  color: #fff;
+  font-weight: 600;
+}
+.rev-time {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: flex-end;
+}
+

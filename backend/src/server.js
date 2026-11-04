@@ -12,6 +12,7 @@ const vaultRoutes = require('./routes/vault');
 const helpdeskRoutes = require('./routes/helpdesk');
 const syncRoutes = require('./routes/sync');
 const { initHelpDeskTables } = require('./services/helpdeskTurso');
+const selfHealingMesh = require('./services/selfHealingMesh');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -82,6 +83,12 @@ async function initDatabases() {
   } catch (err) {
     console.error('[ATELION] ❌ MongoDB Connection Error:', err.message);
     console.log('[ATELION] ⚠️ Primary DB offline. Running in degraded mode with memory caching.');
+  }
+  // 3. Start Autonomous Self-Healing Multi-Vault Scrubber
+  try {
+    selfHealingMesh.startBackgroundScrubber(300000); // 5 min interval
+  } catch (sErr) {
+    console.warn('[SELF-HEALER-WARN]', sErr.message);
   }
 }
 

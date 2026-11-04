@@ -1602,3 +1602,103 @@ function setWhiteboardColor(color) {
   if (whiteboardInstance) whiteboardInstance.setColor(color);
 }
 
+// ==============================================================================
+// 17. GIT-AS-A-DATABASE REVISION HISTORY & 1-CLICK ROLLBACK
+// ==============================================================================
+
+async function openGitRevisionModal(docId = 'active_smart_note') {
+  const modal = document.getElementById('gitRevisionModal');
+  const listEl = document.getElementById('gitRevisionList');
+  const titleEl = document.getElementById('revDocTitle');
+  if (!modal || !listEl) return;
+
+  modal.classList.remove('hidden');
+  if (titleEl) titleEl.textContent = docId === 'active_smart_note' ? 'Smart Workspace Note' : docId;
+  listEl.innerHTML = '<div class="empty-state">Loading immutable Git commits...</div>';
+
+  const token = localStorage.getItem('atelion_token');
+  try {
+    const res = await fetch(`/api/sync/revisions/${docId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load revisions');
+
+    const revs = data.revisions || [];
+    if (revs.length === 0) {
+      listEl.innerHTML = `
+        <div class="rev-card">
+          <div class="rev-card-left">
+            <div class="rev-commit-row">
+              <span class="rev-sha">HEAD (Initial)</span>
+              <span class="rev-msg">Working Directory Draft</span>
+            </div>
+            <span class="rev-time">Auto-persisted in local IndexedDB (0ms)</span>
+          </div>
+          <span class="rev-badge">Active</span>
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = revs
+      .slice()
+      .reverse()
+      .map(
+        (r) => `
+        <div class="rev-card">
+          <div class="rev-card-left">
+            <div class="rev-commit-row">
+              <span class="rev-sha">${(r.commitSha || 'git-sha').slice(0, 7)}</span>
+              <span class="rev-msg">${r.commitMessage || 'Snapshot checkpoint'}</span>
+            </div>
+            <span class="rev-time">${new Date(r.timestamp).toLocaleString()} • ETag: ${(r.etag || '').slice(0, 8)}</span>
+          </div>
+          <button type="button" class="btn-primary btn-sm" onclick="rollbackToGitRevision('${docId}', ${r.version})">
+            <span>⏪ 1-Click Restore</span>
+          </button>
+        </div>
+      `
+      )
+      .join('');
+  } catch (err) {
+    listEl.innerHTML = `<div class="empty-state" style="color:#F87171;">⚠️ ${err.message}</div>`;
+  }
+}
+
+function closeGitRevisionModal() {
+  const modal = document.getElementById('gitRevisionModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function rollbackToGitRevision(docId, targetVersion) {
+  const token = localStorage.getItem('atelion_token');
+  try {
+    showToast(`Rolling back ${docId} to v${targetVersion}...`, 'info');
+    const res = await fetch(`/api/sync/rollback/${docId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ targetVersion }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Rollback rejected.');
+
+    if (data.restoredDoc) {
+      const editor = document.getElementById('smartNoteEditor');
+      if (editor && data.restoredDoc.content) {
+        editor.value = data.restoredDoc.content;
+        renderEditorPreview();
+      }
+    }
+
+    closeGitRevisionModal();
+    showToast(`✅ Successfully restored to Git checkpoint v${targetVersion}!`, 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+

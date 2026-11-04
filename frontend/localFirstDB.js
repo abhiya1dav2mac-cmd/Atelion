@@ -155,3 +155,4 @@ class AtelionLocalFirstDB {
 }
 
 window.localFirstDB = new AtelionLocalFirstDB();
+

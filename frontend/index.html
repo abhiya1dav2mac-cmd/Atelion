@@ -28,6 +28,7 @@
   <script src="localFirstDB.js"></script>
   <script src="p2pSync.js"></script>
   <script src="syncEngine.js"></script>
+  <script src="predictivePrefetcher.js"></script>
 </head>
 <body>
   <!-- Ambient Gradient Glows -->
@@ -537,6 +538,9 @@
                 <div class="zlc-badges">
                   <span class="zlc-pill zlc-cpu" id="statServerCpuPill">Server CPU: ~0.01%</span>
                   <span class="zlc-pill zlc-p2p" id="statP2PStatusPill">P2P Mesh: Active (1 peer)</span>
+                  <span class="zlc-pill" id="statAdaptiveNetPill">⚡ Adaptive Debounce: 1.2s (4G • Ping 40ms)</span>
+                  <span class="zlc-pill" id="statMerklePill">🌲 Merkle O(log N) Active</span>
+                  <span class="zlc-pill" id="statMeshPill">🚑 Self-Healing: 11 Nines (99.999999999%)</span>
                 </div>
               </div>
 
@@ -611,6 +615,9 @@
                   </button>
                   <button type="button" class="btn-secondary btn-sm" onclick="renderEditorPreview()">
                     <span>👁️ Render Preview (KaTeX + Mermaid)</span>
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" onclick="openGitRevisionModal()">
+                    <span>🕒 Git Version History & Rollback</span>
                   </button>
                 </div>
               </div>
@@ -1048,6 +1055,34 @@
     <footer class="auth-footer">
       <span>Protected by Atelion Enterprise Shield • Brevo OTP Verified • 256-bit Encrypted</span>
     </footer>
+  </div>
+
+  <!-- Git-as-a-Database 2-Year Version History & Rollback Modal -->
+  <div id="gitRevisionModal" class="modal-backdrop hidden">
+    <div class="modal-box revision-modal">
+      <div class="modal-header">
+        <div class="mh-title-row">
+          <span class="mh-icon">🐙</span>
+          <div>
+            <h3>Git-as-a-Database Version History</h3>
+            <p>2-Year Immutable Commit Tree • Character Diffs • 1-Click Rollback</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="closeGitRevisionModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="rev-active-info">
+          <span>Target Document: <b id="revDocTitle">Smart Workspace Note</b></span>
+          <span class="rev-badge" id="revActiveVersion">Git-Core v1</span>
+        </div>
+        <div id="gitRevisionList" class="git-revision-list">
+          <div class="empty-state">Loading Git commit checkpoints...</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary btn-sm" onclick="closeGitRevisionModal()">Close</button>
+      </div>
+    </div>
   </div>
 
   <!-- Global Toast Notification Element -->

@@ -66,3 +66,4 @@ class AtelionCompressionUtil {
 }
 
 window.AtelionCompressionUtil = AtelionCompressionUtil;
+
