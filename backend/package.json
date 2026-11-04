@@ -1,0 +1,33 @@
+{
+  "name": "atelion-backend",
+  "version": "1.0.0",
+  "description": "Atelion AI Workspace - Enterprise Backend with Dual-Role Auth & Brevo OTP",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [
+    "atelion",
+    "notion",
+    "workspace",
+    "auth",
+    "brevo",
+    "google-oauth"
+  ],
+  "author": "Atelion Team",
+  "license": "ISC",
+  "dependencies": {
+    "@simplewebauthn/server": "^14.0.3",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "google-auth-library": "^9.15.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

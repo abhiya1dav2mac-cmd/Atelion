@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atelion - Next-Gen AI Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Identity Services for Google OAuth -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- SimpleWebAuthn Browser Bundle for FIDO2 Passkey Support -->
+  <script src="https://unpkg.com/@simplewebauthn/browser@14.0.3/dist/bundle/index.umd.min.js"></script>
+</head>
+<body>
+  <!-- Ambient Gradient Glows -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Main Container -->
+  <div class="auth-wrapper">
+    <!-- Brand Header -->
+    <header class="brand-header">
+      <div class="brand-badge">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">ATELION</span>
+      </div>
+      <p class="brand-tagline">AI-Powered Collaborative Knowledge Operating System</p>
+    </header>
+
+    <!-- Auth Card -->
+    <main class="auth-card" id="authCard">
+      <!-- Tab Switcher -->
+      <nav class="auth-tabs" id="authTabs">
+        <button type="button" class="tab-btn active" id="tabLogin" onclick="switchAuthMode('login')">Sign In</button>
+        <button type="button" class="tab-btn" id="tabRegister" onclick="switchAuthMode('register')">Create Account</button>
+      </nav>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 1: SIGN IN FORM                                                -->
+      <!-- =================================================================== -->
+      <section class="auth-view" id="viewLogin">
+        <div class="form-header">
+          <h2>Welcome Back</h2>
+          <p>Access your documents, AI agents, and team workspaces.</p>
+        </div>
+
+        <!-- Quick Auth (Google & FIDO2 Passkey) -->
+        <div class="quick-auth-grid">
+          <button type="button" class="btn-quick btn-google" onclick="triggerGoogleSignIn()">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.7s.1-2 .4-2.7L1.6 6.4C.6 8.3 0 10.1 0 12s.6 3.7 1.6 5.6l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5.3L1.6 16c1.9 3.8 5.8 7 10.4 7z"/></svg>
+            <span>Google</span>
+          </button>
+          <button type="button" class="btn-quick btn-passkey" onclick="triggerPasskeySignIn()">
+            <span class="pk-chip-icon">🛡️</span>
+            <span>Biometric Passkey</span>
+          </button>
+        </div>
+
+        <div class="divider">
+          <span>or sign in with email & password</span>
+        </div>
+
+        <form id="formLogin" onsubmit="handleLoginSubmit(event)">
+          <div class="input-group">
+            <label for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail" placeholder="you@domain.com" required autocomplete="email">
+          </div>
+
+          <div class="input-group">
+            <div class="label-row">
+              <label for="loginPassword">Password</label>
+              <a href="javascript:void(0)" class="forgot-link" onclick="openForgotPasswordModal()">Forgot Password?</a>
+            </div>
+            <div class="password-wrapper">
+              <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('loginPassword')">👁️</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnLoginSubmit">
+            <span>Sign In to Workspace</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 2: REGISTRATION (STEP 1: ROLE SELECTION)                       -->
+      <!-- =================================================================== -->
+      <section class="auth-view hidden" id="viewRegisterRole">
+        <div class="form-header">
+          <h2>Select Your Profile Type</h2>
+          <p>We tailor your workspace tools, templates, and AI agents for you.</p>
+        </div>
+
+        <div class="role-cards-grid">
+          <!-- Student Card -->
+          <div class="role-card" id="cardStudent" onclick="selectRole('student')">
+            <div class="role-icon">🎓</div>
+            <div class="role-details">
+              <h3>I am a Student</h3>
+              <p>College, university, research scholar or academic learner.</p>
+            </div>
+            <div class="role-select-indicator"></div>
+          </div>
+
+          <!-- Working Professional Card -->
+          <div class="role-card" id="cardProfessional" onclick="selectRole('professional')">
+            <div class="role-icon">💼</div>
+            <div class="role-details">
+              <h3>I am a Professional</h3>
+              <p>Engineer, product manager, founder, or enterprise team member.</p>
+            </div>
+            <div class="role-select-indicator"></div>
+          </div>
+        </div>
+
+        <div class="role-footer-note">
+          <span>Already have an account?</span>
+          <a href="javascript:void(0)" onclick="switchAuthMode('login')">Sign In</a>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 3: REGISTRATION (STEP 2: DETAILS FORM)                         -->
+      <!-- =================================================================== -->
+      <section class="auth-view hidden" id="viewRegisterForm">
+        <div class="role-header-banner">
+          <div class="banner-badge" id="regRoleBadge">
+            <span id="regRoleIcon">🎓</span>
+            <span id="regRoleLabel">Student Registration</span>
+          </div>
+          <button type="button" class="btn-change-role" onclick="goBackToRoleSelection()">Change</button>
+        </div>
+
+        <!-- Google Sign-Up Button -->
+        <div class="google-auth-box">
+          <button type="button" class="btn-google" onclick="triggerGoogleSignIn()">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.4 1 3.5 3.6 1.6 7.4l3.7 2.9C6.2 7.1 8.9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.3 14.7c-.2-.7-.4-1.5-.4-2.7s.1-2 .4-2.7L1.6 6.4C.6 8.3 0 10.1 0 12s.6 3.7 1.6 5.6l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3.1 0-5.8-2.1-6.7-5.3L1.6 16c1.9 3.8 5.8 7 10.4 7z"/></svg>
+            <span>Sign up with Google</span>
+          </button>
+        </div>
+
+        <div class="divider">
+          <span>or fill details manually</span>
+        </div>
+
+        <form id="formRegister" onsubmit="handleRegisterSubmit(event)">
+          <!-- Row 1: Name & Personal Email -->
+          <div class="form-row">
+            <div class="input-group">
+              <label for="regName">Full Name</label>
+              <input type="text" id="regName" placeholder="Alex Morgan" required autocomplete="name">
+            </div>
+            <div class="input-group">
+              <label for="regEmail">Personal Email ID</label>
+              <input type="email" id="regEmail" placeholder="you@gmail.com" required autocomplete="email">
+            </div>
+          </div>
+
+          <!-- Row 2: Mobile Number -->
+          <div class="input-group">
+            <label for="regMobile">Mobile Number</label>
+            <input type="tel" id="regMobile" placeholder="+91 98765 43210" required autocomplete="tel">
+          </div>
+
+          <!-- ==================== STUDENT ONLY FIELDS ==================== -->
+          <div id="studentFieldsBlock">
+            <div class="form-row">
+              <div class="input-group">
+                <label for="regCollegeName">College / University Name</label>
+                <input type="text" id="regCollegeName" placeholder="IIT Delhi, BITS, etc.">
+              </div>
+              <div class="input-group">
+                <label for="regCollegeEmail">
+                  <span>College Email ID</span>
+                  <span class="sub-label">(Optional)</span>
+                </label>
+                <input type="email" id="regCollegeEmail" placeholder="scholar@iitd.ac.in">
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== PROFESSIONAL ONLY FIELDS ==================== -->
+          <div id="professionalFieldsBlock" class="hidden">
+            <div class="form-row">
+              <div class="input-group">
+                <label for="regCompanyName">Company / Organization</label>
+                <input type="text" id="regCompanyName" placeholder="Google, Microsoft, Stripe...">
+              </div>
+              <div class="input-group">
+                <label for="regDesignation">Designation / Role</label>
+                <input type="text" id="regDesignation" placeholder="Sr. Software Engineer">
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="regEmployeeEmail">Employee / Work Email ID</label>
+              <input type="email" id="regEmployeeEmail" placeholder="alex@company.com">
+            </div>
+          </div>
+
+          <!-- Row: Password & Confirm -->
+          <div class="form-row">
+            <div class="input-group">
+              <label for="regPassword">Create Password</label>
+              <div class="password-wrapper">
+                <input type="password" id="regPassword" placeholder="Min. 6 characters" required autocomplete="new-password">
+                <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('regPassword')">👁️</button>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="regConfirmPassword">Confirm Password</label>
+              <div class="password-wrapper">
+                <input type="password" id="regConfirmPassword" placeholder="Repeat password" required autocomplete="new-password">
+                <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('regConfirmPassword')">👁️</button>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnRegisterSubmit">
+            <span>Send Verification Passcode</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 4: OTP VERIFICATION MODAL / SCREEN                             -->
+      <!-- =================================================================== -->
+      <section class="auth-view hidden" id="viewOtp">
+        <div class="otp-container">
+          <div class="otp-badge-icon">🔐</div>
+          <h2>Check Your Email</h2>
+          <p>We've sent a 6-digit verification passcode to:<br><strong id="otpTargetEmail">user@domain.com</strong></p>
+
+          <form id="formOtp" onsubmit="handleOtpSubmit(event)">
+            <div class="otp-inputs-row">
+              <input type="text" maxlength="1" class="otp-box" id="otp1" autofocus autocomplete="off">
+              <input type="text" maxlength="1" class="otp-box" id="otp2" autocomplete="off">
+              <input type="text" maxlength="1" class="otp-box" id="otp3" autocomplete="off">
+              <input type="text" maxlength="1" class="otp-box" id="otp4" autocomplete="off">
+              <input type="text" maxlength="1" class="otp-box" id="otp5" autocomplete="off">
+              <input type="text" maxlength="1" class="otp-box" id="otp6" autocomplete="off">
+            </div>
+
+            <div class="otp-timer-row">
+              <span id="otpCountdownText">Code expires in <strong id="otpTimer">10:00</strong></span>
+              <button type="button" id="btnResendOtp" class="btn-resend-link" disabled onclick="resendRegistrationOtp()">Resend Code</button>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnVerifyOtpSubmit">
+              <span>Verify & Launch Workspace</span>
+              <span class="btn-arrow">🚀</span>
+            </button>
+
+            <button type="button" class="btn-secondary" onclick="goBackToForm()">
+              ← Edit Registration Details
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 5: GOOGLE ONBOARDING MODAL (COMPLETE MISSING DETAILS)          -->
+      <!-- =================================================================== -->
+      <section class="auth-view hidden" id="viewGoogleCompletion">
+        <div class="form-header">
+          <div class="google-user-avatar" id="gCompAvatar">G</div>
+          <h2 id="gCompGreeting">Welcome, User!</h2>
+          <p>Please complete your profile to set up your personalized workspace.</p>
+        </div>
+
+        <form id="formGoogleCompletion" onsubmit="handleGoogleCompletionSubmit(event)">
+          <!-- Role Selector for Google Users -->
+          <div class="input-group">
+            <label>Select Profile Type</label>
+            <div class="google-role-toggle">
+              <button type="button" class="g-role-btn active" id="gRoleStudent" onclick="selectGoogleRole('student')">
+                🎓 Student
+              </button>
+              <button type="button" class="g-role-btn" id="gRoleProfessional" onclick="selectGoogleRole('professional')">
+                💼 Working Professional
+              </button>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="gMobile">Mobile Number</label>
+            <input type="tel" id="gMobile" placeholder="+91 98765 43210" required>
+          </div>
+
+          <!-- Dynamic Student Fields -->
+          <div id="gStudentFields">
+            <div class="input-group">
+              <label for="gCollegeName">College / University Name</label>
+              <input type="text" id="gCollegeName" placeholder="e.g. Stanford, IIT, BITS...">
+            </div>
+            <div class="input-group">
+              <label for="gCollegeEmail">College Email ID <span class="sub-label">(Optional)</span></label>
+              <input type="email" id="gCollegeEmail" placeholder="student@university.edu">
+            </div>
+          </div>
+
+          <!-- Dynamic Professional Fields -->
+          <div id="gProfessionalFields" class="hidden">
+            <div class="input-group">
+              <label for="gCompanyName">Company Name</label>
+              <input type="text" id="gCompanyName" placeholder="e.g. Microsoft, Razorpay...">
+            </div>
+            <div class="input-group">
+              <label for="gDesignation">Job Title / Designation</label>
+              <input type="text" id="gDesignation" placeholder="e.g. Lead Architect">
+            </div>
+            <div class="input-group">
+              <label for="gEmployeeEmail">Work / Employee Email ID</label>
+              <input type="email" id="gEmployeeEmail" placeholder="employee@company.com">
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="gOptionalPassword">Create Workspace Password <span class="sub-label">(Optional, for direct login)</span></label>
+            <input type="password" id="gOptionalPassword" placeholder="Min. 6 characters (Optional)">
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnGoogleCompleteSubmit">
+            <span>Complete Setup & Enter Workspace</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 6: FIDO2 BIOMETRIC PASSKEY ONBOARDING PROMPT                   -->
+      <!-- =================================================================== -->
+      <section class="auth-view hidden" id="viewPasskeyPrompt">
+        <div class="passkey-onboarding-card">
+          <div class="passkey-hero-badge">
+            <span class="pk-icon-large">🛡️</span>
+            <span class="pk-tag">FIDO2 WebAuthn</span>
+          </div>
+          <h2>Activate Biometric Passkey?</h2>
+          <p class="pk-subtitle">
+            Set up Windows Hello, Touch ID, or Face ID to sign in with 1 touch — no passwords or OTPs needed.
+          </p>
+
+          <div class="pk-features-list">
+            <div class="pk-feature-item">
+              <span class="pk-feat-icon">⚡</span>
+              <div class="pk-feat-text">
+                <strong>1-Touch Instant Sign-In</strong>
+                <span>Unlock your workspace effortlessly in under 500ms</span>
+              </div>
+            </div>
+            <div class="pk-feature-item">
+              <span class="pk-feat-icon">🔒</span>
+              <div class="pk-feat-text">
+                <strong>Hardware Cryptographic Security</strong>
+                <span>Phishing-proof keys safely stored in your device's Secure Enclave/TPM</span>
+              </div>
+            </div>
+            <div class="pk-feature-item">
+              <span class="pk-feat-icon">💻</span>
+              <div class="pk-feat-text">
+                <strong>Universal Platform Support</strong>
+                <span>Windows Hello PIN/Fingerprint, MacBook Touch ID, iPhone Face ID, Android Biometrics</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pk-actions-group">
+            <button type="button" class="btn-primary btn-passkey-hero" id="btnActivatePasskey" onclick="registerUserPasskey()">
+              <span>🛡️ Yes, Activate Biometric Passkey</span>
+              <span class="btn-arrow">→</span>
+            </button>
+            <button type="button" class="btn-secondary" onclick="skipPasskeyRegistration()">
+              Skip for Now (I'll Set Up Later)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 7: FORGOT PASSWORD MODAL                                       -->
+      <!-- =================================================================== -->
+      <section class="auth-view hidden" id="viewForgotPassword">
+        <div class="form-header">
+          <h2>Reset Your Password</h2>
+          <p>Enter your registered email address to receive a secure recovery passcode.</p>
+        </div>
+
+        <!-- Step A: Enter Email -->
+        <div id="forgotStepEmail">
+          <form id="formForgotEmail" onsubmit="handleForgotEmailSubmit(event)">
+            <div class="input-group">
+              <label for="forgotEmail">Registered Email Address</label>
+              <input type="email" id="forgotEmail" placeholder="you@domain.com" required autocomplete="email">
+            </div>
+            <button type="submit" class="btn-primary" id="btnForgotEmailSubmit">
+              <span>Send Recovery Code</span>
+              <span class="btn-arrow">→</span>
+            </button>
+            <button type="button" class="btn-secondary" onclick="switchAuthMode('login')">
+              ← Back to Sign In
+            </button>
+          </form>
+        </div>
+
+        <!-- Step B: Enter OTP & New Password -->
+        <div id="forgotStepReset" class="hidden">
+          <form id="formForgotReset" onsubmit="handleForgotResetSubmit(event)">
+            <div class="input-group">
+              <label>6-Digit Recovery Passcode</label>
+              <input type="text" id="forgotOtpCode" placeholder="Enter 6-digit OTP" maxlength="6" required style="letter-spacing: 4px; font-weight: 700;">
+            </div>
+
+            <div class="input-group">
+              <label for="forgotNewPassword">New Password</label>
+              <input type="password" id="forgotNewPassword" placeholder="Min. 6 characters" required>
+            </div>
+
+            <div class="input-group">
+              <label for="forgotConfirmPassword">Confirm New Password</label>
+              <input type="password" id="forgotConfirmPassword" placeholder="Repeat new password" required>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnForgotResetSubmit">
+              <span>Update Password & Sign In</span>
+              <span class="btn-arrow">✓</span>
+            </button>
+
+            <button type="button" class="btn-secondary" onclick="switchAuthMode('login')">
+              Cancel
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- VIEW 7: LOGGED IN SUCCESS / DASHBOARD PREVIEW                      -->
+      <!-- =================================================================== -->
+      <section class="auth-view hidden" id="viewDashboard">
+        <div class="dashboard-card">
+          <div class="success-check-badge">✓</div>
+          <h2>Welcome to Atelion!</h2>
+          <p>Authentication complete. Your session is active.</p>
+
+          <div class="user-profile-badge">
+            <div class="up-avatar" id="dashAvatar">U</div>
+            <div class="up-info">
+              <h3 id="dashName">User Name</h3>
+              <span class="role-pill" id="dashRole">Student</span>
+              <div class="up-email" id="dashEmail">user@domain.com</div>
+              <div class="up-extra" id="dashExtra">College Name</div>
+            </div>
+          </div>
+
+          <!-- Passkey Security Status Card -->
+          <div class="dash-passkey-box" id="dashPasskeyBox">
+            <div class="dpk-left">
+              <div class="dpk-icon-badge" id="dashPkBadge">🛡️</div>
+              <div class="dpk-info">
+                <div class="dpk-title-row">
+                  <span class="dpk-title">Biometric Passkey</span>
+                  <span class="dpk-status-pill" id="dashPkStatusPill">Active</span>
+                </div>
+                <div class="dpk-desc" id="dashPkDesc">FIDO2 device registered for instant sign-in.</div>
+              </div>
+            </div>
+            <button type="button" class="btn-setup-passkey hidden" id="btnDashSetupPasskey" onclick="registerUserPasskey()">
+              + Enable Passkey
+            </button>
+          </div>
+
+          <div class="session-box">
+            <span class="session-label">Session JWT Token</span>
+            <code id="dashTokenSnippet">eyJhbGciOiJIUzI1NiIsIn...</code>
+          </div>
+
+          <button type="button" class="btn-primary" onclick="handleLogout()">
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Copyright -->
+    <footer class="auth-footer">
+      <span>Protected by Atelion Enterprise Shield • Brevo OTP Verified • 256-bit Encrypted</span>
+    </footer>
+  </div>
+
+  <!-- Global Toast Notification Element -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
