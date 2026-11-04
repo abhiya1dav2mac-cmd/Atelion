@@ -153,3 +153,4 @@ class AtelionVaultCrypto {
 
 // Attach to window for global access
 window.AtelionVaultCrypto = AtelionVaultCrypto;
+

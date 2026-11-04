@@ -52,3 +52,4 @@ const VaultItemSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model('VaultItem', VaultItemSchema);
+

@@ -45,6 +45,16 @@ Before registration, users are presented with a modern role selection screen:
 - **Isolated Help Desk (Turso LibSQL SQLite DB):**
   - **Architectural Segregation:** Customer support inquiries, issues, and messaging threads are isolated in an independent **Turso DB** instance via `@libsql/client`.
   - **Role-Aware Support:** Support requests capture whether the user is a Student or Professional for tailored priority resolution.
+- **Smart Notes & Agentic Slash-Commands (`/`):**
+  - **Instant Slash Widgets:** `/diagram` (Mermaid.js flowchart), `/quiz` (interactive MCQs), `/latex` (KaTeX math formula), `/prd` (product spec), `/cornell` (notes layout), `/summarize`, `/actions`.
+  - **Live Visual Split-Pane:** Renders KaTeX mathematical expressions and Mermaid diagrams in real time.
+- **Dual-Persona Adaptive Workspace Suite:**
+  - **🎓 Student Mode:** SuperMemo SM-2 Spaced Repetition 3D Flip Flashcards, Pomodoro Focus Engine with Web Audio chime, and Cornell Notes structure.
+  - **💼 Professional Mode:** Executive PRD Spec Builder, Action Item Priority Matrix, and Architecture Blueprint generator.
+- **🕸️ 60fps Neural Knowledge Graph:**
+  - Interactive force-directed canvas visualizing relationships between core notes, encrypted items, student topics, and support tickets with real-time physics.
+- **🎨 Interactive Whiteboard & Infinite Canvas:**
+  - Freehand sketch pen, translucent highlighter, eraser, draggable sticky notes, color swatches, and high-res PNG export.
 - **Forgot Password Flow:**
   - User submits registered email.
   - 6-digit recovery passcode sent via Brevo.

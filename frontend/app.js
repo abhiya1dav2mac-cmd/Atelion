@@ -881,8 +881,11 @@ async function triggerPasskeySignIn() {
 // 10. DASHBOARD SUB-NAVIGATION TABS
 // ==============================================================================
 
+let knowledgeGraphInstance = null;
+let whiteboardInstance = null;
+
 function switchDashTab(tabName) {
-  const tabs = ['overview', 'vault', 'helpdesk'];
+  const tabs = ['overview', 'notes', 'student', 'prof', 'graph', 'whiteboard', 'vault', 'helpdesk'];
   tabs.forEach((t) => {
     const btn = document.getElementById(`btnNav${t.charAt(0).toUpperCase() + t.slice(1)}`);
     const content = document.getElementById(`dashSub${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -894,6 +897,27 @@ function switchDashTab(tabName) {
     loadEncryptedVaultItems();
   } else if (tabName === 'helpdesk') {
     loadHelpDeskTickets();
+  } else if (tabName === 'student') {
+    if (window.workspaceEngine) {
+      workspaceEngine.renderCurrentFlashcard();
+      workspaceEngine.updatePomodoroDisplay();
+    }
+  } else if (tabName === 'graph') {
+    setTimeout(() => {
+      if (!knowledgeGraphInstance && window.AtelionKnowledgeGraph) {
+        knowledgeGraphInstance = new AtelionKnowledgeGraph('knowledgeGraphCanvas');
+      } else if (knowledgeGraphInstance) {
+        knowledgeGraphInstance.resizeCanvas();
+      }
+    }, 50);
+  } else if (tabName === 'whiteboard') {
+    setTimeout(() => {
+      if (!whiteboardInstance && window.AtelionWhiteboard) {
+        whiteboardInstance = new AtelionWhiteboard('whiteboardCanvas');
+      } else if (whiteboardInstance) {
+        whiteboardInstance.resizeCanvas();
+      }
+    }, 50);
   }
 }
 
@@ -1290,5 +1314,216 @@ async function handleTicketReplySubmit(e) {
 function closeTicketThread() {
   activeTicketId = null;
   document.getElementById('ticketThreadViewer').classList.add('hidden');
+}
+
+// ==============================================================================
+// 13. SMART NOTES & SLASH-COMMAND HANDLERS
+// ==============================================================================
+
+function triggerSlashShortcut(cmd) {
+  const editor = document.getElementById('smartNoteEditor');
+  if (editor && window.workspaceEngine) {
+    workspaceEngine.executeSlashCommand(cmd, editor);
+  }
+}
+
+function handleLocalAISummarize() {
+  const editor = document.getElementById('smartNoteEditor');
+  if (editor && window.workspaceEngine) {
+    workspaceEngine.executeSlashCommand('/summarize', editor);
+  }
+}
+
+function handleLocalAIActions() {
+  const editor = document.getElementById('smartNoteEditor');
+  if (editor && window.workspaceEngine) {
+    workspaceEngine.executeSlashCommand('/actions', editor);
+  }
+}
+
+function renderEditorPreview() {
+  const editor = document.getElementById('smartNoteEditor');
+  const output = document.getElementById('previewRenderOutput');
+  if (!editor || !output) return;
+
+  const text = editor.value;
+  if (!text.trim()) {
+    output.innerHTML = '<div class="empty-state">No content to preview. Type something in the editor!</div>';
+    return;
+  }
+
+  // 1. Process Markdown basics
+  let html = text
+    .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+    .replace(/^\- \[x\] (.*$)/gim, '<div class="preview-todo done">☑ $1</div>')
+    .replace(/^\- \[ \] (.*$)/gim, '<div class="preview-todo">☐ $1</div>')
+    .replace(/^\- (.*$)/gim, '<li>$1</li>')
+    .replace(/\n$/gim, '<br />');
+
+  // 2. Render KaTeX Math ($$...$$ and $...$)
+  if (window.katex) {
+    html = html.replace(/\$\$([^$]+)\$\$/g, (match, math) => {
+      try {
+        return `<div class="katex-display">${katex.renderToString(math, { displayMode: true })}</div>`;
+      } catch (e) {
+        return match;
+      }
+    });
+
+    html = html.replace(/\$([^$\n]+)\$/g, (match, math) => {
+      try {
+        return katex.renderToString(math, { displayMode: false });
+      } catch (e) {
+        return match;
+      }
+    });
+  }
+
+  output.innerHTML = html;
+
+  // 3. Render Mermaid Diagrams
+  if (window.mermaid) {
+    try {
+      mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+      mermaid.run({ nodes: output.querySelectorAll('.mermaid') });
+    } catch (e) {
+      console.warn('Mermaid render error:', e);
+    }
+  }
+}
+
+// ==============================================================================
+// 14. STUDENT SUITE HANDLERS
+// ==============================================================================
+
+function flipFlashcard() {
+  const inner = document.getElementById('flashcardInner');
+  if (inner) inner.classList.toggle('flipped');
+}
+
+function handleAddNewFlashcard() {
+  const qInput = document.getElementById('newFcQ');
+  const aInput = document.getElementById('newFcA');
+  const q = qInput.value.trim();
+  const a = aInput.value.trim();
+
+  if (!q || !a) {
+    showToast('Please enter both question and answer.', 'error');
+    return;
+  }
+
+  if (window.workspaceEngine) {
+    workspaceEngine.addFlashcard(q, a);
+    qInput.value = '';
+    aInput.value = '';
+  }
+}
+
+function generateFlashcardsFromCornell() {
+  const notes = document.getElementById('cornellNotes').value;
+  if (!notes || notes.trim().length < 20) {
+    showToast('Add more lecture notes to generate flashcards.', 'error');
+    return;
+  }
+
+  const cards = AtelionWorkspaceEngine.generateFlashcardsFromText(notes);
+  if (cards.length > 0 && window.workspaceEngine) {
+    cards.forEach((c) => workspaceEngine.addFlashcard(c.question, c.answer));
+    showToast(`Generated ${cards.length} flashcards from Cornell Notes!`, 'success');
+    switchDashTab('student');
+  }
+}
+
+// ==============================================================================
+// 15. PROFESSIONAL SUITE HANDLERS
+// ==============================================================================
+
+function handleGeneratePRD() {
+  const name = document.getElementById('prdName').value.trim() || 'Core Feature';
+  const audience = document.getElementById('prdAudience').value.trim() || 'Enterprise Teams';
+  const problem = document.getElementById('prdProblem').value.trim() || 'Operational latency and data silo';
+  const metrics = document.getElementById('prdMetrics').value.trim() || '<50ms latency, 99.99% uptime';
+
+  const prdText = `
+# 📋 Product Requirement Document: ${name}
+**Target Audience:** ${audience}
+**Status:** Approved for Sprint Planning
+**Date:** ${new Date().toLocaleDateString()}
+
+## 1. Problem Statement
+${problem}
+
+## 2. Key Performance Indicators (KPIs)
+- ${metrics}
+- High test coverage with zero security regressions.
+
+## 3. High-Level Architecture
+\`\`\`mermaid
+graph LR
+  Client[Web/Mobile Client] --> Cloudflare[Cloudflare Edge CDN]
+  Cloudflare --> Express[Atelion Backend]
+  Express --> Mongo[(Primary Atlas DB)]
+  Express --> Turso[(Support Turso SQLite)]
+\`\`\`
+
+## 4. Milestone Schedule
+- [x] Technical Architecture RFC
+- [ ] Staging Cluster Release
+- [ ] Enterprise Security Audit
+`;
+
+  const editor = document.getElementById('smartNoteEditor');
+  if (editor) {
+    editor.value = prdText;
+    switchDashTab('notes');
+    renderEditorPreview();
+    showToast(`PRD for "${name}" generated and opened in Smart Notes!`, 'success');
+  }
+}
+
+function handleAddNewAction() {
+  const input = document.getElementById('newActionText');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const list = document.getElementById('profActionList');
+  if (!list) return;
+
+  const item = document.createElement('label');
+  item.className = 'action-item';
+  item.innerHTML = `
+    <input type="checkbox">
+    <span>${text}</span>
+    <span class="priority-pill pri-high">High</span>
+  `;
+  list.appendChild(item);
+  input.value = '';
+  showToast('Milestone added to matrix', 'success');
+}
+
+// ==============================================================================
+// 16. KNOWLEDGE GRAPH & WHITEBOARD HANDLERS
+// ==============================================================================
+
+function handleAddNewGraphNode() {
+  const input = document.getElementById('newGraphNodeLabel');
+  const label = input.value.trim();
+  if (!label) return;
+
+  if (knowledgeGraphInstance) {
+    knowledgeGraphInstance.addNode(label, 'core');
+    input.value = '';
+    showToast(`Neural node "${label}" connected to knowledge map!`, 'success');
+  }
+}
+
+function setWhiteboardTool(tool) {
+  if (whiteboardInstance) whiteboardInstance.setTool(tool);
+}
+
+function setWhiteboardColor(color) {
+  if (whiteboardInstance) whiteboardInstance.setColor(color);
 }
 

@@ -14,6 +14,15 @@
   <script src="https://unpkg.com/@simplewebauthn/browser@14.0.3/dist/bundle/index.umd.min.js"></script>
   <!-- Atelion Zero-Knowledge E2EE Vault Crypto -->
   <script src="vaultCrypto.js"></script>
+  <!-- KaTeX for LaTeX Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <!-- Mermaid.js for Diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- Workspace Engine, Knowledge Graph, Whiteboard -->
+  <script src="workspaceEngine.js"></script>
+  <script src="knowledgeGraph.js"></script>
+  <script src="whiteboard.js"></script>
 </head>
 <body>
   <!-- Ambient Gradient Glows -->
@@ -463,11 +472,26 @@
             <button type="button" class="subnav-btn active" id="btnNavOverview" onclick="switchDashTab('overview')">
               🏠 Overview
             </button>
+            <button type="button" class="subnav-btn" id="btnNavNotes" onclick="switchDashTab('notes')">
+              📝 Smart Notes & Slash
+            </button>
+            <button type="button" class="subnav-btn" id="btnNavStudent" onclick="switchDashTab('student')">
+              🎓 Student Suite
+            </button>
+            <button type="button" class="subnav-btn" id="btnNavProf" onclick="switchDashTab('prof')">
+              💼 Professional Suite
+            </button>
+            <button type="button" class="subnav-btn" id="btnNavGraph" onclick="switchDashTab('graph')">
+              🕸️ Neural Graph
+            </button>
+            <button type="button" class="subnav-btn" id="btnNavWhiteboard" onclick="switchDashTab('whiteboard')">
+              🎨 Whiteboard
+            </button>
             <button type="button" class="subnav-btn" id="btnNavVault" onclick="switchDashTab('vault')">
-              🔒 Zero-Knowledge Vault
+              🔒 E2EE Vault
             </button>
             <button type="button" class="subnav-btn" id="btnNavHelpdesk" onclick="switchDashTab('helpdesk')">
-              🎫 Help Desk (Turso DB)
+              🎫 Turso Helpdesk
             </button>
           </div>
 
@@ -498,6 +522,299 @@
             <button type="button" class="btn-primary" onclick="handleLogout()">
               <span>Sign Out</span>
             </button>
+          </div>
+
+          <!-- ================= TAB: SMART NOTES & SLASH COMMANDS ================= -->
+          <div id="dashSubNotes" class="subtab-content hidden">
+            <div class="notes-hero-header">
+              <div class="nh-title-row">
+                <span class="nh-icon">📝</span>
+                <div>
+                  <h3>Smart Notes & Slash-Command Editor</h3>
+                  <p>Type <code>/</code> to trigger instant widgets: Mermaid diagrams, Quizzes, LaTeX formulas, PRDs & Summaries.</p>
+                </div>
+              </div>
+              <div class="slash-quick-pills">
+                <button type="button" class="pill-btn" onclick="triggerSlashShortcut('/diagram')">/diagram</button>
+                <button type="button" class="pill-btn" onclick="triggerSlashShortcut('/quiz')">/quiz</button>
+                <button type="button" class="pill-btn" onclick="triggerSlashShortcut('/latex')">/latex</button>
+                <button type="button" class="pill-btn" onclick="triggerSlashShortcut('/prd')">/prd</button>
+                <button type="button" class="pill-btn" onclick="triggerSlashShortcut('/cornell')">/cornell</button>
+                <button type="button" class="pill-btn" onclick="triggerSlashShortcut('/summarize')">/summarize</button>
+                <button type="button" class="pill-btn" onclick="triggerSlashShortcut('/actions')">/actions</button>
+              </div>
+            </div>
+
+            <div class="smart-editor-grid">
+              <div class="editor-pane">
+                <textarea id="smartNoteEditor" rows="12" placeholder="Start typing your note... Use slash commands like /diagram, /latex, /summarize to generate widgets!"></textarea>
+                <div class="editor-toolbar">
+                  <button type="button" class="btn-primary btn-sm" onclick="handleLocalAISummarize()">
+                    <span>⚡ AI Summarize (0 GPU Cost)</span>
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" onclick="handleLocalAIActions()">
+                    <span>📋 Extract Action Items</span>
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" onclick="renderEditorPreview()">
+                    <span>👁️ Render Preview (KaTeX + Mermaid)</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Live KaTeX & Mermaid Preview Box -->
+              <div class="preview-pane" id="editorPreviewPane">
+                <div class="pane-header">
+                  <span>Live Render Preview</span>
+                  <span class="sub-label">KaTeX Math & Mermaid Diagrams</span>
+                </div>
+                <div id="previewRenderOutput" class="preview-output">
+                  <div class="empty-state">Click "Render Preview" or type LaTeX/Mermaid to visualize in real time.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB: STUDENT ACADEMIC SUITE ================= -->
+          <div id="dashSubStudent" class="subtab-content hidden">
+            <div class="suite-header student-theme">
+              <span class="suite-icon">🎓</span>
+              <div>
+                <h3>Student Academic Excellence Suite</h3>
+                <p>Cornell Notes structuring, SuperMemo SM-2 Spaced Repetition Flashcards, and Focus Timer.</p>
+              </div>
+            </div>
+
+            <div class="student-tools-grid">
+              <!-- Tool 1: Pomodoro Focus Timer -->
+              <div class="tool-card pomodoro-card">
+                <div class="tool-card-header">
+                  <span class="tch-icon">⏰</span>
+                  <h4>Pomodoro Focus Engine</h4>
+                </div>
+                <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
+                <div class="pomo-controls">
+                  <button type="button" class="btn-primary btn-sm" id="btnPomodoroToggle" onclick="workspaceEngine.togglePomodoro()">
+                    ▶ Start Focus
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" onclick="workspaceEngine.resetPomodoro()">
+                    🔄 Reset
+                  </button>
+                </div>
+                <div class="pomo-tip">Synthesizes Web Audio chime upon session completion.</div>
+              </div>
+
+              <!-- Tool 2: Spaced Repetition 3D Flip Flashcard -->
+              <div class="tool-card flashcard-card">
+                <div class="tool-card-header">
+                  <span class="tch-icon">🧠</span>
+                  <h4>Spaced Repetition (SM-2)</h4>
+                  <span class="fc-counter" id="fcIndexIndicator">1 / 3</span>
+                </div>
+
+                <div class="flashcard-scene" onclick="flipFlashcard()">
+                  <div class="flashcard-inner" id="flashcardInner">
+                    <div class="flashcard-face flashcard-front">
+                      <span class="fc-label">QUESTION (Click to Flip)</span>
+                      <p id="fcQuestion">What is Time Complexity of Binary Search?</p>
+                    </div>
+                    <div class="flashcard-face flashcard-back">
+                      <span class="fc-label">ANSWER</span>
+                      <p id="fcAnswer">O(log n) because the search space is halved at each step.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="fc-grade-row">
+                  <button type="button" class="grade-btn g-again" onclick="workspaceEngine.gradeFlashcard(1)">Again (1d)</button>
+                  <button type="button" class="grade-btn g-hard" onclick="workspaceEngine.gradeFlashcard(2)">Hard</button>
+                  <button type="button" class="grade-btn g-good" onclick="workspaceEngine.gradeFlashcard(4)">Good</button>
+                  <button type="button" class="grade-btn g-easy" onclick="workspaceEngine.gradeFlashcard(5)">Easy</button>
+                </div>
+
+                <!-- Add Flashcard Mini Form -->
+                <div class="add-fc-row">
+                  <input type="text" id="newFcQ" placeholder="New Question...">
+                  <input type="text" id="newFcA" placeholder="New Answer...">
+                  <button type="button" class="btn-primary btn-sm" onclick="handleAddNewFlashcard()">+ Add</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Cornell Notes Section -->
+            <div class="cornell-card">
+              <div class="tool-card-header">
+                <span class="tch-icon">📖</span>
+                <h4>Cornell Notes Framework</h4>
+                <button type="button" class="btn-secondary btn-sm" onclick="generateFlashcardsFromCornell()">
+                  ⚡ Convert to Flashcards
+                </button>
+              </div>
+              <div class="cornell-grid">
+                <div class="cornell-col cornell-cues">
+                  <span class="col-title">Cues / Questions</span>
+                  <textarea id="cornellCues" rows="5" placeholder="• What is CRDT?&#10;• What is WebCrypto?&#10;• Key Formulas?"></textarea>
+                </div>
+                <div class="cornell-col cornell-notes">
+                  <span class="col-title">Detailed Lecture Notes</span>
+                  <textarea id="cornellNotes" rows="5" placeholder="Record facts, definitions, diagrams, explanations, and code examples..."></textarea>
+                </div>
+              </div>
+              <div class="cornell-summary">
+                <span class="col-title">Summary (Synthesize core takeaway in 2 sentences)</span>
+                <textarea id="cornellSummary" rows="2" placeholder="Write a brief synthesis of the page..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB: PROFESSIONAL ENTERPRISE SUITE ================= -->
+          <div id="dashSubProf" class="subtab-content hidden">
+            <div class="suite-header prof-theme">
+              <span class="suite-icon">💼</span>
+              <div>
+                <h3>Professional Enterprise Sprint Suite</h3>
+                <p>PRD Spec Builder, Action Item Matrices, and Architecture Blueprints.</p>
+              </div>
+            </div>
+
+            <div class="prof-tools-grid">
+              <!-- PRD Generator Card -->
+              <div class="tool-card prd-card">
+                <div class="tool-card-header">
+                  <span class="tch-icon">📋</span>
+                  <h4>Executive PRD Builder</h4>
+                </div>
+                <div class="form-row">
+                  <div class="input-group">
+                    <label>Feature / Initiative Name</label>
+                    <input type="text" id="prdName" placeholder="e.g. Real-Time Collaborative Canvas">
+                  </div>
+                  <div class="input-group">
+                    <label>Target Audience / Persona</label>
+                    <input type="text" id="prdAudience" placeholder="e.g. Enterprise Engineering Teams">
+                  </div>
+                </div>
+                <div class="input-group">
+                  <label>Problem Statement</label>
+                  <textarea id="prdProblem" rows="2" placeholder="What friction exists today?"></textarea>
+                </div>
+                <div class="input-group">
+                  <label>Key Success Metrics (KPIs)</label>
+                  <input type="text" id="prdMetrics" placeholder="e.g. <50ms sync latency, 99.9% uptime">
+                </div>
+                <button type="button" class="btn-primary btn-sm" onclick="handleGeneratePRD()">
+                  <span>⚡ Generate PRD & Push to Notes</span>
+                </button>
+              </div>
+
+              <!-- Action Item Tracker -->
+              <div class="tool-card action-items-card">
+                <div class="tool-card-header">
+                  <span class="tch-icon">✅</span>
+                  <h4>Milestone & Action Matrix</h4>
+                </div>
+                <div class="action-list" id="profActionList">
+                  <label class="action-item">
+                    <input type="checkbox" checked>
+                    <span>Deploy FIDO2 WebAuthn Passkey Authentication</span>
+                    <span class="priority-pill pri-urgent">Urgent</span>
+                  </label>
+                  <label class="action-item">
+                    <input type="checkbox" checked>
+                    <span>Mount Zero-Knowledge AES-256 E2EE Vault</span>
+                    <span class="priority-pill pri-high">High</span>
+                  </label>
+                  <label class="action-item">
+                    <input type="checkbox" checked>
+                    <span>Connect Segregated Turso SQLite Helpdesk</span>
+                    <span class="priority-pill pri-normal">Normal</span>
+                  </label>
+                  <label class="action-item">
+                    <input type="checkbox">
+                    <span>Benchmark Multi-Region Latency & Edge Caching</span>
+                    <span class="priority-pill pri-normal">Normal</span>
+                  </label>
+                </div>
+                <div class="add-action-row">
+                  <input type="text" id="newActionText" placeholder="New action item or milestone...">
+                  <button type="button" class="btn-primary btn-sm" onclick="handleAddNewAction()">+ Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB: NEURAL KNOWLEDGE GRAPH ================= -->
+          <div id="dashSubGraph" class="subtab-content hidden">
+            <div class="graph-hero-header">
+              <div class="gh-left">
+                <span class="gh-icon">🕸️</span>
+                <div>
+                  <h3>Interactive Neural Knowledge Graph</h3>
+                  <p>60fps physics simulation showing semantic clusters and cross-document neural links.</p>
+                </div>
+              </div>
+              <div class="graph-legend">
+                <span class="leg-item"><span class="dot d-core"></span>Core Workspace</span>
+                <span class="leg-item"><span class="dot d-student"></span>Student Tools</span>
+                <span class="leg-item"><span class="dot d-prof"></span>Professional Tools</span>
+                <span class="leg-item"><span class="dot d-sec"></span>E2EE Vault</span>
+                <span class="leg-item"><span class="dot d-turso"></span>Turso Support</span>
+              </div>
+            </div>
+
+            <div class="graph-canvas-wrapper" id="graphContainer">
+              <canvas id="knowledgeGraphCanvas"></canvas>
+            </div>
+            <div class="graph-controls-bar">
+              <input type="text" id="newGraphNodeLabel" placeholder="Add custom node label (e.g. Machine Learning)...">
+              <button type="button" class="btn-primary btn-sm" onclick="handleAddNewGraphNode()">+ Insert Neural Node</button>
+              <span class="graph-tip">💡 Tip: Click and drag any node to test the physics simulation!</span>
+            </div>
+          </div>
+
+          <!-- ================= TAB: VISUAL WHITEBOARD & CANVAS ================= -->
+          <div id="dashSubWhiteboard" class="subtab-content hidden">
+            <div class="whiteboard-hero-header">
+              <div class="wh-left">
+                <span class="wh-icon">🎨</span>
+                <div>
+                  <h3>Interactive Whiteboard & Infinite Canvas</h3>
+                  <p>Sketch architectural diagrams, draw freehand, attach sticky notes, and export PNGs.</p>
+                </div>
+              </div>
+              <div class="wb-actions">
+                <button type="button" class="btn-primary btn-sm" onclick="whiteboardInstance && whiteboardInstance.addStickyNote('New Idea')">
+                  📌 Add Sticky Note
+                </button>
+                <button type="button" class="btn-secondary btn-sm" onclick="whiteboardInstance && whiteboardInstance.clearCanvas()">
+                  🗑️ Clear
+                </button>
+                <button type="button" class="btn-primary btn-sm" onclick="whiteboardInstance && whiteboardInstance.exportImage()">
+                  📥 Export PNG
+                </button>
+              </div>
+            </div>
+
+            <!-- Whiteboard Toolbar -->
+            <div class="wb-toolbar">
+              <div class="wb-tool-group">
+                <button type="button" class="wb-tool-btn active" data-tool="pen" onclick="setWhiteboardTool('pen')">✏️ Pen</button>
+                <button type="button" class="wb-tool-btn" data-tool="highlighter" onclick="setWhiteboardTool('highlighter')">🖍️ Highlighter</button>
+                <button type="button" class="wb-tool-btn" data-tool="eraser" onclick="setWhiteboardTool('eraser')">🧹 Eraser</button>
+              </div>
+
+              <div class="wb-color-group">
+                <span class="wb-color-dot active" style="background: #38BDF8;" data-color="#38BDF8" onclick="setWhiteboardColor('#38BDF8')"></span>
+                <span class="wb-color-dot" style="background: #34D399;" data-color="#34D399" onclick="setWhiteboardColor('#34D399')"></span>
+                <span class="wb-color-dot" style="background: #FBBF24;" data-color="#FBBF24" onclick="setWhiteboardColor('#FBBF24')"></span>
+                <span class="wb-color-dot" style="background: #F472B6;" data-color="#F472B6" onclick="setWhiteboardColor('#F472B6')"></span>
+                <span class="wb-color-dot" style="background: #FFFFFF;" data-color="#FFFFFF" onclick="setWhiteboardColor('#FFFFFF')"></span>
+              </div>
+            </div>
+
+            <!-- Whiteboard Container -->
+            <div class="whiteboard-canvas-wrapper" id="whiteboardContainer">
+              <canvas id="whiteboardCanvas"></canvas>
+            </div>
           </div>
 
           <!-- ================= TAB 2: ZERO-KNOWLEDGE E2EE VAULT ================= -->
