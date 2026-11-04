@@ -14,6 +14,20 @@ const inMemoryDocStore = new Map();
 router.use(authenticateToken);
 
 /**
+ * ROOM POPULATION ENDPOINT (For Adaptive Collaboration Router)
+ */
+router.get('/room/:roomId/population', (req, res) => {
+  const { roomId } = req.params;
+  res.set('Cache-Control', 'no-store, private');
+  res.json({
+    success: true,
+    roomId,
+    peerCount: 1,
+    protocolRecommended: 'P2P_MESH',
+  });
+});
+
+/**
  * 1. BATCH SYNC INGESTION (HIGH-THROUGHPUT, MINIMAL CPU)
  * Receives compressed, coalesced batches from client.
  */

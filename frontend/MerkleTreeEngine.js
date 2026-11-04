@@ -58,3 +58,4 @@ class AtelionMerkleTreeEngine {
 }
 
 window.MerkleTreeEngine = AtelionMerkleTreeEngine;
+

@@ -28,9 +28,28 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve frontend static files if present
+// Serve frontend static files with Edge CDN-friendly caching for immutable assets
 const frontendDistPath = path.join(__dirname, '../../frontend');
-app.use(express.static(frontendDistPath));
+app.use(
+  express.static(frontendDistPath, {
+    maxAge: '1y',
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.html')) {
+        // HTML is always revalidated
+        res.setHeader('Cache-Control', 'no-cache');
+      } else {
+        // Static assets (JS, CSS, images) are cached immutably at the edge
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
+  })
+);
+
+// Edge CDN Security & Cache-Key Isolation Matrix: All private API endpoints strictly bypass CDN
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, private');
+  next();
+});
 
 // API Routes
 app.use('/api/auth', authRoutes);
