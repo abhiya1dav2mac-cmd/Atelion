@@ -58,15 +58,20 @@ app.get('*', (req, res, next) => {
 
 // Connect to MongoDB & Start Server
 async function startServer() {
+  // 1. Initialize Turso Isolated Help Desk
+  try {
+    await initHelpDeskTables();
+  } catch (tErr) {
+    console.error('[TURSO-INIT-WARN]', tErr.message);
+  }
+
+  // 2. Connect to Primary Database (MongoDB Atlas)
   try {
     console.log('[ATELION] 🚀 Connecting to MongoDB Atlas...');
     await mongoose.connect(MONGO_URI, {
       serverSelectionTimeoutMS: 5000,
     });
     console.log('[ATELION] ✅ MongoDB Connected successfully to database:', mongoose.connection.name);
-
-    // Initialize Turso Help Desk Schema
-    await initHelpDeskTables();
 
     app.listen(PORT, () => {
       console.log(`[ATELION] 🌐 Server running smoothly on http://localhost:${PORT}`);
