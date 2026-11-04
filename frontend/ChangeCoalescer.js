@@ -73,3 +73,4 @@ class AtelionChangeCoalescer {
 }
 
 window.ChangeCoalescer = AtelionChangeCoalescer;
+

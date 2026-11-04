@@ -150,3 +150,4 @@ class AtelionAdaptiveCollabRouter {
 }
 
 window.AdaptiveCollabRouter = AtelionAdaptiveCollabRouter;
+
