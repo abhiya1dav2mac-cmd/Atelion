@@ -20,6 +20,7 @@ class AtelionWhiteboard {
 
     this.resizeCanvas();
     this.setupListeners();
+    window.whiteboardInstance = this;
   }
 
   resizeCanvas() {
@@ -96,12 +97,62 @@ class AtelionWhiteboard {
     }
 
     this.ctx.stroke();
+
+    // Broadcast stroke to peers via WebRTC / Local Broadcast (0 server load)
+    if (window.p2pSync) {
+      window.p2pSync.broadcast('WHITEBOARD_STROKE', {
+        lastX: this.lastX,
+        lastY: this.lastY,
+        x,
+        y,
+        tool: this.currentTool,
+        color: this.currentColor,
+        lineWidth: this.lineWidth,
+      });
+    }
+
     this.lastX = x;
     this.lastY = y;
   }
 
+  drawRemoteStroke(stroke) {
+    if (!this.ctx || !stroke) return;
+    this.ctx.save();
+    this.ctx.beginPath();
+    this.ctx.moveTo(stroke.lastX, stroke.lastY);
+    this.ctx.lineTo(stroke.x, stroke.y);
+
+    if (stroke.tool === 'eraser') {
+      this.ctx.strokeStyle = '#020617';
+      this.ctx.lineWidth = 24;
+      this.ctx.globalAlpha = 1.0;
+    } else if (stroke.tool === 'highlighter') {
+      this.ctx.strokeStyle = stroke.color || '#38BDF8';
+      this.ctx.lineWidth = 18;
+      this.ctx.globalAlpha = 0.35;
+    } else {
+      this.ctx.strokeStyle = stroke.color || '#38BDF8';
+      this.ctx.lineWidth = stroke.lineWidth || 3;
+      this.ctx.globalAlpha = 1.0;
+    }
+
+    this.ctx.stroke();
+    this.ctx.restore();
+  }
+
   stopDrawing() {
-    this.isDrawing = false;
+    if (this.isDrawing) {
+      this.isDrawing = false;
+      // Register coalesced snapshot locally in IndexedDB & sync engine
+      if (window.syncEngine && this.canvas) {
+        window.syncEngine.registerEdit(
+          'active_whiteboard',
+          'Collaborative Whiteboard',
+          this.canvas.toDataURL('image/webp', 0.5),
+          'whiteboard'
+        );
+      }
+    }
   }
 
   setTool(tool) {
@@ -120,6 +171,17 @@ class AtelionWhiteboard {
 
   clearCanvas() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    if (window.p2pSync) {
+      window.p2pSync.broadcast('WHITEBOARD_CLEAR', {});
+    }
+    if (window.syncEngine) {
+      window.syncEngine.registerEdit(
+        'active_whiteboard',
+        'Collaborative Whiteboard',
+        '',
+        'whiteboard'
+      );
+    }
     showToast('Whiteboard cleared', 'info');
   }
 
@@ -174,3 +236,4 @@ class AtelionWhiteboard {
 }
 
 window.AtelionWhiteboard = AtelionWhiteboard;
+

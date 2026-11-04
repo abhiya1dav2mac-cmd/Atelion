@@ -576,6 +576,78 @@ function saveSessionAndShowDashboard(token, user) {
   }
 
   document.getElementById('dashTokenSnippet').textContent = `${token.slice(0, 36)}...`;
+
+  // Initialize Zero-Load Client-Side Listeners & Restore Offline Documents
+  setupZeroLoadEditorListeners();
+}
+
+function setupZeroLoadEditorListeners() {
+  const noteEditor = document.getElementById('smartNoteEditor');
+  if (noteEditor && !noteEditor.dataset.zeroLoadInitialized) {
+    noteEditor.dataset.zeroLoadInitialized = 'true';
+
+    // 1. Restore cached note from local IndexedDB (0 server latency)
+    if (window.localFirstDB) {
+      window.localFirstDB.getLocalDoc('active_smart_note').then((doc) => {
+        if (doc && doc.content && !noteEditor.value) {
+          noteEditor.value = doc.content;
+          renderEditorPreview();
+        }
+      }).catch((e) => console.warn('[LOCAL-DB] Restore error:', e));
+    }
+
+    // 2. On Keystroke: Local IndexedDB persist + Adaptive coalescing + P2P broadcast
+    noteEditor.addEventListener('input', () => {
+      renderEditorPreview();
+
+      if (window.syncEngine) {
+        window.syncEngine.registerEdit(
+          'active_smart_note',
+          'Smart Workspace Note',
+          noteEditor.value,
+          'note'
+        );
+      }
+
+      if (window.p2pSync) {
+        window.p2pSync.broadcast('NOTE_EDIT', {
+          docId: 'active_smart_note',
+          length: noteEditor.value.length,
+        });
+      }
+    });
+  }
+
+  const cornellEditor = document.getElementById('cornellNotes');
+  if (cornellEditor && !cornellEditor.dataset.zeroLoadInitialized) {
+    cornellEditor.dataset.zeroLoadInitialized = 'true';
+
+    if (window.localFirstDB) {
+      window.localFirstDB.getLocalDoc('active_cornell_notes').then((doc) => {
+        if (doc && doc.content && !cornellEditor.value) {
+          cornellEditor.value = doc.content;
+        }
+      }).catch((e) => console.warn('[LOCAL-DB] Restore error:', e));
+    }
+
+    cornellEditor.addEventListener('input', () => {
+      if (window.syncEngine) {
+        window.syncEngine.registerEdit(
+          'active_cornell_notes',
+          'Cornell Lecture Notes',
+          cornellEditor.value,
+          'cornell'
+        );
+      }
+
+      if (window.p2pSync) {
+        window.p2pSync.broadcast('NOTE_EDIT', {
+          docId: 'active_cornell_notes',
+          length: cornellEditor.value.length,
+        });
+      }
+    });
+  }
 }
 
 function handleLogout() {
@@ -610,6 +682,9 @@ window.addEventListener('DOMContentLoaded', async () => {
       callback: window.handleGoogleCredentialResponse,
     });
   }
+
+  // Ensure Zero-Load Listeners & Local-First DB are ready
+  setupZeroLoadEditorListeners();
 });
 
 // ==============================================================================

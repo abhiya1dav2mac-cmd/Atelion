@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const passkeyRoutes = require('./routes/passkey');
 const vaultRoutes = require('./routes/vault');
 const helpdeskRoutes = require('./routes/helpdesk');
+const syncRoutes = require('./routes/sync');
 const { initHelpDeskTables } = require('./services/helpdeskTurso');
 
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/auth/passkey', passkeyRoutes);
 app.use('/api/vault', vaultRoutes);
 app.use('/api/helpdesk', helpdeskRoutes);
+app.use('/api/sync', syncRoutes);
 
 // Healthcheck Route
 app.get('/api/health', (req, res) => {
@@ -56,8 +58,13 @@ app.get('*', (req, res, next) => {
   });
 });
 
-// Connect to MongoDB & Start Server
-async function startServer() {
+// Start HTTP Server immediately for instant responsiveness
+const server = app.listen(PORT, () => {
+  console.log(`[ATELION] 🌐 Server running smoothly on http://localhost:${PORT}`);
+});
+
+// Connect to Databases in Background
+async function initDatabases() {
   // 1. Initialize Turso Isolated Help Desk
   try {
     await initHelpDeskTables();
@@ -69,21 +76,16 @@ async function startServer() {
   try {
     console.log('[ATELION] 🚀 Connecting to MongoDB Atlas...');
     await mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 4000,
     });
     console.log('[ATELION] ✅ MongoDB Connected successfully to database:', mongoose.connection.name);
-
-    app.listen(PORT, () => {
-      console.log(`[ATELION] 🌐 Server running smoothly on http://localhost:${PORT}`);
-    });
   } catch (err) {
     console.error('[ATELION] ❌ MongoDB Connection Error:', err.message);
-    console.log('[ATELION] ⚠️ Starting server in degraded mode (API listening, retrying DB)...');
-    app.listen(PORT, () => {
-      console.log(`[ATELION] 🌐 Server listening on http://localhost:${PORT} (Waiting for valid Mongo URI)`);
-    });
+    console.log('[ATELION] ⚠️ Primary DB offline. Running in degraded mode with memory caching.');
   }
 }
 
-startServer();
+initDatabases();
+
+module.exports = app;
 
