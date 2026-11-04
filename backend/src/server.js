@@ -13,12 +13,17 @@ const helpdeskRoutes = require('./routes/helpdesk');
 const syncRoutes = require('./routes/sync');
 const { initHelpDeskTables } = require('./services/helpdeskTurso');
 const selfHealingMesh = require('./services/selfHealingMesh');
+const { zeroTrustHelmet, zeroTrustAuditMiddleware } = require('./middleware/zeroTrustHelmet');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/atelion';
 
-// Middleware
+// 1. Zero Trust Security Helmet & Request Validation (NIST SP 800-207)
+app.use(zeroTrustHelmet);
+app.use(zeroTrustAuditMiddleware);
+
+// 2. Cross-Origin Resource Sharing (CORS)
 app.use(
   cors({
     origin: '*', // Or specify process.env.CLIENT_URL
@@ -68,6 +73,26 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Zero Trust Security Helmet Status Route
+app.get('/api/security/zero-trust', (req, res) => {
+  res.json({
+    status: 'enforced',
+    architecture: 'Zero Trust (NIST SP 800-207)',
+    helmet: 'v8.3.0',
+    policies: {
+      contentSecurityPolicy: 'Active (Strict)',
+      crossOriginOpenerPolicy: 'same-origin-allow-popups',
+      antiClickjacking: 'SAMEORIGIN Frameguard',
+      hsts: 'maxAge=31536000 (1 Year Preloaded)',
+      noSniff: 'MIME-sniffing disabled',
+      xssProtection: 'Enabled',
+      noSqlSanitizer: 'Active',
+      permissionsPolicy: 'camera=(), microphone=(), geolocation=(), payment=()',
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Fallback to frontend index.html for SPA routing
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) return next();
@@ -78,10 +103,13 @@ app.get('*', (req, res, next) => {
   });
 });
 
-// Start HTTP Server immediately for instant responsiveness
-const server = app.listen(PORT, () => {
-  console.log(`[ATELION] 🌐 Server running smoothly on http://localhost:${PORT}`);
-});
+// Start HTTP Server immediately if run directly
+let server = null;
+if (require.main === module) {
+  server = app.listen(PORT, () => {
+    console.log(`[ATELION] 🌐 Server running smoothly on http://localhost:${PORT}`);
+  });
+}
 
 // Connect to Databases in Background
 async function initDatabases() {
