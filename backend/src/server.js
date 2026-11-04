@@ -8,6 +8,9 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const passkeyRoutes = require('./routes/passkey');
+const vaultRoutes = require('./routes/vault');
+const helpdeskRoutes = require('./routes/helpdesk');
+const { initHelpDeskTables } = require('./services/helpdeskTurso');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,6 +33,8 @@ app.use(express.static(frontendDistPath));
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/auth/passkey', passkeyRoutes);
+app.use('/api/vault', vaultRoutes);
+app.use('/api/helpdesk', helpdeskRoutes);
 
 // Healthcheck Route
 app.get('/api/health', (req, res) => {
@@ -59,6 +64,9 @@ async function startServer() {
       serverSelectionTimeoutMS: 5000,
     });
     console.log('[ATELION] ✅ MongoDB Connected successfully to database:', mongoose.connection.name);
+
+    // Initialize Turso Help Desk Schema
+    await initHelpDeskTables();
 
     app.listen(PORT, () => {
       console.log(`[ATELION] 🌐 Server running smoothly on http://localhost:${PORT}`);

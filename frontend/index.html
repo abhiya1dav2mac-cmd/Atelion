@@ -12,6 +12,8 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- SimpleWebAuthn Browser Bundle for FIDO2 Passkey Support -->
   <script src="https://unpkg.com/@simplewebauthn/browser@14.0.3/dist/bundle/index.umd.min.js"></script>
+  <!-- Atelion Zero-Knowledge E2EE Vault Crypto -->
+  <script src="vaultCrypto.js"></script>
 </head>
 <body>
   <!-- Ambient Gradient Glows -->
@@ -456,31 +458,216 @@
             </div>
           </div>
 
-          <!-- Passkey Security Status Card -->
-          <div class="dash-passkey-box" id="dashPasskeyBox">
-            <div class="dpk-left">
-              <div class="dpk-icon-badge" id="dashPkBadge">🛡️</div>
-              <div class="dpk-info">
-                <div class="dpk-title-row">
-                  <span class="dpk-title">Biometric Passkey</span>
-                  <span class="dpk-status-pill" id="dashPkStatusPill">Active</span>
-                </div>
-                <div class="dpk-desc" id="dashPkDesc">FIDO2 device registered for instant sign-in.</div>
-              </div>
-            </div>
-            <button type="button" class="btn-setup-passkey hidden" id="btnDashSetupPasskey" onclick="registerUserPasskey()">
-              + Enable Passkey
+          <!-- Dashboard Sub-Navigation Tabs -->
+          <div class="dash-subnav">
+            <button type="button" class="subnav-btn active" id="btnNavOverview" onclick="switchDashTab('overview')">
+              🏠 Overview
+            </button>
+            <button type="button" class="subnav-btn" id="btnNavVault" onclick="switchDashTab('vault')">
+              🔒 Zero-Knowledge Vault
+            </button>
+            <button type="button" class="subnav-btn" id="btnNavHelpdesk" onclick="switchDashTab('helpdesk')">
+              🎫 Help Desk (Turso DB)
             </button>
           </div>
 
-          <div class="session-box">
-            <span class="session-label">Session JWT Token</span>
-            <code id="dashTokenSnippet">eyJhbGciOiJIUzI1NiIsIn...</code>
+          <!-- ================= TAB 1: OVERVIEW ================= -->
+          <div id="dashSubOverview" class="subtab-content">
+            <!-- Passkey Security Status Card -->
+            <div class="dash-passkey-box" id="dashPasskeyBox">
+              <div class="dpk-left">
+                <div class="dpk-icon-badge" id="dashPkBadge">🛡️</div>
+                <div class="dpk-info">
+                  <div class="dpk-title-row">
+                    <span class="dpk-title">Biometric Passkey</span>
+                    <span class="dpk-status-pill" id="dashPkStatusPill">Active</span>
+                  </div>
+                  <div class="dpk-desc" id="dashPkDesc">FIDO2 device registered for instant sign-in.</div>
+                </div>
+              </div>
+              <button type="button" class="btn-setup-passkey hidden" id="btnDashSetupPasskey" onclick="registerUserPasskey()">
+                + Enable Passkey
+              </button>
+            </div>
+
+            <div class="session-box">
+              <span class="session-label">Session JWT Token</span>
+              <code id="dashTokenSnippet">eyJhbGciOiJIUzI1NiIsIn...</code>
+            </div>
+
+            <button type="button" class="btn-primary" onclick="handleLogout()">
+              <span>Sign Out</span>
+            </button>
           </div>
 
-          <button type="button" class="btn-primary" onclick="handleLogout()">
-            <span>Sign Out</span>
-          </button>
+          <!-- ================= TAB 2: ZERO-KNOWLEDGE E2EE VAULT ================= -->
+          <div id="dashSubVault" class="subtab-content hidden">
+            <div class="vault-hero-header">
+              <div class="vh-badge">
+                <span class="vh-icon">🔒</span>
+                <div>
+                  <h3>Zero-Knowledge E2EE Vault</h3>
+                  <p>AES-GCM-256 Client-Side Encryption. MongoDB receives only encrypted ciphertext.</p>
+                </div>
+              </div>
+              <div class="vault-status-indicator" id="vaultStatusIndicator">
+                <span class="status-dot locked" id="vaultStatusDot"></span>
+                <span id="vaultStatusText">Locked</span>
+              </div>
+            </div>
+
+            <!-- Vault Unlock Card -->
+            <div class="vault-lock-box" id="vaultLockBox">
+              <div class="input-group">
+                <label for="vaultSecretInput">Enter Vault Master Passphrase</label>
+                <div class="password-wrapper">
+                  <input type="password" id="vaultSecretInput" placeholder="Master passphrase to derive AES-256 key">
+                  <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility('vaultSecretInput')">👁️</button>
+                </div>
+              </div>
+              <button type="button" class="btn-primary" onclick="unlockVault()">
+                <span>🔓 Unlock Client Cryptographic Session</span>
+              </button>
+            </div>
+
+            <!-- Vault Unlocked Work Area -->
+            <div id="vaultWorkArea" class="hidden">
+              <div class="vault-toolbar">
+                <button type="button" class="btn-primary btn-sm" onclick="toggleNewVaultItemModal()">
+                  + New Encrypted Document
+                </button>
+                <button type="button" class="btn-secondary btn-sm" onclick="lockVault()">
+                  🔒 Lock Vault
+                </button>
+              </div>
+
+              <!-- Create New Encrypted Document Form -->
+              <div id="newVaultItemForm" class="vault-create-card hidden">
+                <h4>Encrypt New Document on Device</h4>
+                <div class="input-group">
+                  <label for="vaultNewTitle">Document Title</label>
+                  <input type="text" id="vaultNewTitle" placeholder="e.g. Confidential Research / Secret Keys">
+                </div>
+                <div class="input-group">
+                  <label for="vaultNewContent">Document Content (Encrypted with WebCrypto AES-GCM-256)</label>
+                  <textarea id="vaultNewContent" rows="4" placeholder="Type confidential notes, project plans, formulas, or codes..."></textarea>
+                </div>
+                <div class="vault-btn-row">
+                  <button type="button" class="btn-primary btn-sm" id="btnEncryptSave" onclick="handleSaveEncryptedDocument()">
+                    <span>🔒 Encrypt & Save to DB</span>
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" onclick="toggleNewVaultItemModal()">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+
+              <!-- Encrypted Items List -->
+              <div class="vault-items-container">
+                <h4>Encrypted Vault Items (<span id="vaultItemCount">0</span>)</h4>
+                <div id="vaultItemsList" class="vault-items-list">
+                  <div class="empty-state">No encrypted items yet. Create your first zero-knowledge document!</div>
+                </div>
+              </div>
+
+              <!-- Decrypted View Modal -->
+              <div id="decryptedViewer" class="decrypted-box hidden">
+                <div class="dec-header">
+                  <h4 id="decryptedTitle">Title</h4>
+                  <button type="button" class="btn-close-sm" onclick="closeDecryptedViewer()">✕</button>
+                </div>
+                <div class="dec-badge">✅ Decrypted in Browser RAM via WebCrypto AES-GCM-256</div>
+                <pre id="decryptedContent"></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB 3: TURSO HELPDESK ================= -->
+          <div id="dashSubHelpdesk" class="subtab-content hidden">
+            <div class="helpdesk-hero-header">
+              <div class="hh-badge">
+                <span class="hh-icon">🎫</span>
+                <div>
+                  <h3>Isolated Help Desk</h3>
+                  <p>Segregated support ticketing powered by <strong>Turso LibSQL SQLite DB</strong>.</p>
+                </div>
+              </div>
+              <button type="button" class="btn-primary btn-sm" onclick="toggleNewTicketForm()">
+                + New Ticket
+              </button>
+            </div>
+
+            <!-- New Ticket Form -->
+            <div id="newTicketForm" class="ticket-create-card hidden">
+              <h4>Submit Support Request to Turso DB</h4>
+              <form id="formCreateTicket" onsubmit="handleCreateTicketSubmit(event)">
+                <div class="form-row">
+                  <div class="input-group">
+                    <label for="ticketCategory">Category</label>
+                    <select id="ticketCategory">
+                      <option value="technical">Technical Support</option>
+                      <option value="account">Account & Authentication</option>
+                      <option value="security">Passkeys & Security</option>
+                      <option value="feature_request">Feature Suggestion</option>
+                    </select>
+                  </div>
+                  <div class="input-group">
+                    <label for="ticketPriority">Priority</label>
+                    <select id="ticketPriority">
+                      <option value="normal">Normal</option>
+                      <option value="urgent">Urgent</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="input-group">
+                  <label for="ticketSubject">Subject</label>
+                  <input type="text" id="ticketSubject" placeholder="Brief summary of the issue" required>
+                </div>
+
+                <div class="input-group">
+                  <label for="ticketDescription">Description / Details</label>
+                  <textarea id="ticketDescription" rows="4" placeholder="Explain the problem or inquiry in detail..." required></textarea>
+                </div>
+
+                <div class="vault-btn-row">
+                  <button type="submit" class="btn-primary btn-sm" id="btnSubmitTicket">
+                    <span>🚀 Submit to Turso Helpdesk</span>
+                  </button>
+                  <button type="button" class="btn-secondary btn-sm" onclick="toggleNewTicketForm()">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Tickets List -->
+            <div class="tickets-container">
+              <h4>Support Tickets</h4>
+              <div id="ticketsList" class="tickets-list">
+                <div class="empty-state">Loading support tickets from Turso DB...</div>
+              </div>
+            </div>
+
+            <!-- Ticket Thread Modal / View -->
+            <div id="ticketThreadViewer" class="ticket-thread-box hidden">
+              <div class="tt-header">
+                <div>
+                  <span class="tt-number" id="threadTicketNumber">#ATEL-0000</span>
+                  <h4 id="threadSubject">Subject</h4>
+                </div>
+                <button type="button" class="btn-close-sm" onclick="closeTicketThread()">✕</button>
+              </div>
+              <div class="tt-messages-list" id="threadMessagesList"></div>
+              <form id="formTicketReply" onsubmit="handleTicketReplySubmit(event)">
+                <div class="tt-reply-row">
+                  <input type="text" id="ticketReplyInput" placeholder="Type a response message..." required>
+                  <button type="submit" class="btn-primary btn-sm" id="btnSendReply">Send</button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -38,6 +38,13 @@ Before registration, users are presented with a modern role selection screen:
   - **Registration Prompt:** Right after OTP verification or Google account setup, user is asked: *"Do you want to enable Biometric Passkey (Windows Hello, Face ID, Touch ID) for 1-touch sign-in?"*
   - **1-Touch Passwordless Login:** Sign in instantly via platform biometrics or hardware security key without typing passwords.
   - **Security:** Public keys stored on MongoDB; private keys never leave user's hardware TPM/Secure Enclave.
+- **Zero-Knowledge End-to-End Encryption (E2EE Vault):**
+  - **Client-Side AES-GCM-256:** Documents and titles are encrypted and decrypted exclusively in the client's browser using WebCrypto API.
+  - **100% Blind Database:** MongoDB Atlas stores only Base64 ciphertext, IV, and salt. Even database admins and hackers cannot view user notes.
+  - **RAM-Only Key Derivation:** Master passphrase/passkey seeds derive temporary CryptoKeys in browser RAM; wiped clean on lock or sign-out.
+- **Isolated Help Desk (Turso LibSQL SQLite DB):**
+  - **Architectural Segregation:** Customer support inquiries, issues, and messaging threads are isolated in an independent **Turso DB** instance via `@libsql/client`.
+  - **Role-Aware Support:** Support requests capture whether the user is a Student or Professional for tailored priority resolution.
 - **Forgot Password Flow:**
   - User submits registered email.
   - 6-digit recovery passcode sent via Brevo.
@@ -98,6 +105,16 @@ http://localhost:5000
 | `/api/auth/passkey/verify-login` | `POST` | Verifies biometric assertion and authenticates user |
 | `/api/auth/forgot-password/send-otp` | `POST` | Sends password recovery passcode via Brevo |
 | `/api/auth/forgot-password/verify-and-reset` | `POST` | Verifies recovery OTP and updates password |
+| `/api/vault/items` | `GET` | List user's zero-knowledge encrypted vault items |
+| `/api/vault/items` | `POST` | Store client-encrypted AES-256-GCM document |
+| `/api/vault/items/:id` | `GET` | Retrieve encrypted document for client-side decryption |
+| `/api/vault/items/:id` | `PUT` | Update encrypted document ciphertext |
+| `/api/vault/items/:id` | `DELETE` | Purge encrypted document from database |
+| `/api/helpdesk/tickets` | `POST` | Submit support ticket to isolated Turso DB |
+| `/api/helpdesk/tickets` | `GET` | Fetch user support tickets from Turso DB |
+| `/api/helpdesk/tickets/:id` | `GET` | Retrieve ticket details and conversation thread |
+| `/api/helpdesk/tickets/:id/reply` | `POST` | Append message reply to ticket in Turso DB |
+| `/api/helpdesk/tickets/:id/status` | `PATCH` | Update ticket status in Turso DB |
 | `/api/auth/me` | `GET` | Returns authenticated user profile |
 | `/api/health` | `GET` | Health status of API and MongoDB connection |
 

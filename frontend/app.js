@@ -877,3 +877,418 @@ async function triggerPasskeySignIn() {
   }
 }
 
+// ==============================================================================
+// 10. DASHBOARD SUB-NAVIGATION TABS
+// ==============================================================================
+
+function switchDashTab(tabName) {
+  const tabs = ['overview', 'vault', 'helpdesk'];
+  tabs.forEach((t) => {
+    const btn = document.getElementById(`btnNav${t.charAt(0).toUpperCase() + t.slice(1)}`);
+    const content = document.getElementById(`dashSub${t.charAt(0).toUpperCase() + t.slice(1)}`);
+    if (btn) btn.classList.toggle('active', t === tabName);
+    if (content) content.classList.toggle('hidden', t !== tabName);
+  });
+
+  if (tabName === 'vault') {
+    loadEncryptedVaultItems();
+  } else if (tabName === 'helpdesk') {
+    loadHelpDeskTickets();
+  }
+}
+
+// ==============================================================================
+// 11. ZERO-KNOWLEDGE E2EE VAULT CLIENT LOGIC
+// ==============================================================================
+
+let activeVaultSecret = null;
+let cachedVaultItems = [];
+
+function unlockVault() {
+  const input = document.getElementById('vaultSecretInput');
+  const secret = input.value.trim();
+  if (!secret) {
+    showToast('Please enter a vault master passphrase.', 'error');
+    return;
+  }
+
+  activeVaultSecret = secret;
+  input.value = '';
+
+  document.getElementById('vaultLockBox').classList.add('hidden');
+  document.getElementById('vaultWorkArea').classList.remove('hidden');
+
+  const dot = document.getElementById('vaultStatusDot');
+  const text = document.getElementById('vaultStatusText');
+  const indicator = document.getElementById('vaultStatusIndicator');
+
+  if (dot) dot.classList.add('unlocked');
+  if (text) text.textContent = 'Unlocked';
+  if (indicator) indicator.classList.add('unlocked');
+
+  showToast('🔓 Vault unlocked. AES-256 session active in browser RAM.', 'success');
+  loadEncryptedVaultItems();
+}
+
+function lockVault() {
+  activeVaultSecret = null;
+  document.getElementById('vaultWorkArea').classList.add('hidden');
+  document.getElementById('vaultLockBox').classList.remove('hidden');
+  document.getElementById('decryptedViewer').classList.add('hidden');
+
+  const dot = document.getElementById('vaultStatusDot');
+  const text = document.getElementById('vaultStatusText');
+  const indicator = document.getElementById('vaultStatusIndicator');
+
+  if (dot) dot.classList.remove('unlocked');
+  if (text) text.textContent = 'Locked';
+  if (indicator) indicator.classList.remove('unlocked');
+
+  showToast('🔒 Vault locked. Encryption keys purged from memory.', 'info');
+}
+
+function toggleNewVaultItemModal() {
+  const form = document.getElementById('newVaultItemForm');
+  form.classList.toggle('hidden');
+}
+
+async function handleSaveEncryptedDocument() {
+  if (!activeVaultSecret) {
+    showToast('Vault is locked. Unlock vault first.', 'error');
+    return;
+  }
+
+  const title = document.getElementById('vaultNewTitle').value.trim();
+  const content = document.getElementById('vaultNewContent').value;
+  const btn = document.getElementById('btnEncryptSave');
+
+  if (!title || !content) {
+    showToast('Please fill in title and content.', 'error');
+    return;
+  }
+
+  const token = localStorage.getItem('atelion_token');
+  if (!token) return;
+
+  setButtonLoading(btn, true, 'Encrypting on device...');
+
+  try {
+    // 1. Encrypt title and content with AES-GCM-256 in browser
+    const encrypted = await AtelionVaultCrypto.encryptDocument({
+      title,
+      content,
+      passphraseOrSeed: activeVaultSecret,
+    });
+
+    // 2. Transmit unreadable ciphertext to server
+    const res = await fetch('/api/vault/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(encrypted),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to save encrypted document.');
+
+    showToast('Document encrypted with AES-256-GCM and stored!', 'success');
+    document.getElementById('vaultNewTitle').value = '';
+    document.getElementById('vaultNewContent').value = '';
+    toggleNewVaultItemModal();
+    loadEncryptedVaultItems();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    setButtonLoading(btn, false, '🔒 Encrypt & Save to DB');
+  }
+}
+
+async function loadEncryptedVaultItems() {
+  const token = localStorage.getItem('atelion_token');
+  if (!token) return;
+
+  try {
+    const res = await fetch('/api/vault/items', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load vault items.');
+
+    cachedVaultItems = data.items || [];
+    const countEl = document.getElementById('vaultItemCount');
+    if (countEl) countEl.textContent = cachedVaultItems.length;
+
+    renderVaultItemsList();
+  } catch (err) {
+    console.error('Failed to load vault items:', err);
+  }
+}
+
+async function renderVaultItemsList() {
+  const container = document.getElementById('vaultItemsList');
+  if (!container) return;
+
+  if (cachedVaultItems.length === 0) {
+    container.innerHTML = '<div class="empty-state">No encrypted items yet. Create your first zero-knowledge document!</div>';
+    return;
+  }
+
+  let html = '';
+  for (const item of cachedVaultItems) {
+    let displayTitle = '🔒 [Ciphertext Protected]';
+
+    // If vault is unlocked, decrypt title client-side on the fly!
+    if (activeVaultSecret) {
+      try {
+        const key = await AtelionVaultCrypto.deriveKey(activeVaultSecret, item.salt);
+        displayTitle = await AtelionVaultCrypto.decryptString(item.titleCipher, item.iv, key);
+      } catch {
+        displayTitle = '🔒 [Decryption Key Mismatch]';
+      }
+    }
+
+    const dateStr = new Date(item.updatedAt || item.createdAt).toLocaleDateString();
+    const sizeKB = (item.sizeBytes / 1024).toFixed(1);
+
+    html += `
+      <div class="vault-item-card">
+        <div class="vic-left">
+          <span class="vic-icon">🔐</span>
+          <div class="vic-details">
+            <span class="vic-title">${displayTitle}</span>
+            <span class="vic-meta">AES-256-GCM • ${sizeKB} KB • Updated ${dateStr}</span>
+          </div>
+        </div>
+        <button type="button" class="btn-decrypt-doc" onclick="handleDecryptAndRead('${item._id}')">
+          🔓 Decrypt & Read
+        </button>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+async function handleDecryptAndRead(itemId) {
+  if (!activeVaultSecret) {
+    showToast('Please unlock vault with your master passphrase first.', 'error');
+    return;
+  }
+
+  const token = localStorage.getItem('atelion_token');
+  if (!token) return;
+
+  try {
+    const res = await fetch(`/api/vault/items/${itemId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch encrypted payload.');
+
+    const item = data.item;
+
+    // Decrypt on client device
+    const decrypted = await AtelionVaultCrypto.decryptDocument({
+      titleCipher: item.titleCipher,
+      ciphertext: item.ciphertext,
+      iv: item.iv,
+      salt: item.salt,
+      passphraseOrSeed: activeVaultSecret,
+    });
+
+    document.getElementById('decryptedTitle').textContent = decrypted.title;
+    document.getElementById('decryptedContent').textContent = decrypted.content;
+    document.getElementById('decryptedViewer').classList.remove('hidden');
+
+    showToast('Decrypted securely on your device!', 'success');
+  } catch (err) {
+    showToast('Decryption failed. Ensure you entered the correct passphrase.', 'error');
+  }
+}
+
+function closeDecryptedViewer() {
+  document.getElementById('decryptedViewer').classList.add('hidden');
+}
+
+// ==============================================================================
+// 12. ISOLATED TURSO HELPDESK CLIENT LOGIC
+// ==============================================================================
+
+let activeTicketId = null;
+
+function toggleNewTicketForm() {
+  const form = document.getElementById('newTicketForm');
+  form.classList.toggle('hidden');
+}
+
+async function loadHelpDeskTickets() {
+  const token = localStorage.getItem('atelion_token');
+  if (!token) return;
+
+  const container = document.getElementById('ticketsList');
+
+  try {
+    const res = await fetch('/api/helpdesk/tickets', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load support tickets from Turso.');
+
+    const tickets = data.tickets || [];
+    if (tickets.length === 0) {
+      container.innerHTML = '<div class="empty-state">No support tickets found. Submit a new ticket to contact support!</div>';
+      return;
+    }
+
+    container.innerHTML = tickets
+      .map((t) => {
+        const statusClass = t.status === 'resolved' ? 'tc-status-resolved' : t.status === 'closed' ? 'tc-status-closed' : 'tc-status-open';
+        const dateStr = new Date(t.created_at).toLocaleDateString();
+        return `
+        <div class="ticket-card" onclick="openTicketThread('${t.id}')">
+          <div class="tc-left">
+            <span class="tt-number">#${t.ticket_number}</span>
+            <div class="tc-details">
+              <span class="tc-subject">${t.subject}</span>
+              <span class="tc-meta">Category: ${t.category} • Priority: ${t.priority} • ${dateStr}</span>
+            </div>
+          </div>
+          <span class="tc-status-pill ${statusClass}">${t.status}</span>
+        </div>
+      `;
+      })
+      .join('');
+  } catch (err) {
+    if (container) container.innerHTML = `<div class="empty-state">Unable to load tickets: ${err.message}</div>`;
+  }
+}
+
+async function handleCreateTicketSubmit(e) {
+  e.preventDefault();
+  const token = localStorage.getItem('atelion_token');
+  if (!token) return;
+
+  const btn = document.getElementById('btnSubmitTicket');
+  const payload = {
+    category: document.getElementById('ticketCategory').value,
+    priority: document.getElementById('ticketPriority').value,
+    subject: document.getElementById('ticketSubject').value.trim(),
+    description: document.getElementById('ticketDescription').value.trim(),
+  };
+
+  setButtonLoading(btn, true, 'Submitting to Turso...');
+
+  try {
+    const res = await fetch('/api/helpdesk/tickets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to create ticket.');
+
+    showToast(`Support ticket #${data.ticket.ticketNumber} created in Turso DB!`, 'success');
+    document.getElementById('ticketSubject').value = '';
+    document.getElementById('ticketDescription').value = '';
+    toggleNewTicketForm();
+    loadHelpDeskTickets();
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    setButtonLoading(btn, false, '🚀 Submit to Turso Helpdesk');
+  }
+}
+
+async function openTicketThread(ticketId) {
+  const token = localStorage.getItem('atelion_token');
+  if (!token) return;
+
+  activeTicketId = ticketId;
+  const viewer = document.getElementById('ticketThreadViewer');
+  const msgList = document.getElementById('threadMessagesList');
+
+  try {
+    const res = await fetch(`/api/helpdesk/tickets/${ticketId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch ticket conversation.');
+
+    document.getElementById('threadTicketNumber').textContent = `#${data.ticket.ticket_number}`;
+    document.getElementById('threadSubject').textContent = data.ticket.subject;
+
+    msgList.innerHTML = (data.messages || [])
+      .map((m) => {
+        const timeStr = new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const isAgent = m.sender_type === 'support_agent';
+        return `
+        <div class="tt-msg ${isAgent ? 'tt-msg-agent' : ''}">
+          <div class="tt-msg-header">
+            <span class="tt-msg-sender">${isAgent ? '🛡️ Support Team' : '👤 ' + m.sender_name}</span>
+            <span class="tt-msg-time">${timeStr}</span>
+          </div>
+          <div class="tt-msg-body">${m.message}</div>
+        </div>
+      `;
+      })
+      .join('');
+
+    viewer.classList.remove('hidden');
+    msgList.scrollTop = msgList.scrollHeight;
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+}
+
+async function handleTicketReplySubmit(e) {
+  e.preventDefault();
+  if (!activeTicketId) return;
+
+  const token = localStorage.getItem('atelion_token');
+  if (!token) return;
+
+  const input = document.getElementById('ticketReplyInput');
+  const message = input.value.trim();
+  if (!message) return;
+
+  const btn = document.getElementById('btnSendReply');
+  setButtonLoading(btn, true, 'Sending...');
+
+  try {
+    const res = await fetch(`/api/helpdesk/tickets/${activeTicketId}/reply`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ message }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send reply.');
+
+    input.value = '';
+    showToast('Reply dispatched to Turso DB.', 'success');
+    openTicketThread(activeTicketId);
+  } catch (err) {
+    showToast(err.message, 'error');
+  } finally {
+    setButtonLoading(btn, false, 'Send');
+  }
+}
+
+function closeTicketThread() {
+  activeTicketId = null;
+  document.getElementById('ticketThreadViewer').classList.add('hidden');
+}
+

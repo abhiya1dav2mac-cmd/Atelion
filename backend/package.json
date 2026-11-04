@@ -18,6 +18,7 @@
   "author": "Atelion Team",
   "license": "ISC",
   "dependencies": {
+    "@libsql/client": "^0.18.0",
     "@simplewebauthn/server": "^14.0.3",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
