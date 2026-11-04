@@ -92,3 +92,4 @@ class AtelionPredictivePrefetcher {
 
 // Global Singleton Instance
 window.predictivePrefetcher = new AtelionPredictivePrefetcher();
+

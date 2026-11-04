@@ -79,3 +79,4 @@ class SelfHealingStorageMesh {
 
 const selfHealingMesh = new SelfHealingStorageMesh();
 module.exports = selfHealingMesh;
+
