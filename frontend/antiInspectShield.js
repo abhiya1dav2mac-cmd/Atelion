@@ -138,8 +138,8 @@ class AtelionAntiInspectShield {
   }
 
   /**
-   * 4. INFINITE DEBUGGER LOOP TRAP
-   * If DevTools is forcibly opened, execution halts on recursive debugger evaluation
+   * 4. ADAPTIVE DEBUGGER LOOP TRAP (Banking-Grade)
+   * Keeps CPU at ~0% when DevTools is closed, but freezes execution instantly if inspect is triggered.
    */
   initDebuggerTrap() {
     const runTrap = () => {
@@ -152,12 +152,19 @@ class AtelionAntiInspectShield {
       } catch (e) {}
     };
 
-    // Low-frequency check to keep CPU 0% when DevTools is closed
+    // Low-frequency heartbeat (1500ms) to ensure 0% CPU consumption
     this.debuggerTrapInterval = setInterval(() => {
       if (this.isEnabled) {
         runTrap();
       }
     }, 1500);
+
+    // Immediate tight trap activation on tamper trigger
+    this.executeTightTrap = () => {
+      for (let i = 0; i < 5; i++) {
+        runTrap();
+      }
+    };
   }
 
   /**
@@ -197,7 +204,12 @@ class AtelionAntiInspectShield {
     if (window.__ATELION_SESSION__) window.__ATELION_SESSION__ = null;
     if (window.__ATELION_VAULT_KEYS__) window.__ATELION_VAULT_KEYS__ = null;
 
-    // 2. Tier 4 Active Kill-Switch: Send Silent Security Beacon to Backend
+    // 2. Fire Tight Adaptive Debugger Trap
+    if (typeof this.executeTightTrap === 'function') {
+      this.executeTightTrap();
+    }
+
+    // 3. Tier 4 Active Kill-Switch: Send Silent Security Beacon to Backend
     try {
       const payload = JSON.stringify({
         reason: 'UNAUTHORIZED_DEVTOOLS_INSPECTION_ATTEMPT',
