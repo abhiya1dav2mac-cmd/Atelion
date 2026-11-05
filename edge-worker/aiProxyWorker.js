@@ -256,25 +256,58 @@ async function callGitHubModels(prompt, systemPrompt, env, stream) {
 }
 
 /**
- * 4. GEMINI 2.0 FLASH FAILOVER CALL
+ * 4. GEMINI FLASH-LITE FAILOVER CALL (With 503 Auto-Shift to 3.5-flash-lite)
  */
-async function callGeminiFlash(prompt, systemPrompt, env, stream) {
-  const endpoint = stream
-    ? `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${env.GEMINI_API_KEY}`
-    : `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+async function callGeminiFlash(prompt, systemPrompt, env, stream, imageBase64 = null) {
+  const models = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite'];
+  let lastRes = null;
 
-  return await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.6,
-        maxOutputTokens: 2048,
-      },
-    }),
-  });
+  for (const model of models) {
+    try {
+      const endpoint = stream
+        ? `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${env.GEMINI_API_KEY}`
+        : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`;
+
+      const parts = [];
+      if (imageBase64) {
+        const cleanB64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+        const mimeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        parts.push({
+          inlineData: {
+            mimeType,
+            data: cleanB64,
+          },
+        });
+      }
+      parts.push({ text: prompt });
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: 'user', parts }],
+          generationConfig: {
+            temperature: 0.5,
+            maxOutputTokens: 2048,
+          },
+        }),
+      });
+
+      if (res.status === 503 || res.status === 404) {
+        console.warn(`[EDGE-GEMINI] ${model} returned ${res.status}. Shifting to next model...`);
+        lastRes = res;
+        continue;
+      }
+
+      return res;
+    } catch (e) {
+      console.warn(`[EDGE-GEMINI] Error with ${model}:`, e.message);
+    }
+  }
+
+  return lastRes || new Response(JSON.stringify({ error: 'Gemini service temporarily unavailable.' }), { status: 503 });
 }
 
 /**

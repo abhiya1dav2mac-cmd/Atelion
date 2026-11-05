@@ -46,11 +46,13 @@ router.post('/circle-search', async (req, res) => {
       });
     }
 
-    // 2. Cache Miss: Execute Multi-Provider Free AI Cascade (Solution 2)
-    // Tries Groq -> OpenRouter Free -> GitHub Models -> Gemini 2.0 Flash -> Heuristic Guard
+    // 2. Cache Miss: Execute Multi-Provider Free AI Cascade
+    // If Image/Diagram -> Gemini Flash-Lite Vision with 503 Auto-Shift
+    // If Text -> Groq LPU (~800 tok/s) with 429 Fallback to Gemini Flash-Lite
     const aiResult = await queryMultiProviderCascade({
       prompt: queryText,
-      queryType: 'circle-search',
+      imageBase64,
+      queryType: imageBase64 ? 'vision-ocr' : 'circle-search',
     });
     const aiEngine = aiResult.provider || 'Atelion Multi-Provider Cascade';
 
