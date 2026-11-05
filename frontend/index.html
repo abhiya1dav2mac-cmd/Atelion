@@ -33,6 +33,7 @@
   <script src="p2pSync.js"></script>
   <script src="syncEngine.js"></script>
   <script src="predictivePrefetcher.js"></script>
+  <script src="circleToSearch.js"></script>
 </head>
 <body>
   <!-- Ambient Gradient Glows -->
@@ -502,6 +503,9 @@
             </button>
             <button type="button" class="subnav-btn" id="btnNavHelpdesk" onclick="switchDashTab('helpdesk')">
               🎫 Turso Helpdesk
+            </button>
+            <button type="button" class="subnav-btn cts-trigger-btn" onclick="activateCircleToSearch()" style="background: linear-gradient(135deg, rgba(2, 132, 199, 0.25), rgba(124, 58, 237, 0.25)); border-color: rgba(56, 189, 248, 0.4); color: #38BDF8;">
+              ⭕ Circle to Search (AI)
             </button>
           </div>
 
@@ -1089,6 +1093,12 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Circle to Search FAB -->
+  <button type="button" class="floating-circle-search-fab" onclick="activateCircleToSearch()" title="Circle to Search with AI (Alt+S)">
+    <span class="fab-icon">⭕</span>
+    <span>Circle to Search</span>
+  </button>
 
   <!-- Global Toast Notification Element -->
   <div class="toast-container" id="toastContainer"></div>

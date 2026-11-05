@@ -11,6 +11,7 @@ const passkeyRoutes = require('./routes/passkey');
 const vaultRoutes = require('./routes/vault');
 const helpdeskRoutes = require('./routes/helpdesk');
 const syncRoutes = require('./routes/sync');
+const aiRoutes = require('./routes/ai');
 const { initHelpDeskTables } = require('./services/helpdeskTurso');
 const selfHealingMesh = require('./services/selfHealingMesh');
 const { zeroTrustHelmet, zeroTrustAuditMiddleware } = require('./middleware/zeroTrustHelmet');
@@ -62,6 +63,7 @@ app.use('/api/auth/passkey', passkeyRoutes);
 app.use('/api/vault', vaultRoutes);
 app.use('/api/helpdesk', helpdeskRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Healthcheck Route
 app.get('/api/health', (req, res) => {
