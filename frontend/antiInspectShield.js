@@ -192,6 +192,30 @@ class AtelionAntiInspectShield {
     const modal = document.getElementById('tamperSecurityModal');
     if (modal) modal.classList.remove('hidden');
     document.body.classList.add('tamper-blur-active');
+
+    // 1. In-Memory Sensitive State Purge (Zeroize sensitive buffers)
+    if (window.__ATELION_SESSION__) window.__ATELION_SESSION__ = null;
+    if (window.__ATELION_VAULT_KEYS__) window.__ATELION_VAULT_KEYS__ = null;
+
+    // 2. Tier 4 Active Kill-Switch: Send Silent Security Beacon to Backend
+    try {
+      const payload = JSON.stringify({
+        reason: 'UNAUTHORIZED_DEVTOOLS_INSPECTION_ATTEMPT',
+        url: window.location.pathname,
+        timestamp: Date.now()
+      });
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon('/api/security/tamper-alert', blob);
+      } else {
+        fetch('/api/security/tamper-alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (e) {}
   }
 
   onDevToolsClosed() {
@@ -243,3 +267,4 @@ class AtelionAntiInspectShield {
 
 // Global Singleton Instance
 window.antiInspectShield = new AtelionAntiInspectShield();
+

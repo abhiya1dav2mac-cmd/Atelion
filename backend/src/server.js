@@ -12,6 +12,7 @@ const vaultRoutes = require('./routes/vault');
 const helpdeskRoutes = require('./routes/helpdesk');
 const syncRoutes = require('./routes/sync');
 const aiRoutes = require('./routes/ai');
+const securityRoutes = require('./routes/security');
 const { initHelpDeskTables } = require('./services/helpdeskTurso');
 const selfHealingMesh = require('./services/selfHealingMesh');
 const { zeroTrustHelmet, zeroTrustAuditMiddleware } = require('./middleware/zeroTrustHelmet');
@@ -64,6 +65,7 @@ app.use('/api/vault', vaultRoutes);
 app.use('/api/helpdesk', helpdeskRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/security', securityRoutes);
 
 // Healthcheck Route
 app.get('/api/health', (req, res) => {
@@ -72,26 +74,6 @@ app.get('/api/health', (req, res) => {
     service: 'Atelion AI Workspace Backend',
     timestamp: new Date().toISOString(),
     database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-  });
-});
-
-// Zero Trust Security Helmet Status Route
-app.get('/api/security/zero-trust', (req, res) => {
-  res.json({
-    status: 'enforced',
-    architecture: 'Zero Trust (NIST SP 800-207)',
-    helmet: 'v8.3.0',
-    policies: {
-      contentSecurityPolicy: 'Active (Strict)',
-      crossOriginOpenerPolicy: 'same-origin-allow-popups',
-      antiClickjacking: 'SAMEORIGIN Frameguard',
-      hsts: 'maxAge=31536000 (1 Year Preloaded)',
-      noSniff: 'MIME-sniffing disabled',
-      xssProtection: 'Enabled',
-      noSqlSanitizer: 'Active',
-      permissionsPolicy: 'camera=(), microphone=(), geolocation=(), payment=()',
-    },
-    timestamp: new Date().toISOString(),
   });
 });
 
