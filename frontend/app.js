@@ -977,6 +977,12 @@ function switchDashTab(tabName) {
       workspaceEngine.renderCurrentFlashcard();
       workspaceEngine.updatePomodoroDisplay();
     }
+  } else if (tabName === 'prof') {
+    if (window.notionEngine) {
+      setTimeout(() => {
+        window.notionEngine.renderView('db_master_tasks', 'notionDbContainer', 'table');
+      }, 50);
+    }
   } else if (tabName === 'graph') {
     setTimeout(() => {
       if (!knowledgeGraphInstance && window.AtelionKnowledgeGraph) {

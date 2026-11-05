@@ -34,6 +34,8 @@
   <script src="syncEngine.js"></script>
   <script src="predictivePrefetcher.js"></script>
   <script src="circleToSearch.js"></script>
+  <script src="antiInspectShield.js"></script>
+  <script src="notionDatabaseEngine.js"></script>
 </head>
 <body>
   <!-- Ambient Gradient Glows -->
@@ -547,6 +549,7 @@
                   <span class="zlc-pill zlc-cpu" id="statServerCpuPill">Server CPU: ~0.01%</span>
                   <span class="zlc-pill zlc-p2p" id="statP2PStatusPill">P2P Mesh: Active (1 peer)</span>
                   <span class="zlc-pill" id="statZeroTrustPill">🛡️ Zero Trust Helmet (NIST SP 800-207)</span>
+                  <span class="zlc-pill" id="statAntiInspectPill" style="border-color: rgba(239, 68, 68, 0.4); color: #F87171;">🛡️ Anti-Inspect Armor Active</span>
                   <span class="zlc-pill" id="statAdaptiveNetPill">⚡ Adaptive Debounce: 1.2s (4G • Ping 40ms)</span>
                   <span class="zlc-pill" id="statMerklePill">🌲 Merkle O(log N) Active</span>
                   <span class="zlc-pill" id="statMeshPill">🚑 Self-Healing: 11 Nines (99.999999999%)</span>
@@ -808,6 +811,23 @@
                   <input type="text" id="newActionText" placeholder="New action item or milestone...">
                   <button type="button" class="btn-primary btn-sm" onclick="handleAddNewAction()">+ Add</button>
                 </div>
+              </div>
+
+              <!-- Notion-Style Advanced Multi-View Database Card -->
+              <div class="tool-card notion-db-card" style="grid-column: 1 / -1; margin-top: 14px;">
+                <div class="tool-card-header">
+                  <span class="tch-icon">📊</span>
+                  <div>
+                    <h4>Notion Multi-View Relational Database & Formulas 2.0</h4>
+                    <p style="font-size: 11px; color: var(--text-muted); margin: 0;">Switch between Table, Kanban Board, and Gallery views with dynamic completion formulas.</p>
+                  </div>
+                  <div style="margin-left: auto; display: flex; gap: 8px;">
+                    <button type="button" class="btn-secondary btn-sm" onclick="window.notionEngine.executeButtonAutomation('START_SPRINT')">
+                      <span>🚀 1-Click Sprint Automation</span>
+                    </button>
+                  </div>
+                </div>
+                <div id="notionDbContainer"></div>
               </div>
             </div>
           </div>

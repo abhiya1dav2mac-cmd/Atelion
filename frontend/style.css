@@ -2334,3 +2334,282 @@ input::placeholder {
   margin-top: 4px;
 }
 
+/* =================================================================== */
+/* 🛡️ BANKING-GRADE ANTI-INSPECT & ANTI-TAMPERING SHIELD               */
+/* =================================================================== */
+.tamper-blur-active .auth-wrapper {
+  filter: blur(14px) grayscale(60%);
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+.tamper-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: rgba(2, 6, 23, 0.88);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.tamper-modal-box {
+  background: linear-gradient(180deg, #1E1B4B, #0F172A);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  box-shadow: 0 0 50px rgba(239, 68, 68, 0.25), 0 25px 60px rgba(0, 0, 0, 0.9);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  padding: 26px 28px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: tamperShake 0.4s ease;
+}
+
+@keyframes tamperShake {
+  0%, 100% { transform: scale(1); }
+  25% { transform: scale(0.98) rotate(-1deg); }
+  75% { transform: scale(1.02) rotate(1deg); }
+}
+
+.tamper-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tamper-icon {
+  font-size: 36px;
+  filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.6));
+}
+
+.tamper-badge {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #F87171;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.tamper-modal-box h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.tamper-modal-box p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #CBD5E1;
+}
+
+.tamper-policy-box {
+  background: rgba(2, 6, 23, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  width: 100%;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #94A3B8;
+}
+
+.tpb-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tpb-row b {
+  color: #E2E8F0;
+}
+
+/* =================================================================== */
+/* 📊 ADVANCED NOTION-STYLE DATABASE MULTI-VIEWS (Table/Board/Gallery) */
+/* =================================================================== */
+.notion-db-wrapper {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.notion-db-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 10px;
+}
+.ndb-views {
+  display: flex;
+  gap: 6px;
+}
+.ndb-view-btn {
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.ndb-view-btn:hover, .ndb-view-btn.active {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38BDF8;
+  border-color: rgba(56, 189, 248, 0.35);
+}
+.notion-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.notion-table th {
+  text-align: left;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.notion-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #E2E8F0;
+}
+.formula-code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #34D399;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.tags-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tag-chip {
+  background: rgba(168, 85, 247, 0.15);
+  color: #C084FC;
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.status-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.status-done { background: rgba(16, 185, 129, 0.15); color: #34D399; }
+.status-in-progress { background: rgba(56, 189, 248, 0.15); color: #38BDF8; }
+.status-in-review { background: rgba(251, 191, 36, 0.15); color: #FBBF24; }
+.status-backlog { background: rgba(148, 163, 184, 0.15); color: #94A3B8; }
+
+/* Kanban Board View */
+.notion-board-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+}
+.notion-board-col {
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.nbc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nbc-count {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.nbc-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.notion-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.notion-card h4 {
+  margin: 0;
+  font-size: 12.5px;
+  color: #fff;
+  line-height: 1.4;
+}
+.nc-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Gallery View */
+.notion-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+.notion-gallery-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ngc-cover {
+  height: 80px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(168, 85, 247, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.ngc-body {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ngc-body h4 {
+  margin: 0;
+  font-size: 13px;
+  color: #fff;
+}
+
