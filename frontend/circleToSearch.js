@@ -404,7 +404,13 @@ class AtelionCircleToSearch {
       if (!res.ok) throw new Error(data.error || 'AI analysis failed');
 
       const elapsed = Math.round(performance.now() - startTime);
-      if (timeEl) timeEl.textContent = `${elapsed}ms`;
+      if (timeEl) {
+        if (data.cached) {
+          timeEl.innerHTML = `<span style="color:#34D399; font-weight: 600;">⚡ Turso Edge Cache (${data.hitCount}x hits)</span> • ${elapsed}ms`;
+        } else {
+          timeEl.innerHTML = `<span style="color:#60A5FA;">💾 Cached to Turso DB</span> • ${elapsed}ms`;
+        }
+      }
 
       const ai = data.result;
       this.latestAiResult = ai;
