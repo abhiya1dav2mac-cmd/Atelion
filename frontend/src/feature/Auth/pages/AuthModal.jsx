@@ -145,25 +145,26 @@ export default function AuthModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl max-w-[520px] w-full p-6 sm:p-8 shadow-2xl border border-gray-100 relative text-center animate-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto"
+        className="bg-white rounded-3xl max-w-[520px] w-full p-5 sm:p-7 shadow-2xl border border-gray-100 relative text-center animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto no-scrollbar"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
           type="button"
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+          className="absolute top-3.5 right-3.5 text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header Illustration */}
-        <div className="flex justify-center mb-2.5">
+        <div className="flex justify-center mb-2">
           <img
             src="/assets/auth-avatars.png"
             alt="Community Avatars"
-            className="h-14 sm:h-16 w-auto object-contain select-none drop-shadow-sm"
+            className="h-11 sm:h-13 w-auto object-contain select-none drop-shadow-sm"
           />
         </div>
 

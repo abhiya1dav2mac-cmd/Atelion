@@ -90,7 +90,7 @@ export default function Sidebar({
         </div>
 
         {/* Scrollable Document Tree */}
-        <div className="overflow-y-auto px-2 py-3 space-y-4 flex-1">
+        <div className="overflow-y-auto no-scrollbar px-2 py-3 space-y-4 flex-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {/* Favorites Section */}
           {favorites.length > 0 && (
             <div>

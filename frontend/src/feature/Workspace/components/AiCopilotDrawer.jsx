@@ -57,7 +57,7 @@ export default function AiCopilotDrawer({ isOpen, onClose, onInsertText }) {
       </div>
 
       {/* Middle Content Stream */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {/* Quick Suggestion Chips */}
         <div className="flex flex-wrap gap-1.5">
           {['Explain Quantum Entanglement', 'Derive Navier-Stokes', 'Write Python QuickSort', 'What is CRDT sync?'].map(
