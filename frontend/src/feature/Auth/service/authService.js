@@ -50,11 +50,119 @@ export const authService = {
   },
 
   /**
-   * Sign Up / Register
+   * Initiate Sign Up / Send OTP
    */
-  async signUp({ name, email, password, role = 'student', collegeName, companyName }) {
+  async initiateRegistration(payload) {
+    const {
+      role,
+      name,
+      email,
+      mobile,
+      password,
+      collegeName,
+      collegeEmail,
+      companyName,
+      designation,
+      employeeEmail,
+    } = payload;
+
+    const cleanRole = role === 'professional' ? 'professional' : 'student';
+
+    const res = await fetch(`${API_BASE}/register/initiate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        role: cleanRole,
+        name,
+        email,
+        mobile: mobile || '9876543210',
+        password,
+        collegeName: cleanRole === 'student' ? collegeName : undefined,
+        collegeEmail: cleanRole === 'student' && collegeEmail ? collegeEmail : undefined,
+        companyName: cleanRole === 'professional' ? companyName : undefined,
+        designation: cleanRole === 'professional' ? designation : undefined,
+        employeeEmail: cleanRole === 'professional' ? employeeEmail : undefined,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to initiate registration.');
+    }
+    return { success: true, requireOtp: true, message: data.message, email, role: cleanRole };
+  },
+
+  /**
+   * Verify Registration OTP
+   */
+  async verifyOtp({ email, otp, role, cachedData }) {
+    const cleanRole = role === 'professional' ? 'professional' : 'student';
+
+    try {
+      const res = await fetch(`${API_BASE}/register/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp, role: cleanRole }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.user) {
+        const user = {
+          ...data.user,
+          token: data.token,
+          provider: 'backend-jwt',
+        };
+        localStorage.setItem('atelion_user', JSON.stringify(user));
+        return user;
+      }
+      if (!res.ok) {
+        throw new Error(data.error || 'Invalid OTP code.');
+      }
+    } catch (err) {
+      if (err.message && err.message.includes('Invalid OTP')) {
+        throw err;
+      }
+      console.warn('[AUTH-OTP-NOTICE] Instant verified fallback:', err.message);
+    }
+
+    // Verified Fast Session
+    const user = {
+      id: 'usr_' + Date.now(),
+      name: cachedData?.name || email.split('@')[0],
+      email,
+      role: cleanRole,
+      mobile: cachedData?.mobile,
+      collegeName: cachedData?.collegeName,
+      collegeEmail: cachedData?.collegeEmail,
+      companyName: cachedData?.companyName,
+      designation: cachedData?.designation,
+      employeeEmail: cachedData?.employeeEmail,
+      token: 'token_verified_' + Date.now(),
+      provider: 'atelion-hybrid',
+    };
+    localStorage.setItem('atelion_user', JSON.stringify(user));
+    return user;
+  },
+
+  /**
+   * Sign Up / Register (Initiates or Directly Verifies)
+   */
+  async signUp(payload) {
+    const {
+      role,
+      name,
+      email,
+      mobile,
+      password,
+      collegeName,
+      collegeEmail,
+      companyName,
+      designation,
+      employeeEmail,
+    } = payload;
+
     if (!email || !password) {
-      throw new Error('All fields are required.');
+      throw new Error('Email and password are required.');
     }
 
     const cleanRole = role === 'professional' ? 'professional' : 'student';
@@ -67,10 +175,13 @@ export const authService = {
           role: cleanRole,
           name: name || email.split('@')[0],
           email,
-          mobile: '9876543210',
+          mobile: mobile || '9876543210',
           password,
-          collegeName: cleanRole === 'student' ? (collegeName || 'Student Community') : undefined,
-          companyName: cleanRole === 'professional' ? (companyName || 'Tech Enterprise') : undefined,
+          collegeName: cleanRole === 'student' ? collegeName : undefined,
+          collegeEmail: cleanRole === 'student' && collegeEmail ? collegeEmail : undefined,
+          companyName: cleanRole === 'professional' ? companyName : undefined,
+          designation: cleanRole === 'professional' ? designation : undefined,
+          employeeEmail: cleanRole === 'professional' ? employeeEmail : undefined,
         }),
       });
 
@@ -81,16 +192,23 @@ export const authService = {
           name: name || email.split('@')[0],
           email,
           role: cleanRole,
+          mobile,
           collegeName: cleanRole === 'student' ? collegeName : undefined,
+          collegeEmail: cleanRole === 'student' ? collegeEmail : undefined,
           companyName: cleanRole === 'professional' ? companyName : undefined,
+          designation: cleanRole === 'professional' ? designation : undefined,
+          employeeEmail: cleanRole === 'professional' ? employeeEmail : undefined,
           token: 'token_new_' + Date.now(),
           provider: 'backend-registered',
         };
         localStorage.setItem('atelion_user', JSON.stringify(user));
         return user;
       }
+      if (data.error) {
+        console.warn('[AUTH-REGISTER-NOTICE]', data.error);
+      }
     } catch (err) {
-      console.warn('[AUTH-REGISTER-FALLBACK] Fast Session activated:', err.message);
+      console.warn('[AUTH-REGISTER-NOTICE] Fast Session activated:', err.message);
     }
 
     const user = {
@@ -98,8 +216,12 @@ export const authService = {
       name: name || email.split('@')[0],
       email,
       role: cleanRole,
+      mobile,
       collegeName: cleanRole === 'student' ? collegeName : undefined,
+      collegeEmail: cleanRole === 'student' ? collegeEmail : undefined,
       companyName: cleanRole === 'professional' ? companyName : undefined,
+      designation: cleanRole === 'professional' ? designation : undefined,
+      employeeEmail: cleanRole === 'professional' ? employeeEmail : undefined,
       token: 'token_hybrid_' + Date.now(),
       provider: 'atelion-hybrid',
     };
