@@ -9,6 +9,7 @@ export default function AuthModal({
   onLogin,
   onRegister,
   onGoogleLogin,
+  onQuickLaunch,
   isLoading,
   error
 }) {
@@ -125,6 +126,16 @@ export default function AuthModal({
             />
           </svg>
           <span>Continue with Google</span>
+        </button>
+
+        {/* 1-Click Fast Launch to Notion Workspace */}
+        <button
+          type="button"
+          onClick={onQuickLaunch}
+          disabled={isLoading}
+          className="w-full mt-2.5 flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-sm hover:shadow"
+        >
+          <span>⚡ Fast Track: Open Notion-Style Workspace Directly</span>
         </button>
 
         {/* Divider */}

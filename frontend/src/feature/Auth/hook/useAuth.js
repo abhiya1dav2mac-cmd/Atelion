@@ -72,6 +72,18 @@ export function useAuth() {
     }
   };
 
+  const quickLaunch = async () => {
+    setIsLoading(true);
+    try {
+      const res = await authService.quickLaunch();
+      setUser(res);
+      closeAuth();
+      return res;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     authService.signOut();
     setUser(null);
@@ -100,6 +112,7 @@ export function useAuth() {
     login,
     register,
     loginWithGoogle,
+    quickLaunch,
     logout,
   };
 }

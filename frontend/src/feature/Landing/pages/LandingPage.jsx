@@ -23,6 +23,7 @@ export default function LandingPage() {
     login,
     register,
     loginWithGoogle,
+    quickLaunch,
     isLoading: isAuthLoading,
     error: authError
   } = useAuth();
@@ -57,6 +58,7 @@ export default function LandingPage() {
         onLogin={login}
         onRegister={register}
         onGoogleLogin={loginWithGoogle}
+        onQuickLaunch={quickLaunch}
         isLoading={isAuthLoading}
         error={authError}
       />
