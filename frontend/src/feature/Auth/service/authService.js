@@ -52,21 +52,25 @@ export const authService = {
   /**
    * Sign Up / Register
    */
-  async signUp({ name, email, password }) {
+  async signUp({ name, email, password, role = 'student', collegeName, companyName }) {
     if (!email || !password) {
       throw new Error('All fields are required.');
     }
+
+    const cleanRole = role === 'professional' ? 'professional' : 'student';
 
     try {
       const res = await fetch(`${API_BASE}/register/initiate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          role: 'professional',
+          role: cleanRole,
           name: name || email.split('@')[0],
           email,
           mobile: '9876543210',
           password,
+          collegeName: cleanRole === 'student' ? (collegeName || 'Student Community') : undefined,
+          companyName: cleanRole === 'professional' ? (companyName || 'Tech Enterprise') : undefined,
         }),
       });
 
@@ -76,7 +80,9 @@ export const authService = {
           id: 'usr_' + Date.now(),
           name: name || email.split('@')[0],
           email,
-          role: 'Professional',
+          role: cleanRole,
+          collegeName: cleanRole === 'student' ? collegeName : undefined,
+          companyName: cleanRole === 'professional' ? companyName : undefined,
           token: 'token_new_' + Date.now(),
           provider: 'backend-registered',
         };
@@ -91,7 +97,9 @@ export const authService = {
       id: 'usr_' + Math.random().toString(36).substring(2, 9),
       name: name || email.split('@')[0],
       email,
-      role: 'Pro Member',
+      role: cleanRole,
+      collegeName: cleanRole === 'student' ? collegeName : undefined,
+      companyName: cleanRole === 'professional' ? companyName : undefined,
       token: 'token_hybrid_' + Date.now(),
       provider: 'atelion-hybrid',
     };

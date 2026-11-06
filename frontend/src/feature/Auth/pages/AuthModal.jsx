@@ -9,21 +9,29 @@ export default function AuthModal({
   onLogin,
   onRegister,
   onGoogleLogin,
-  onQuickLaunch,
   isLoading,
   error
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState('student'); // 'student' | 'professional'
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [organization, setOrganization] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (mode === 'signup') {
-      await onRegister({ name, email, password });
+      await onRegister({
+        role,
+        name,
+        email,
+        password,
+        collegeName: role === 'student' ? organization : undefined,
+        companyName: role === 'professional' ? organization : undefined,
+      });
     } else {
       await onLogin({ email, password });
     }
@@ -31,48 +39,48 @@ export default function AuthModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-all"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 transition-all"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl max-w-[480px] sm:max-w-[500px] w-full p-8 sm:p-10 shadow-2xl border border-gray-100 relative text-center animate-in zoom-in-95 duration-150"
+        className="bg-white rounded-3xl max-w-[500px] w-full p-6 sm:p-8 shadow-2xl border border-gray-100 relative text-center animate-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
           type="button"
-          className="absolute top-5 right-5 text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
           aria-label="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Avatars Header Illustration */}
-        <div className="flex justify-center mb-5">
+        <div className="flex justify-center mb-3">
           <img
             src="/assets/auth-avatars.png"
             alt="Community Avatars"
-            className="h-20 sm:h-24 w-auto object-contain select-none drop-shadow-sm"
+            className="h-16 sm:h-20 w-auto object-contain select-none drop-shadow-sm"
           />
         </div>
 
         {/* Title & Subtitle */}
-        <h3 className="text-2xl sm:text-3xl font-bold text-gray-950 tracking-tight">
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-950 tracking-tight">
           {mode === 'signup' ? 'Create your account' : 'Welcome back'}
         </h3>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1.5 mb-6">
+        <p className="text-xs text-gray-500 mt-1 mb-5">
           {mode === 'signup'
-            ? 'Join designers & engineers mastering tactile interfaces.'
+            ? 'Join learners & engineers mastering tactile interfaces.'
             : 'Enter your credentials to access your account.'}
         </p>
 
         {/* Switch Mode Segmented Pill */}
-        <div className="flex bg-gray-100 p-1 rounded-xl mb-6 text-xs sm:text-sm font-medium">
+        <div className="flex bg-gray-100 p-1 rounded-xl mb-5 text-xs sm:text-sm font-medium">
           <button
             type="button"
             onClick={() => setMode('signup')}
-            className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 sm:py-2 rounded-lg transition-all cursor-pointer ${
               mode === 'signup'
                 ? 'bg-white text-gray-950 shadow-sm font-semibold'
                 : 'text-gray-500 hover:text-gray-950'
@@ -83,7 +91,7 @@ export default function AuthModal({
           <button
             type="button"
             onClick={() => setMode('signin')}
-            className={`flex-1 py-2 rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-1.5 sm:py-2 rounded-lg transition-all cursor-pointer ${
               mode === 'signin'
                 ? 'bg-white text-gray-950 shadow-sm font-semibold'
                 : 'text-gray-500 hover:text-gray-950'
@@ -105,7 +113,7 @@ export default function AuthModal({
           type="button"
           onClick={onGoogleLogin}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-200 hover:border-gray-300 rounded-xl bg-white hover:bg-gray-50/80 text-gray-800 text-sm font-medium transition-all shadow-sm cursor-pointer disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 py-2.5 sm:py-3 px-4 border border-gray-200 hover:border-gray-300 rounded-xl bg-white hover:bg-gray-50/80 text-gray-800 text-xs sm:text-sm font-medium transition-all shadow-sm cursor-pointer disabled:opacity-50"
         >
           <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
             <path
@@ -128,18 +136,8 @@ export default function AuthModal({
           <span>Continue with Google</span>
         </button>
 
-        {/* 1-Click Fast Launch to Notion Workspace */}
-        <button
-          type="button"
-          onClick={onQuickLaunch}
-          disabled={isLoading}
-          className="w-full mt-2.5 flex items-center justify-center gap-2 py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer shadow-sm hover:shadow"
-        >
-          <span>⚡ Fast Track: Open Notion-Style Workspace Directly</span>
-        </button>
-
         {/* Divider */}
-        <div className="relative my-5">
+        <div className="relative my-4">
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-gray-200"></div>
           </div>
@@ -149,35 +147,138 @@ export default function AuthModal({
         </div>
 
         {/* Auth Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-left">
+          {/* Attractive Role Selection Cards for Sign Up */}
+          {mode === 'signup' && (
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                Are you a Student or Professional?
+              </label>
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-0.5">
+                {/* Student Card */}
+                <div
+                  type="button"
+                  onClick={() => setRole('student')}
+                  className={`group relative p-3 sm:p-3.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none text-left flex flex-col justify-between ${
+                    role === 'student'
+                      ? 'border-blue-600 bg-gradient-to-br from-blue-50/90 to-indigo-50/50 shadow-md ring-2 ring-blue-500/20'
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/60'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-base shadow-sm">
+                      🎓
+                    </div>
+                    <div
+                      className={`w-4 h-4 rounded-full flex items-center justify-center transition-all ${
+                        role === 'student'
+                          ? 'bg-blue-600 text-white text-[10px] font-bold shadow-sm'
+                          : 'border-2 border-gray-300'
+                      }`}
+                    >
+                      {role === 'student' && '✓'}
+                    </div>
+                  </div>
+                  <div className="mt-2.5">
+                    <h4 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                      Student
+                    </h4>
+                    <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
+                      Exam prep, formulas, notes & AI homework doubts
+                    </p>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1">
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded-md">
+                      Free Study Hub
+                    </span>
+                  </div>
+                </div>
+
+                {/* Professional Card */}
+                <div
+                  type="button"
+                  onClick={() => setRole('professional')}
+                  className={`group relative p-3 sm:p-3.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none text-left flex flex-col justify-between ${
+                    role === 'professional'
+                      ? 'border-indigo-600 bg-gradient-to-br from-indigo-50/90 to-purple-50/50 shadow-md ring-2 ring-indigo-500/20'
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/60'
+                  }`}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-base shadow-sm">
+                      💼
+                    </div>
+                    <div
+                      className={`w-4 h-4 rounded-full flex items-center justify-center transition-all ${
+                        role === 'professional'
+                          ? 'bg-indigo-600 text-white text-[10px] font-bold shadow-sm'
+                          : 'border-2 border-gray-300'
+                      }`}
+                    >
+                      {role === 'professional' && '✓'}
+                    </div>
+                  </div>
+                  <div className="mt-2.5">
+                    <h4 className="text-xs sm:text-sm font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                      Professional
+                    </h4>
+                    <p className="text-[11px] text-gray-500 leading-tight mt-0.5">
+                      Sprints, databases, roadmaps & team delivery
+                    </p>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1">
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-md">
+                      Pro Workspace
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {mode === 'signup' && (
             <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">Full Name</label>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Full Name</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Jane Doe"
-                className="w-full px-4 py-2.5 sm:py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+                placeholder={role === 'student' ? 'e.g. Rahul Sharma' : 'e.g. Priya Patel'}
+                className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+              />
+            </div>
+          )}
+
+          {mode === 'signup' && (
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                {role === 'student' ? 'College / University' : 'Company / Organization'} <span className="text-gray-400 font-normal">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={organization}
+                onChange={(e) => setOrganization(e.target.value)}
+                placeholder={role === 'student' ? 'e.g. Stanford / IIT / University' : 'e.g. Google / Stripe / Startup'}
+                className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Email address</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Email address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="w-full px-4 py-2.5 sm:py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+              className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
             />
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-semibold text-gray-700">Password</label>
               {mode === 'signin' && (
                 <button
@@ -196,7 +297,7 @@ export default function AuthModal({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full px-4 py-2.5 sm:py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400 pr-11"
+                className="w-full px-3.5 py-2 sm:py-2.5 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400 pr-11"
               />
               <button
                 type="button"
@@ -212,18 +313,18 @@ export default function AuthModal({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full mt-2 btn-blue-pill py-3 sm:py-3.5 px-4 rounded-xl text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+            className="w-full mt-2 btn-blue-pill py-2.5 sm:py-3 px-4 rounded-xl text-white font-semibold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
           >
             {isLoading
               ? 'Please wait...'
               : mode === 'signup'
-              ? 'Create Account'
+              ? (role === 'student' ? 'Join as Student & Open Study Hub →' : 'Join as Professional & Open Workspace →')
               : 'Sign In'}
           </button>
         </form>
 
         {/* Bottom Switch Link */}
-        <p className="mt-5 text-xs sm:text-sm text-gray-500">
+        <p className="mt-4 text-xs text-gray-500">
           {mode === 'signup' ? (
             <>
               Already have an account?{' '}

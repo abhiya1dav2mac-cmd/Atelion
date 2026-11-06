@@ -6,12 +6,13 @@ import { workspaceService } from '../services/workspaceService';
 import { Sparkles, Database } from '../components/WorkspaceIcons';
 
 export default function WorkspacePage({ user, onLogout }) {
-  const [pages, setPages] = useState(() => workspaceService.getPages());
+  const userRole = user?.role === 'student' ? 'student' : 'professional';
+  const [pages, setPages] = useState(() => workspaceService.getPages(userRole));
   const [activePageId, setActivePageId] = useState(() => {
-    const list = workspaceService.getPages();
+    const list = workspaceService.getPages(userRole);
     return list.length > 0 ? list[0].id : null;
   });
-  const [databaseItems, setDatabaseItems] = useState(() => workspaceService.getDatabaseItems());
+  const [databaseItems, setDatabaseItems] = useState(() => workspaceService.getDatabaseItems(userRole));
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAiOpen, setIsAiOpen] = useState(false);
 
@@ -137,3 +138,4 @@ export default function WorkspacePage({ user, onLogout }) {
     </div>
   );
 }
+

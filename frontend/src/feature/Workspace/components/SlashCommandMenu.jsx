@@ -48,3 +48,4 @@ export default function SlashCommandMenu({ position, onSelect, onClose }) {
     </div>
   );
 }
+

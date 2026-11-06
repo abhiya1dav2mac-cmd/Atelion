@@ -47,11 +47,15 @@ export default function Sidebar({
         <div className="p-3.5 flex items-center justify-between border-b border-[#EBEBEA]/80">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-              ⚡
+              {user?.role === 'student' ? '🎓' : '⚡'}
             </div>
             <div className="min-w-0">
-              <h2 className="text-xs font-bold text-gray-900 truncate tracking-tight">Atelion OS</h2>
-              <p className="text-[10px] text-gray-500 truncate font-mono">Pro Workspace • Turso Edge</p>
+              <h2 className="text-xs font-bold text-gray-900 truncate tracking-tight">
+                {user?.role === 'student' ? 'Student Study Hub' : 'Atelion OS Pro'}
+              </h2>
+              <p className="text-[10px] text-gray-500 truncate font-mono">
+                {user?.collegeName || user?.companyName || (user?.role === 'student' ? 'Academic Edition' : 'Enterprise Workspace')}
+              </p>
             </div>
           </div>
           <button
@@ -148,7 +152,18 @@ export default function Sidebar({
             {user?.name ? user.name[0] : 'U'}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-gray-900 truncate">{user?.name || 'Pro User'}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs font-semibold text-gray-900 truncate">{user?.name || 'Pro User'}</p>
+              <span
+                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
+                  user?.role === 'student'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-indigo-100 text-indigo-700'
+                }`}
+              >
+                {user?.role === 'student' ? 'Student' : 'Pro'}
+              </span>
+            </div>
             <p className="text-[10px] text-gray-400 truncate">{user?.email || 'user@workspace.io'}</p>
           </div>
         </div>
@@ -186,3 +201,4 @@ function PageItem({ page, isActive, onSelect, onDelete }) {
     </div>
   );
 }
+

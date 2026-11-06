@@ -8,6 +8,57 @@
 
 const STORAGE_KEY = 'atelion_notion_pages';
 
+export const STUDENT_PAGES = [
+  {
+    id: 'page_student_hub',
+    title: '📚 Course Notes & Lecture Hub',
+    icon: '📚',
+    cover: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4F46E5 100%)',
+    favorite: true,
+    updatedAt: 'Just now',
+    blocks: [
+      { id: 'b_sh_1', type: 'callout', content: 'Welcome to your Student Study Hub! Organize lecture notes, solve equations with LaTeX, and use Circle to Search AI (bottom right) for instant step-by-step doubt explanations.', icon: '🎓' },
+      { id: 'b_sh_2', type: 'heading_1', content: 'Weekly Study Checklist' },
+      { id: 'b_sh_3', type: 'todo', content: 'Revise Schrödinger wave equation derivation for Physics Quiz', checked: true },
+      { id: 'b_sh_4', type: 'todo', content: 'Implement Graph Dijkstra algorithm in C++/Python', checked: false },
+      { id: 'b_sh_5', type: 'todo', content: 'Circle to Search: OCR handwritten notes from lecture 14', checked: false },
+      { id: 'b_sh_6', type: 'heading_2', content: 'Active Course Syllabi & References' },
+      { id: 'b_sh_7', type: 'paragraph', content: 'Type "/" anywhere to insert LaTeX formulas, todo checklists, code blocks or relational database views.' },
+    ],
+  },
+  {
+    id: 'page_math',
+    title: '🧪 Quantum Physics & Applied Mathematics',
+    icon: '🧪',
+    cover: 'linear-gradient(135deg, #042F2E 0%, #0F766E 50%, #14B8A6 100%)',
+    favorite: true,
+    updatedAt: '10 mins ago',
+    blocks: [
+      { id: 'b_m1', type: 'callout', content: 'Equations are rendered using high-precision LaTeX math syntax with zero-latency KaTeX rendering.', icon: '⚛️' },
+      { id: 'b_m2', type: 'heading_1', content: 'Fundamental Physical Equations' },
+      { id: 'b_m3', type: 'math', content: 'E = m c^2' },
+      { id: 'b_m4', type: 'paragraph', content: 'Einstein\'s mass-energy equivalence formula demonstrates that mass and energy are mutually convertible.' },
+      { id: 'b_m5', type: 'heading_2', content: 'Schrödinger Wave Equation' },
+      { id: 'b_m6', type: 'math', content: 'i \\hbar \\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r}, t) = \\hat{H} \\Psi(\\mathbf{r}, t)' },
+      { id: 'b_m7', type: 'heading_2', content: 'Gaussian Integral' },
+      { id: 'b_m8', type: 'math', content: '\\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi}' },
+    ],
+  },
+  {
+    id: 'page_student_db',
+    title: '🗂️ Academic Course & Exam Tracker',
+    icon: '🗂️',
+    cover: 'linear-gradient(135deg, #064E3B 0%, #047857 50%, #10B981 100%)',
+    favorite: false,
+    updatedAt: '30 mins ago',
+    isDatabasePage: true,
+    blocks: [
+      { id: 'b_sdb_desc', type: 'callout', content: 'Track assignments, semester milestones, and exam targets with Formulas 2.0 dynamic progress bars. Switch to Kanban Board or Gallery View below.', icon: '📊' },
+      { id: 'b_sdb_embed', type: 'database' },
+    ],
+  },
+];
+
 export const INITIAL_PAGES = [
   {
     id: 'page_roadmap',
@@ -75,6 +126,13 @@ export const INITIAL_PAGES = [
   },
 ];
 
+export const STUDENT_DATABASE_ITEMS = [
+  { id: 'st_1', title: 'Calculus III: Multivariable Integration Proofs', status: 'Done', priority: 'P0 Urgent', progress: 100, assignee: 'Student', due: 'Nov 10' },
+  { id: 'st_2', title: 'Data Structures: Red-Black Tree Implementation', status: 'In Progress', priority: 'P1 High', progress: 80, assignee: 'Student', due: 'Nov 12' },
+  { id: 'st_3', title: 'Organic Chemistry: Reaction Mechanism Notes', status: 'In Progress', priority: 'P1 High', progress: 60, assignee: 'Student', due: 'Nov 15' },
+  { id: 'st_4', title: 'Physics Lab: Photoelectric Effect Report', status: 'To Do', priority: 'P2 Normal', progress: 25, assignee: 'Student', due: 'Nov 18' },
+];
+
 export const INITIAL_DATABASE_ITEMS = [
   { id: 't_1', title: 'Implement Groq LPU Edge Streaming', status: 'Done', priority: 'P0 Urgent', progress: 100, assignee: 'Alex', due: 'Nov 8' },
   { id: 't_2', title: 'Dedicated Turso DB Circle Search Cache', status: 'Done', priority: 'P0 Urgent', progress: 100, assignee: 'Lead Architect', due: 'Nov 9' },
@@ -85,13 +143,15 @@ export const INITIAL_DATABASE_ITEMS = [
 ];
 
 export const workspaceService = {
-  getPages() {
+  getPages(role) {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) return JSON.parse(data);
     } catch {}
-    this.savePages(INITIAL_PAGES);
-    return INITIAL_PAGES;
+
+    const seed = role === 'student' ? STUDENT_PAGES : INITIAL_PAGES;
+    this.savePages(seed);
+    return seed;
   },
 
   savePages(pages) {
@@ -100,13 +160,15 @@ export const workspaceService = {
     } catch {}
   },
 
-  getDatabaseItems() {
+  getDatabaseItems(role) {
     try {
       const data = localStorage.getItem('atelion_db_items');
       if (data) return JSON.parse(data);
     } catch {}
-    this.saveDatabaseItems(INITIAL_DATABASE_ITEMS);
-    return INITIAL_DATABASE_ITEMS;
+
+    const seed = role === 'student' ? STUDENT_DATABASE_ITEMS : INITIAL_DATABASE_ITEMS;
+    this.saveDatabaseItems(seed);
+    return seed;
   },
 
   saveDatabaseItems(items) {

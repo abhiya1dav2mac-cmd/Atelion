@@ -150,3 +150,4 @@ export default function AiCopilotDrawer({ isOpen, onClose, onInsertText }) {
     </div>
   );
 }
+

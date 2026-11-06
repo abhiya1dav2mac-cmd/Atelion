@@ -58,7 +58,6 @@ export default function LandingPage() {
         onLogin={login}
         onRegister={register}
         onGoogleLogin={loginWithGoogle}
-        onQuickLaunch={quickLaunch}
         isLoading={isAuthLoading}
         error={authError}
       />
