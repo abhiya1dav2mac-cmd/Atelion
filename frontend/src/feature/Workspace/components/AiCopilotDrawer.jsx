@@ -127,14 +127,21 @@ export default function AiCopilotDrawer({ isOpen, onClose, onInsertText, activeP
     >
       {/* 1. Header (Matching Screenshot 1) */}
       <div className="h-12 border-b border-[#282828] px-3.5 flex items-center justify-between bg-[#191919]">
-        <div className="flex items-center gap-2 cursor-pointer group">
-          <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-xs">
-            ✨
+        <div className="flex items-center gap-1.5 cursor-pointer group">
+          <button
+            onClick={() => alert('AI Session History: switch between active reasoning threads.')}
+            className="p-1 text-[#777777] hover:text-white rounded hover:bg-[#282828] transition-colors"
+            title="Session options"
+          >
+            <MoreHorizontal className="w-3.5 h-3.5" />
+          </button>
+          <div className="flex items-center gap-1.5 px-1.5 py-1 rounded-md hover:bg-[#282828] transition-colors">
+            <span className="text-xs">🌴</span>
+            <span className="font-semibold text-xs text-white group-hover:text-[#60A5FA] transition-colors">
+              New AI chat
+            </span>
+            <span className="text-[10px] text-[#777777]">⌄</span>
           </div>
-          <span className="font-semibold text-xs text-white group-hover:text-[#60A5FA] transition-colors">
-            New AI chat
-          </span>
-          <span className="text-[10px] text-[#777777]">⌄</span>
         </div>
 
         <div className="flex items-center gap-1 text-[#888888]">
@@ -181,31 +188,83 @@ export default function AiCopilotDrawer({ isOpen, onClose, onInsertText, activeP
           <div className="h-full flex flex-col justify-end pb-4 space-y-5 animate-in fade-in duration-150">
             {/* Notion AI Avatar & Welcome Header (Matching Screenshot 1) */}
             <div className="space-y-3">
-              <div className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center font-bold text-sm shadow-md">
-                ✨
+              <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center font-bold text-base shadow-lg">
+                <svg className="w-5 h-5 text-gray-900" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L14.4 7.6L20 8.4L16 12.4L17.2 18L12 15.2L6.8 18L8 12.4L4 8.4L9.6 7.6L12 2Z" />
+                </svg>
               </div>
-              <h3 className="text-lg font-bold text-white tracking-tight">
+              <h3 className="text-xl font-bold text-white tracking-tight">
                 How can I help you today?
               </h3>
             </div>
 
             {/* 4 Action Suggestions (Matching Screenshot 1) */}
-            <div className="space-y-1.5 text-left">
-              {suggestions.map((s) => {
-                const IconComponent = s.icon;
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => handleSendMessage(s.prompt)}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] border border-[#2d2d2d] hover:border-[#383838] transition-all cursor-pointer group text-left"
-                  >
-                    <IconComponent className="w-4 h-4 text-[#888888] group-hover:text-white transition-colors flex-shrink-0" />
-                    <span className="text-xs font-medium text-[#cccccc] group-hover:text-white transition-colors">
-                      {s.title}
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="space-y-2 text-left">
+              {/* 1. Summarize */}
+              <button
+                onClick={() =>
+                  handleSendMessage(
+                    `Summarize the key takeaways and actionable points of "${activePage?.title || 'this page'}" into concise bullet points.`
+                  )
+                }
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] border border-[#2d2d2d] hover:border-[#383838] transition-all cursor-pointer group text-left"
+              >
+                <div className="w-4 h-4 flex flex-col justify-center gap-0.5 text-[#888888] group-hover:text-white transition-colors">
+                  <span className="w-3.5 h-0.5 bg-current rounded" />
+                  <span className="w-2.5 h-0.5 bg-current rounded" />
+                  <span className="w-3 h-0.5 bg-current rounded" />
+                </div>
+                <span className="text-xs font-medium text-[#cccccc] group-hover:text-white transition-colors">
+                  Summarize this page
+                </span>
+              </button>
+
+              {/* 2. Translate */}
+              <button
+                onClick={() =>
+                  handleSendMessage(
+                    `Translate the content of "${activePage?.title || 'this page'}" into Hindi and Spanish with accurate terminology.`
+                  )
+                }
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] border border-[#2d2d2d] hover:border-[#383838] transition-all cursor-pointer group text-left"
+              >
+                <span className="text-xs font-bold text-[#888888] group-hover:text-white transition-colors">
+                  A文
+                </span>
+                <span className="text-xs font-medium text-[#cccccc] group-hover:text-white transition-colors">
+                  Translate this page
+                </span>
+              </button>
+
+              {/* 3. Analyze */}
+              <button
+                onClick={() =>
+                  handleSendMessage(
+                    `Perform a deep SWOT and algorithmic architectural analysis of "${activePage?.title || 'this page'}". Highlight bottlenecks and optimization opportunities.`
+                  )
+                }
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] border border-[#2d2d2d] hover:border-[#383838] transition-all cursor-pointer group text-left"
+              >
+                <Search className="w-4 h-4 text-[#888888] group-hover:text-white transition-colors flex-shrink-0" />
+                <span className="text-xs font-medium text-[#cccccc] group-hover:text-white transition-colors">
+                  Analyze for insights
+                </span>
+              </button>
+
+              {/* 4. Task Tracker */}
+              <button
+                onClick={() =>
+                  handleSendMessage(
+                    `Extract actionable deliverables from "${activePage?.title || 'this page'}" and generate a structured Kanban task backlog with priorities.`
+                  )
+                }
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] border border-[#2d2d2d] hover:border-[#383838] transition-all cursor-pointer group text-left"
+              >
+                <CheckSquare className="w-4 h-4 text-[#888888] group-hover:text-white transition-colors flex-shrink-0" />
+                <span className="text-xs font-medium text-[#cccccc] group-hover:text-white transition-colors">
+                  Create a task tracker
+                </span>
+              </button>
             </div>
           </div>
         ) : (

@@ -225,35 +225,46 @@ export default function CommandPaletteModal({
             )}
           </div>
 
-          {/* Right Panel: Live Page Preview */}
+          {/* Right Panel: Live Page Preview (Matching Screenshot 4) */}
           <div
-            className="w-1/2 p-4 overflow-y-auto no-scrollbar bg-[#191919] flex flex-col text-left"
+            className="w-1/2 p-4 overflow-y-auto no-scrollbar bg-[#181818] flex flex-col text-left border-l border-[#262626]"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {activePage ? (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#282828] border border-[#333333] flex items-center justify-center text-lg shadow-sm">
-                    {activePage.icon || '📄'}
+              <div className="space-y-3.5 flex-1 flex flex-col">
+                {/* Preview Card Mock (Matching Screenshot 4) */}
+                <div className="p-4 rounded-xl bg-[#202020] border border-[#2d2d2d] space-y-3 shadow-inner">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-[#2e2e2e] flex items-center justify-center text-sm shadow">
+                      {activePage.icon || '📄'}
+                    </div>
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="h-3 w-3/4 bg-[#333333] rounded" />
+                      <div className="h-2 w-1/2 bg-[#2a2a2a] rounded" />
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-bold text-white text-sm truncate">{activePage.title}</h3>
-                    <p className="text-[10px] text-[#777777] font-mono">
-                      Updated {activePage.updatedAt || 'Recently'} • Atelion Workspace
-                    </p>
+                  <div className="space-y-1.5 pt-1">
+                    <div className="h-2 w-full bg-[#292929] rounded" />
+                    <div className="h-2 w-5/6 bg-[#262626] rounded" />
+                    <div className="h-2 w-4/6 bg-[#262626] rounded" />
                   </div>
                 </div>
 
-                <div className="h-px bg-[#262626] my-2" />
+                <div className="flex items-center justify-between text-xs pt-1">
+                  <span className="font-bold text-white truncate text-xs">{activePage.title}</span>
+                  <span className="text-[10px] text-[#666666] font-mono">
+                    {activePage.updatedAt || 'Active'}
+                  </span>
+                </div>
 
-                {/* Excerpt Blocks Preview */}
-                <div className="space-y-2 text-xs text-[#999999] font-mono leading-relaxed">
-                  {(activePage.blocks || []).slice(0, 5).map((b, idx) => (
+                {/* Actual Excerpt Blocks Preview */}
+                <div className="space-y-1.5 text-xs text-[#999999] leading-relaxed flex-1 overflow-hidden">
+                  {(activePage.blocks || []).slice(0, 4).map((b, idx) => (
                     <div
                       key={idx}
-                      className="p-2 rounded bg-[#202020] border border-[#2a2a2a] text-[#b0b0b0]"
+                      className="p-2 rounded-lg bg-[#202020]/70 border border-[#262626] text-[#cccccc] text-[11px] truncate"
                     >
-                      {b.content || (b.type === 'database' ? 'Relational Database Embed' : 'Block content')}
+                      {b.content || (b.type === 'database' ? '📊 Relational Database Embed' : '📝 Block content')}
                     </div>
                   ))}
                 </div>

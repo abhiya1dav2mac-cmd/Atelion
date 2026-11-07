@@ -284,10 +284,11 @@ export default function Sidebar({
               onClick={() => {
                 alert('Atelion Help: Press Ctrl+K for search, / for block commands, or ask AI Copilot.');
               }}
-              className="p-1.5 hover:text-white hover:bg-[#262626] rounded-md transition-colors cursor-pointer"
+              className="p-1.5 hover:text-white hover:bg-[#262626] rounded-md transition-colors cursor-pointer relative"
               title="Help & documentation"
             >
               <HelpCircle className="w-4 h-4" />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#3B82F6] rounded-full ring-2 ring-[#1a1a1a]" />
             </button>
 
             <button
