@@ -16,11 +16,12 @@
  * ==============================================================================
  */
 
-// Crisp SVG Pencil Cursor (hotspot at pencil tip: x=2, y=22) — Safari & Chromium compatible
+// Crisp SVG Pencil Cursor (hotspot at pencil tip: x=2, y=22) — Base64 encoded for universal Windows Chrome & Safari support
 const PENCIL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M17.5 2.5L21.5 6.5L8 20L2.5 21.5L4 16L17.5 2.5Z" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5" stroke-linejoin="round"/><path d="M15 5L19 9" stroke="#FFFFFF" stroke-width="1.4"/><path d="M2.5 21.5L5.5 20.7L3.3 18.5L2.5 21.5Z" fill="#0F172A"/></svg>`;
 
-// Single quotes inside url('...') to ensure WebKit / Safari inline CSS parser compatibility
-export const PENCIL_CURSOR_STYLE = `url('data:image/svg+xml,${encodeURIComponent(PENCIL_SVG)}') 2 22, crosshair`;
+const PENCIL_BASE64 = typeof btoa !== 'undefined' ? btoa(PENCIL_SVG) : encodeURIComponent(PENCIL_SVG);
+
+export const PENCIL_CURSOR_STYLE = `url('data:image/svg+xml;base64,${PENCIL_BASE64}') 2 22, url('data:image/svg+xml,${encodeURIComponent(PENCIL_SVG)}') 2 22, crosshair`;
 
 export const MULTI_STROKE_GRACE_MS = 650;
 
@@ -84,6 +85,20 @@ export function safeSetPointerCapture(target, pointerId) {
     }
   } catch {
     // Ignore Safari WebKit synthetic/touch pointerId exception
+  }
+}
+
+/**
+ * Safe pointer release helper
+ */
+export function safeReleasePointerCapture(target, pointerId) {
+  if (!target || pointerId === undefined || pointerId === null) return;
+  try {
+    if (typeof target.releasePointerCapture === 'function' && target.hasPointerCapture?.(pointerId)) {
+      target.releasePointerCapture(pointerId);
+    }
+  } catch {
+    // Ignore release errors
   }
 }
 

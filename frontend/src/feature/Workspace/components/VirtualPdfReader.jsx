@@ -6,6 +6,7 @@ import {
   drawSmoothStroke,
   renderFreehandStrokesToCanvas,
   safeSetPointerCapture,
+  safeReleasePointerCapture,
   getSafeCanvasDpr,
 } from '../services/circleSearchEngine';
 import { X, ChevronRight, Plus } from './WorkspaceIcons';
@@ -557,10 +558,15 @@ function PdfPageCanvasWithPencil({
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e) => {
+    safeReleasePointerCapture(e?.currentTarget, e?.pointerId);
     if (!isPencilActive || !activeStrokeRef.current) return;
     const finished = activeStrokeRef.current;
     activeStrokeRef.current = null;
+
+    if (finished.length === 1) {
+      finished.push({ x: finished[0].x + 3, y: finished[0].y + 3 });
+    }
 
     if (finished.length >= 2 || strokesRef.current.length > 0) {
       strokesRef.current = [...strokesRef.current, finished];
@@ -571,8 +577,8 @@ function PdfPageCanvasWithPencil({
     }
   };
 
-  const handlePointerCancel = () => {
-    // Safari iOS/iPadOS pointer cancel handler
+  const handlePointerCancel = (e) => {
+    safeReleasePointerCapture(e?.currentTarget, e?.pointerId);
     if (activeStrokeRef.current && activeStrokeRef.current.length >= 2) {
       strokesRef.current = [...strokesRef.current, activeStrokeRef.current];
       redrawOverlay();

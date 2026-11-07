@@ -7,6 +7,7 @@ import {
   renderFreehandStrokesToCanvas,
   extractDomTextInBounds,
   safeSetPointerCapture,
+  safeReleasePointerCapture,
   getSafeCanvasDpr,
 } from '../services/circleSearchEngine';
 import { X } from './WorkspaceIcons';
@@ -15,8 +16,10 @@ import { X } from './WorkspaceIcons';
  * ==============================================================================
  * HOME / WORKSPACE FREEHAND PENCIL OVERLAY (FreehandCircleOverlay.jsx)
  * - Immediate ✏️ Freehand Pencil on activation (PENCIL_CURSOR_STYLE)
- * - No circle required: underline, line, bracket, diagram, circuit, chemical ring,
- *   or handwritten math structure -> ~650ms multi-stroke grace -> Direct AI Result!
+ * - Live floating ✏️ Pencil Follower at cursor position for 100% visual feedback
+ * - 1-Tap Toggle: 🖥️ Screen Draw (over notes/math) vs 📝 Clean Pad (blank board)
+ * - No circle required: underline, line, bracket, diagram, circuit, or math structure
+ *   -> ~650ms multi-stroke grace -> Direct AI Result!
  * ==============================================================================
  */
 export default function FreehandCircleOverlay({
@@ -32,6 +35,7 @@ export default function FreehandCircleOverlay({
   const [strokeCount, setStrokeCount] = useState(0);
   const [isWaitingGrace, setIsWaitingGrace] = useState(false);
   const [canvasMode, setCanvasMode] = useState('screen'); // 'screen' | 'pad'
+  const [pointerPos, setPointerPos] = useState({ x: -100, y: -100, visible: false, isDrawing: false });
 
   const clearGraceTimer = () => {
     if (graceTimerRef.current) {
@@ -49,6 +53,8 @@ export default function FreehandCircleOverlay({
     const w = canvas.width / dpr;
     const h = canvas.height / dpr;
 
+    // Reset transform to safe DPR before clearing and drawing
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
     const allStrokes = activeStrokeRef.current
@@ -62,8 +68,9 @@ export default function FreehandCircleOverlay({
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.25)';
-    ctx.lineWidth = 9;
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.28)';
+    ctx.fillStyle = 'rgba(59, 130, 246, 0.28)';
+    ctx.lineWidth = 8;
     for (const pts of allStrokes) {
       drawSmoothStroke(ctx, pts, 0, 0, 1);
     }
@@ -137,6 +144,7 @@ export default function FreehandCircleOverlay({
     strokesRef.current = [];
     activeStrokeRef.current = null;
     setStrokeCount(0);
+    setPointerPos((prev) => ({ ...prev, isDrawing: false }));
 
     if (onCompleteCapture) {
       onCompleteCapture({
@@ -158,6 +166,7 @@ export default function FreehandCircleOverlay({
       strokesRef.current = [];
       activeStrokeRef.current = null;
       setStrokeCount(0);
+      setPointerPos({ x: -100, y: -100, visible: false, isDrawing: false });
       return;
     }
 
@@ -178,16 +187,6 @@ export default function FreehandCircleOverlay({
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
 
-    // Safari iOS/iPadOS passive:false touch guard to block native scroll/loupe/overscroll
-    const canvasEl = canvasRef.current;
-    const preventSafariScroll = (ev) => {
-      if (ev.cancelable) ev.preventDefault();
-    };
-    if (canvasEl) {
-      canvasEl.addEventListener('touchstart', preventSafariScroll, { passive: false });
-      canvasEl.addEventListener('touchmove', preventSafariScroll, { passive: false });
-    }
-
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         clearGraceTimer();
@@ -201,10 +200,6 @@ export default function FreehandCircleOverlay({
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
       window.removeEventListener('keydown', handleKeyDown);
-      if (canvasEl) {
-        canvasEl.removeEventListener('touchstart', preventSafariScroll);
-        canvasEl.removeEventListener('touchmove', preventSafariScroll);
-      }
       clearGraceTimer();
     };
   }, [isOpen, onCancel, redrawCanvas, finalizeFreehandSearch]);
@@ -215,26 +210,50 @@ export default function FreehandCircleOverlay({
     if (e.button !== undefined && e.button !== 0) return;
     if (e.cancelable) e.preventDefault();
     clearGraceTimer();
-    activeStrokeRef.current = [{ x: e.clientX, y: e.clientY }];
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    activeStrokeRef.current = [{ x, y }];
     safeSetPointerCapture(e.currentTarget, e.pointerId);
+    setPointerPos({ x: e.clientX, y: e.clientY, visible: true, isDrawing: true });
     redrawCanvas();
   };
 
   const handlePointerMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setPointerPos({
+      x: e.clientX,
+      y: e.clientY,
+      visible: true,
+      isDrawing: Boolean(activeStrokeRef.current),
+    });
+
     if (!activeStrokeRef.current) return;
     if (e.cancelable) e.preventDefault();
     const pts = activeStrokeRef.current;
     const last = pts[pts.length - 1];
-    if (!last || Math.hypot(e.clientX - last.x, e.clientY - last.y) >= 2) {
-      pts.push({ x: e.clientX, y: e.clientY });
+    if (!last || Math.hypot(x - last.x, y - last.y) >= 1.5) {
+      pts.push({ x, y });
       redrawCanvas();
     }
   };
 
-  const handlePointerUp = () => {
+  const handlePointerUp = (e) => {
+    safeReleasePointerCapture(e?.currentTarget || canvasRef.current, e?.pointerId);
+    setPointerPos((prev) => ({ ...prev, isDrawing: false }));
+
     if (!activeStrokeRef.current) return;
     const finished = activeStrokeRef.current;
     activeStrokeRef.current = null;
+
+    // If single point (quick click/tap on formula), synthesize a small vector so it triggers search
+    if (finished.length === 1) {
+      finished.push({ x: finished[0].x + 3, y: finished[0].y + 3 });
+    }
 
     if (finished.length >= 2 || strokesRef.current.length > 0) {
       strokesRef.current = [...strokesRef.current, finished];
@@ -249,8 +268,10 @@ export default function FreehandCircleOverlay({
     }
   };
 
-  const handlePointerCancel = () => {
-    // Safari iOS/iPadOS pointer cancel handler: only save if stroke has meaningful length
+  const handlePointerCancel = (e) => {
+    safeReleasePointerCapture(e?.currentTarget || canvasRef.current, e?.pointerId);
+    setPointerPos((prev) => ({ ...prev, isDrawing: false }));
+
     if (activeStrokeRef.current && activeStrokeRef.current.length >= 2) {
       strokesRef.current = [...strokesRef.current, activeStrokeRef.current];
       setStrokeCount(strokesRef.current.length);
@@ -264,7 +285,7 @@ export default function FreehandCircleOverlay({
   };
 
   const handleClear = (e) => {
-    e.stopPropagation();
+    if (e?.stopPropagation) e.stopPropagation();
     clearGraceTimer();
     strokesRef.current = [];
     activeStrokeRef.current = null;
@@ -288,6 +309,7 @@ export default function FreehandCircleOverlay({
         backgroundSize: '24px 24px',
         touchAction: 'none',
       }}
+      onPointerLeave={() => setPointerPos((prev) => ({ ...prev, visible: false }))}
     >
       {/* Full-Viewport Freehand Pencil Canvas */}
       <canvas
@@ -296,6 +318,9 @@ export default function FreehandCircleOverlay({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
+        onMouseDown={handlePointerDown}
+        onMouseMove={handlePointerMove}
+        onMouseUp={handlePointerUp}
         className="absolute inset-0 w-full h-full"
         style={{
           cursor: PENCIL_CURSOR_STYLE,
@@ -304,6 +329,29 @@ export default function FreehandCircleOverlay({
           WebkitTouchCallout: 'none',
         }}
       />
+
+      {/* Live Floating ✏️ Pencil Follower Badge right at cursor position */}
+      {pointerPos.visible && (
+        <div
+          className="fixed pointer-events-none z-50 flex items-center gap-1 select-none transition-transform duration-75"
+          style={{
+            left: `${pointerPos.x}px`,
+            top: `${pointerPos.y}px`,
+            transform: 'translate(-3px, -24px)',
+          }}
+        >
+          <span
+            className={`text-xl transition-transform drop-shadow-md ${
+              pointerPos.isDrawing ? 'scale-125 rotate-12' : 'scale-100 -rotate-12'
+            }`}
+          >
+            ✏️
+          </span>
+          {pointerPos.isDrawing && (
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping shadow-xs" />
+          )}
+        </div>
+      )}
 
       {/* Clean White Floating Instruction & Control Pill */}
       <div
