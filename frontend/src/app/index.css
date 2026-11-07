@@ -7,6 +7,9 @@
 html {
   margin: 0;
   padding: 0;
+  height: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
   background-color: #F3F4F6;
   overscroll-behavior: none;
   overscroll-behavior-y: none;
@@ -16,14 +19,12 @@ html {
 body {
   margin: 0;
   padding: 0;
+  height: 100% !important;
+  width: 100% !important;
+  overflow: hidden !important;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: #F3F4F6;
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(255,255,255,0.85) 0%, rgba(243,244,246,0.4) 60%),
-    repeating-linear-gradient(0deg, rgba(0,0,0,0.008) 0px, rgba(0,0,0,0.008) 1px, transparent 1px, transparent 3px);
   color: #111827;
-  overflow-x: hidden;
-  min-height: 100vh;
   overscroll-behavior: none;
   overscroll-behavior-y: none;
 }

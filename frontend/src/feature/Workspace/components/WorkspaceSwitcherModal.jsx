@@ -42,11 +42,13 @@ export default function WorkspaceSwitcherModal({
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-white truncate text-xs">{displayName}'s Space</h3>
-            <p className="text-[10px] text-amber-400 font-bold truncate">👑 PREMIUM UNLOCKED • Enterprise Edition</p>
+            <p className="text-[10px] text-[#888888] font-medium truncate">
+              Free Plan · 1 member <span className="text-amber-400 font-semibold">• 👑 Premium</span>
+            </p>
           </div>
         </div>
 
-        {/* Quick Workspace Actions */}
+        {/* Quick Workspace Actions (Matching Screenshot 2) */}
         <div className="space-y-0.5">
           <button
             onClick={() => {
@@ -56,7 +58,9 @@ export default function WorkspaceSwitcherModal({
             }}
             className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md hover:bg-[#2a2a2a] text-[#3B82F6] font-medium transition-colors cursor-pointer text-left"
           >
-            <ArrowUp className="w-4 h-4 text-[#3B82F6]" />
+            <svg className="w-4 h-4 text-[#3B82F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 11l3-3m0 0l3 3m-3-3v8m0-13a9 9 0 110 18 9 9 0 010-18z" />
+            </svg>
             <span>Upgrade</span>
           </button>
 

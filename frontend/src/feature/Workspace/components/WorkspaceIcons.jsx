@@ -272,3 +272,37 @@ export function ExternalLink({ className = "w-4 h-4", ...props }) {
     </svg>
   );
 }
+
+export function Pin({ className = "w-4 h-4", ...props }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 3l1 1-4 4 3 3-1 1-5-2-3 3-1-1 3-3-2-5 1-1 3 3 4-4 1 1z" />
+    </svg>
+  );
+}
+
+export function ChevronsLeft({ className = "w-4 h-4", ...props }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+    </svg>
+  );
+}
+
+export function DockPanel({ className = "w-4 h-4", ...props }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+      <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="2" />
+      <path strokeLinecap="round" strokeWidth="2" d="M15 3v18" />
+      <path strokeLinecap="round" strokeWidth="2" d="M17 7h2m-2 4h2m-2 4h2" />
+    </svg>
+  );
+}
+
+export function SunMoon({ className = "w-4 h-4", ...props }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  );
+}

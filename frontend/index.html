@@ -27,8 +27,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-      /* Complete Scrollbar Obliteration - 100% Invisible across all browsers and OS */
-      html, body, #root, * {
+      /* Complete Scrollbar Obliteration & Window Locking - 100% Invisible across all browsers and OS */
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: 100% !important;
+        width: 100% !important;
+        overflow: hidden !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      #root, * {
         scrollbar-width: none !important;
         -ms-overflow-style: none !important;
       }

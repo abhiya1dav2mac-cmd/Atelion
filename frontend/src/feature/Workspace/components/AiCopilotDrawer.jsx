@@ -11,15 +11,32 @@ import {
   Search,
   CheckSquare,
   Check,
+  Pin,
+  DockPanel,
 } from './WorkspaceIcons';
 
-export default function AiCopilotDrawer({ isOpen, onClose, onInsertText, activePage, user }) {
+export default function AiCopilotDrawer({
+  isOpen,
+  onClose,
+  onInsertText,
+  activePage,
+  user,
+  isPinned = true,
+  onTogglePin,
+}) {
   const [messages, setMessages] = useState([]);
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState('Auto');
   const [isWide, setIsWide] = useState(false);
+  const [localPinned, setLocalPinned] = useState(true);
   const messagesEndRef = useRef(null);
+
+  const pinned = onTogglePin ? isPinned : localPinned;
+  const togglePin = () => {
+    if (onTogglePin) onTogglePin();
+    else setLocalPinned(!localPinned);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -153,10 +170,23 @@ export default function AiCopilotDrawer({ isOpen, onClose, onInsertText, activeP
             <Plus className="w-4 h-4" />
           </button>
 
+          {/* 📌 Pin / Dock Side Panel Button (Matching Screenshot 2 [|]) */}
+          <button
+            onClick={togglePin}
+            className={`p-1 rounded transition-all cursor-pointer flex items-center gap-1 ${
+              pinned
+                ? 'text-[#60A5FA] bg-[#3B82F6]/20 border border-[#3B82F6]/40 shadow-xs'
+                : 'hover:text-white hover:bg-[#282828] text-[#888888]'
+            }`}
+            title={pinned ? 'Side panel pinned: Docked side-by-side with document (Click to unpin)' : 'Pin side panel: Dock side-by-side'}
+          >
+            <DockPanel className="w-4 h-4" />
+          </button>
+
           <button
             onClick={() => setIsWide(!isWide)}
             className="p-1 hover:text-white hover:bg-[#282828] rounded transition-colors cursor-pointer"
-            title={isWide ? 'Standard width' : 'Expand width'}
+            title={isWide ? 'Standard width (384px)' : 'Expand width (540px)'}
           >
             <Split className="w-4 h-4" />
           </button>
@@ -172,7 +202,7 @@ export default function AiCopilotDrawer({ isOpen, onClose, onInsertText, activeP
           <button
             onClick={onClose}
             className="p-1 hover:text-white hover:bg-[#282828] rounded transition-colors cursor-pointer"
-            title="Close AI chat"
+            title="Close AI chat (>>)"
           >
             <ChevronsRight className="w-4 h-4" />
           </button>

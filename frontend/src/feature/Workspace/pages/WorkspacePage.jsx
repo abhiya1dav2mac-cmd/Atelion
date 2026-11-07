@@ -5,7 +5,7 @@ import AiCopilotDrawer from '../components/AiCopilotDrawer';
 import CommandPaletteModal from '../components/CommandPaletteModal';
 import TelemetryBar from '../components/TelemetryBar';
 import { workspaceService } from '../services/workspaceService';
-import { Sparkles, Search, ChevronRight } from '../components/WorkspaceIcons';
+import { Sparkles, Search, ChevronRight, Pin, SidebarToggle, SunMoon } from '../components/WorkspaceIcons';
 import {
   PremiumBadge,
   VersionHistoryModal,
@@ -24,7 +24,10 @@ export default function WorkspacePage({ user, onLogout }) {
   });
   const [databaseItems, setDatabaseItems] = useState(() => workspaceService.getDatabaseItems(userRole));
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarPinned, setIsSidebarPinned] = useState(true);
+  const [sidebarTheme, setSidebarTheme] = useState('dark');
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [isAiPinned, setIsAiPinned] = useState(true);
   const [isCommandSearchOpen, setIsCommandSearchOpen] = useState(false);
   const [activePremiumModal, setActivePremiumModal] = useState(null); // 'history' | 'share' | 'export' | 'graph' | 'passkey'
 
@@ -99,14 +102,61 @@ export default function WorkspacePage({ user, onLogout }) {
         onOpenSearch={() => setIsCommandSearchOpen(true)}
         isOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        isPinned={isSidebarPinned}
+        onTogglePin={() => setIsSidebarPinned((prev) => !prev)}
+        sidebarTheme={sidebarTheme}
+        onToggleTheme={() => setSidebarTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
       />
 
       {/* 2. Main Document Work Area (Clean White Canvas) */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-white">
         {/* Top Minimal Navigation Bar */}
         <header className="h-11 border-b border-gray-200 px-4 flex items-center justify-between bg-white/95 backdrop-blur-sm z-20 select-none text-gray-800">
-          {/* Breadcrumb Navigation */}
+          {/* Breadcrumb Navigation & Pin Controls */}
           <div className="flex items-center gap-2 text-xs font-medium text-gray-500 truncate">
+            {/* 📌 Pin Sidebar Button in Top Bar */}
+            <button
+              onClick={() => {
+                if (!isSidebarOpen) {
+                  setIsSidebarOpen(true);
+                  setIsSidebarPinned(true);
+                } else {
+                  setIsSidebarPinned(!isSidebarPinned);
+                  if (isSidebarPinned) setIsSidebarOpen(false);
+                }
+              }}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer border ${
+                isSidebarOpen && isSidebarPinned
+                  ? 'bg-amber-50 text-amber-700 border-amber-300 shadow-xs'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200'
+              }`}
+              title={
+                isSidebarOpen && isSidebarPinned
+                  ? 'Sidebar is PINNED (Click to unpin/collapse)'
+                  : 'Click to open & PIN sidebar'
+              }
+            >
+              <Pin className="w-3.5 h-3.5 text-current" />
+              <span className="hidden sm:inline">
+                {isSidebarOpen && isSidebarPinned ? 'Sidebar Pinned' : 'Pin Sidebar'}
+              </span>
+            </button>
+
+            {/* 🌓 Sidebar Theme Quick Switcher in Header */}
+            <button
+              onClick={() => setSidebarTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+              className="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer border border-transparent hover:border-gray-200"
+              title={
+                sidebarTheme === 'dark'
+                  ? 'Side panel is Dark (#202020) - click for Light'
+                  : 'Side panel is Light (#F7F7F5) - click for Dark'
+              }
+            >
+              <SunMoon className="w-3.5 h-3.5" />
+            </button>
+
+            <span className="text-gray-300">|</span>
+
             <span className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
               Atelion
             </span>
@@ -139,11 +189,17 @@ export default function WorkspacePage({ user, onLogout }) {
             </div>
 
             <button
-              onClick={() => setIsAiOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs"
+              onClick={() => setIsAiOpen((prev) => !prev)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs border ${
+                isAiOpen
+                  ? 'bg-blue-600 text-white border-blue-700'
+                  : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+              }`}
+              title={isAiOpen ? 'Close AI Side Panel' : 'Open Notion AI Side Panel'}
             >
-              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <Sparkles className="w-3.5 h-3.5 text-current" />
               <span className="hidden sm:inline">Ask Notion AI</span>
+              {isAiOpen && <Pin className="w-3 h-3 ml-0.5 text-blue-200" />}
             </button>
 
             {/* User Profile Pill in Top Header Bar */}
@@ -198,6 +254,8 @@ export default function WorkspacePage({ user, onLogout }) {
         onInsertText={handleInsertAiText}
         activePage={activePage}
         user={user}
+        isPinned={isAiPinned}
+        onTogglePin={() => setIsAiPinned((prev) => !prev)}
       />
 
       {/* 6. Universal Command Search & Quick Switcher (Matching Screenshot 4) */}

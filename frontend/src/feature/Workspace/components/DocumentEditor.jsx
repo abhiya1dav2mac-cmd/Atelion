@@ -165,7 +165,7 @@ export default function DocumentEditor({
 
   return (
     <div
-      className="flex-1 overflow-y-auto no-scrollbar bg-white text-gray-900 min-h-screen"
+      className="flex-1 h-full min-h-0 overflow-y-auto no-scrollbar bg-white text-gray-900"
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
       {/* 1. Cover Image Banner */}
