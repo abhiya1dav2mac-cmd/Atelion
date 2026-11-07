@@ -1,18 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   FileText,
   Plus,
   Trash,
-  Database,
-  Sparkles,
-  LogOut,
-  Star,
+  Search,
+  Home,
+  MessageSquare,
+  BookOpen,
+  Calendar,
+  Settings,
+  HelpCircle,
+  Grid,
+  ChevronDown,
   ChevronRight,
   SidebarToggle,
+  X,
+  Star,
 } from './WorkspaceIcons';
+import WorkspaceSwitcherModal from './WorkspaceSwitcherModal';
+import AppsMenuModal from './AppsMenuModal';
+import { PremiumBadge } from './PremiumModals';
 
 export default function Sidebar({
-  pages,
+  pages = [],
   activePageId,
   onSelectPage,
   onCreatePage,
@@ -20,185 +30,292 @@ export default function Sidebar({
   user,
   onLogout,
   onOpenAi,
+  onOpenSearch,
   isOpen,
   onToggleSidebar,
 }) {
-  const favorites = pages.filter((p) => p.favorite);
-  const regularPages = pages.filter((p) => !p.favorite);
+  const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
+  const [isAppsMenuOpen, setIsAppsMenuOpen] = useState(false);
+  const [showInviteToast, setShowInviteToast] = useState(true);
+
+  const displayName = user?.name || (user?.role === 'student' ? 'Student Scholar' : 'Enterprise Architect');
+  const initial = displayName.charAt(0).toUpperCase();
+
+  const recents = pages.slice(0, 5);
+  const privatePages = pages;
 
   if (!isOpen) {
     return (
-      <div className="fixed top-4 left-4 z-40">
+      <div className="fixed top-3 left-3 z-40">
         <button
           onClick={onToggleSidebar}
-          className="p-2.5 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-950 rounded-xl shadow-md border border-gray-200/80 backdrop-blur-md transition-all cursor-pointer"
+          className="p-2 bg-[#202020] hover:bg-[#2a2a2a] text-[#cccccc] hover:text-white rounded-lg shadow-lg border border-[#2f2f2f] transition-all cursor-pointer"
           title="Open Sidebar"
         >
-          <SidebarToggle className="w-5 h-5" />
+          <SidebarToggle className="w-4 h-4" />
         </button>
       </div>
     );
   }
 
   return (
-    <aside className="w-64 sm:w-72 h-screen bg-[#FBFBFA] border-r border-[#EBEBEA] flex flex-col justify-between select-none z-30 transition-all flex-shrink-0">
-      {/* Top Workspace Header */}
+    <aside
+      className="w-64 h-screen bg-[#202020] border-r border-[#2c2c2c] flex flex-col justify-between select-none z-30 transition-all flex-shrink-0 text-[#cccccc] font-sans no-scrollbar"
+      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+    >
+      {/* 1. TOP HEADER & SEARCH (Matching Screenshot 4) */}
       <div className="flex flex-col overflow-hidden">
-        <div className="p-3.5 flex items-center justify-between border-b border-[#EBEBEA]/80">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-              {user?.role === 'student' ? '🎓' : '⚡'}
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-xs font-bold text-gray-900 truncate tracking-tight">
-                {user?.role === 'student' ? 'Student Study Hub' : 'Atelion OS Pro'}
-              </h2>
-              <p className="text-[10px] text-gray-500 truncate font-mono">
-                {user?.collegeName || user?.companyName || (user?.role === 'student' ? 'Academic Edition' : 'Enterprise Workspace')}
-              </p>
-            </div>
+        {/* Workspace Brand & Upper Corner Premium Badge */}
+        <div className="px-3 pt-3 pb-1 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm">⚡</span>
+            <span className="text-xs font-bold text-white tracking-tight">Atelion Workspace</span>
           </div>
+          <PremiumBadge className="scale-85" />
+        </div>
+
+        {/* Search or Ask Input */}
+        <div className="p-3 pb-2 pt-1.5">
           <button
-            onClick={onToggleSidebar}
-            className="text-gray-400 hover:text-gray-700 p-1.5 rounded-md hover:bg-gray-100 transition-colors cursor-pointer"
-            title="Collapse Sidebar"
+            onClick={onOpenSearch}
+            className="w-full flex items-center justify-between px-2.5 py-1.5 bg-[#262626] hover:bg-[#2c2c2c] border border-[#303030] rounded-lg text-xs text-[#888888] hover:text-[#cccccc] transition-colors cursor-pointer group"
           >
-            <SidebarToggle className="w-4 h-4" />
+            <div className="flex items-center gap-2">
+              <Search className="w-3.5 h-3.5 text-[#777777] group-hover:text-[#aaaaaa]" />
+              <span>Search or ask</span>
+            </div>
+            <kbd className="text-[10px] bg-[#1d1d1d] px-1.5 py-0.5 rounded border border-[#333333] text-[#777777] font-mono">
+              Ctrl+K
+            </kbd>
           </button>
         </div>
 
-        {/* Quick Launch Tools */}
-        <div className="px-2 pt-3 pb-2 space-y-0.5 border-b border-[#EBEBEA]/60">
+        {/* Top Navigation Links */}
+        <div className="px-2 space-y-0.5 text-xs font-medium">
+          <button
+            onClick={() => {
+              if (pages.length > 0) onSelectPage(pages[0].id);
+            }}
+            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md hover:bg-[#282828] text-[#cccccc] hover:text-white transition-colors cursor-pointer text-left"
+          >
+            <Home className="w-4 h-4 text-[#888888]" />
+            <span>Home</span>
+          </button>
+
           <button
             onClick={onOpenAi}
-            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50/80 hover:bg-blue-100/80 rounded-lg transition-colors cursor-pointer group"
+            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md hover:bg-[#282828] text-[#cccccc] hover:text-white transition-colors cursor-pointer text-left"
           >
-            <Sparkles className="w-4 h-4 text-blue-600 animate-pulse" />
-            <span>AI Copilot & Circle Search</span>
-            <span className="ml-auto text-[9px] bg-blue-200 text-blue-800 px-1.5 py-0.5 rounded font-mono">
-              Groq LPU
-            </span>
+            <MessageSquare className="w-4 h-4 text-[#3B82F6]" />
+            <span className="text-white font-medium">New chat</span>
           </button>
 
           <button
-            onClick={() => onCreatePage('New Document', '📄')}
-            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs text-gray-600 hover:text-gray-950 hover:bg-gray-200/50 rounded-lg transition-colors cursor-pointer"
+            onClick={() => {
+              if (onOpenSearch) onOpenSearch();
+            }}
+            className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-md hover:bg-[#282828] text-[#cccccc] hover:text-white transition-colors cursor-pointer text-left"
           >
-            <Plus className="w-4 h-4 text-gray-400" />
-            <span>Add New Page</span>
+            <BookOpen className="w-4 h-4 text-[#888888]" />
+            <span>Library</span>
           </button>
         </div>
 
-        {/* Scrollable Document Tree */}
-        <div className="overflow-y-auto no-scrollbar px-2 py-3 space-y-4 flex-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {/* Favorites Section */}
-          {favorites.length > 0 && (
-            <div>
-              <div className="px-2 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                <span>Favorites</span>
-              </div>
-              <div className="space-y-0.5">
-                {favorites.map((p) => (
-                  <PageItem
-                    key={p.id}
-                    page={p}
-                    isActive={p.id === activePageId}
-                    onSelect={() => onSelectPage(p.id)}
-                    onDelete={(e) => {
-                      e.stopPropagation();
-                      onDeletePage(p.id);
-                    }}
-                  />
-                ))}
-              </div>
+        {/* Divider */}
+        <div className="h-px bg-[#282828] mx-3 my-2" />
+
+        {/* Scrollable Tree Sections */}
+        <div
+          className="overflow-y-auto no-scrollbar px-2 space-y-3 flex-1 max-h-[calc(100vh-270px)]"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {/* Upcoming Events Section (Matching Screenshot 4) */}
+          <div className="space-y-1">
+            <p className="px-2.5 text-[10px] font-bold text-[#666666] uppercase tracking-wider">
+              Upcoming events
+            </p>
+            <button
+              onClick={() => {
+                alert('Connect your Google Calendar or Outlook to sync live schedule and AI meeting notes.');
+              }}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-[#282828] text-[#3B82F6] hover:text-[#60A5FA] text-xs font-medium transition-colors cursor-pointer text-left"
+            >
+              <Calendar className="w-3.5 h-3.5 text-[#3B82F6]" />
+              <span className="truncate">Connect your calendar</span>
+            </button>
+          </div>
+
+          {/* Recents Section (Matching Screenshot 4) */}
+          {recents.length > 0 && (
+            <div className="space-y-0.5">
+              <p className="px-2.5 text-[10px] font-bold text-[#666666] uppercase tracking-wider">
+                Recents
+              </p>
+              {recents.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => onSelectPage(p.id)}
+                  className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs text-left transition-colors cursor-pointer group ${
+                    p.id === activePageId
+                      ? 'bg-[#2c2c2c] text-white font-medium'
+                      : 'text-[#999999] hover:bg-[#262626] hover:text-white'
+                  }`}
+                >
+                  <span className="text-sm select-none">{p.icon || '📄'}</span>
+                  <span className="truncate flex-1">{p.title}</span>
+                </button>
+              ))}
             </div>
           )}
 
-          {/* Regular Pages */}
-          <div>
-            <div className="px-2 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center justify-between">
-              <span>Workspace Pages</span>
+          {/* Shared Section (Matching Screenshot 4) */}
+          <div className="space-y-1">
+            <p className="px-2.5 text-[10px] font-bold text-[#666666] uppercase tracking-wider">
+              Shared
+            </p>
+            <button
+              onClick={() => {
+                alert('Start collaborating: invite teammates to co-edit pages in real time.');
+              }}
+              className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md hover:bg-[#282828] text-[#888888] hover:text-white text-xs font-medium transition-colors cursor-pointer text-left"
+            >
+              <Plus className="w-3.5 h-3.5 text-[#777777]" />
+              <span>Start collaborating</span>
+            </button>
+          </div>
+
+          {/* Private Notes Section (Matching Screenshot 4) */}
+          <div className="space-y-0.5">
+            <div className="flex items-center justify-between px-2.5">
+              <p className="text-[10px] font-bold text-[#666666] uppercase tracking-wider">
+                Private
+              </p>
               <button
-                onClick={() => onCreatePage('New Page', '📝')}
-                className="hover:text-gray-700 p-0.5 rounded cursor-pointer"
-                title="Create Page"
+                onClick={() => onCreatePage('New page', '📄')}
+                title="Add a page"
+                className="text-[#666666] hover:text-white p-0.5 rounded cursor-pointer"
               >
                 <Plus className="w-3 h-3" />
               </button>
             </div>
-            <div className="space-y-0.5">
-              {regularPages.map((p) => (
-                <PageItem
-                  key={p.id}
-                  page={p}
-                  isActive={p.id === activePageId}
-                  onSelect={() => onSelectPage(p.id)}
-                  onDelete={(e) => {
+
+            {privatePages.map((p) => (
+              <div
+                key={p.id}
+                onClick={() => onSelectPage(p.id)}
+                className={`group flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs cursor-pointer transition-colors ${
+                  p.id === activePageId
+                    ? 'bg-[#2c2c2c] text-white font-medium'
+                    : 'text-[#999999] hover:bg-[#262626] hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <span className="text-sm select-none">{p.icon || '📄'}</span>
+                  <span className="truncate">{p.title}</span>
+                </div>
+                <button
+                  onClick={(e) => {
                     e.stopPropagation();
                     onDeletePage(p.id);
                   }}
-                />
-              ))}
-            </div>
+                  className="opacity-0 group-hover:opacity-100 p-0.5 text-[#666666] hover:text-red-400 rounded transition-opacity"
+                  title="Delete page"
+                >
+                  <Trash className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* User Footer Profile & Sign Out */}
-      <div className="p-3 border-t border-[#EBEBEA] bg-white/60 flex items-center justify-between">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-semibold uppercase flex-shrink-0">
-            {user?.name ? user.name[0] : 'U'}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <p className="text-xs font-semibold text-gray-900 truncate">{user?.name || 'Pro User'}</p>
-              <span
-                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
-                  user?.role === 'student'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-indigo-100 text-indigo-700'
-                }`}
-              >
-                {user?.role === 'student' ? 'Student' : 'Pro'}
-              </span>
+      {/* 2. BOTTOM ACTIONS & PROFILE SWITCHER (Matching Screenshots 2, 3, 4) */}
+      <div className="flex flex-col relative">
+        {/* Invite Members Bottom Toast (Matching Screenshot 4) */}
+        {showInviteToast && (
+          <div className="mx-3 mb-2 p-2.5 rounded-xl bg-[#262626] border border-[#333333] shadow-lg flex items-center justify-between text-xs">
+            <div className="min-w-0 pr-1">
+              <p className="font-semibold text-white text-[11px] truncate">Invite members</p>
+              <p className="text-[10px] text-[#888888] truncate">Collaborate with your team.</p>
             </div>
-            <p className="text-[10px] text-gray-400 truncate">{user?.email || 'user@workspace.io'}</p>
+            <button
+              onClick={() => setShowInviteToast(false)}
+              className="text-[#777777] hover:text-white p-1 rounded cursor-pointer flex-shrink-0"
+              title="Dismiss"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* Customize Sidebar Button (Matching Screenshot 3) */}
+        <div className="px-3 pb-2">
+          <button
+            onClick={() => alert('Customize Sidebar: Pin favorites or toggle private sections.')}
+            className="w-full flex items-center gap-2 text-[11px] text-[#777777] hover:text-[#cccccc] transition-colors cursor-pointer py-1"
+          >
+            <Settings className="w-3.5 h-3.5 text-[#666666]" />
+            <span>Customize sidebar</span>
+          </button>
+        </div>
+
+        {/* Bottom Profile Bar (Matching Screenshots 2, 3, 4) */}
+        <div className="p-2 border-t border-[#2a2a2a] bg-[#1a1a1a] flex items-center justify-between">
+          {/* Workspace Switcher Trigger Button */}
+          <button
+            onClick={() => {
+              setIsSwitcherOpen(!isSwitcherOpen);
+              setIsAppsMenuOpen(false);
+            }}
+            className="flex items-center gap-2 min-w-0 p-1.5 rounded-lg hover:bg-[#262626] text-left transition-colors cursor-pointer group flex-1 mr-1"
+          >
+            <div className="w-5 h-5 rounded bg-[#333333] text-[10px] font-bold text-white flex items-center justify-center flex-shrink-0">
+              {initial}
+            </div>
+            <span className="truncate text-xs font-semibold text-white group-hover:text-[#60A5FA] transition-colors">
+              {displayName}'...
+            </span>
+            <ChevronDown className="w-3 h-3 text-[#777777] flex-shrink-0" />
+          </button>
+
+          {/* Quick Icons: Help (?) and Apps Menu (::) */}
+          <div className="flex items-center gap-1 text-[#888888]">
+            <button
+              onClick={() => {
+                alert('Atelion Help: Press Ctrl+K for search, / for block commands, or ask AI Copilot.');
+              }}
+              className="p-1.5 hover:text-white hover:bg-[#262626] rounded-md transition-colors cursor-pointer"
+              title="Help & documentation"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => {
+                setIsAppsMenuOpen(!isAppsMenuOpen);
+                setIsSwitcherOpen(false);
+              }}
+              className="p-1.5 hover:text-white hover:bg-[#262626] rounded-md transition-colors cursor-pointer"
+              title="Apps, Skills & Trash"
+            >
+              <Grid className="w-4 h-4" />
+            </button>
           </div>
         </div>
-        <button
-          onClick={onLogout}
-          className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-          title="Log out"
-        >
-          <LogOut className="w-4 h-4" />
-        </button>
+
+        {/* Dropdown Modals */}
+        <WorkspaceSwitcherModal
+          isOpen={isSwitcherOpen}
+          onClose={() => setIsSwitcherOpen(false)}
+          user={user}
+          onLogout={onLogout}
+        />
+
+        <AppsMenuModal
+          isOpen={isAppsMenuOpen}
+          onClose={() => setIsAppsMenuOpen(false)}
+        />
       </div>
     </aside>
   );
 }
-
-function PageItem({ page, isActive, onSelect, onDelete }) {
-  return (
-    <div
-      onClick={onSelect}
-      className={`group flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
-        isActive ? 'bg-[#EFEFEF] text-gray-950 font-semibold' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-      }`}
-    >
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="text-sm select-none">{page.icon || '📄'}</span>
-        <span className="truncate">{page.title}</span>
-      </div>
-      <button
-        onClick={onDelete}
-        className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 rounded transition-opacity"
-        title="Delete page"
-      >
-        <Trash className="w-3 h-3" />
-      </button>
-    </div>
-  );
-}
-

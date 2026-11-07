@@ -4,6 +4,14 @@ import DocumentEditor from '../components/DocumentEditor';
 import AiCopilotDrawer from '../components/AiCopilotDrawer';
 import { workspaceService } from '../services/workspaceService';
 import { Sparkles, Database } from '../components/WorkspaceIcons';
+import {
+  PremiumBadge,
+  VersionHistoryModal,
+  SharePublishModal,
+  ExportModal,
+  KnowledgeGraphModal,
+  PasskeyEnrollModal,
+} from '../components/PremiumModals';
 
 export default function WorkspacePage({ user, onLogout }) {
   const userRole = user?.role === 'student' ? 'student' : 'professional';
@@ -15,6 +23,7 @@ export default function WorkspacePage({ user, onLogout }) {
   const [databaseItems, setDatabaseItems] = useState(() => workspaceService.getDatabaseItems(userRole));
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [activePremiumModal, setActivePremiumModal] = useState(null); // 'history' | 'share' | 'export' | 'graph' | 'passkey'
 
   // Sync to local-first database on state change
   useEffect(() => {
@@ -92,6 +101,8 @@ export default function WorkspacePage({ user, onLogout }) {
 
           {/* Quick Actions & Live Backend Status Pill */}
           <div className="flex items-center gap-2">
+            <PremiumBadge />
+
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[11px] font-mono border border-emerald-200/80">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Backend & Turso Active</span>
@@ -115,6 +126,7 @@ export default function WorkspacePage({ user, onLogout }) {
             databaseItems={databaseItems}
             onUpdateDatabaseItems={setDatabaseItems}
             onOpenAi={() => setIsAiOpen(true)}
+            onOpenPremium={setActivePremiumModal}
           />
         )}
 
@@ -134,6 +146,41 @@ export default function WorkspacePage({ user, onLogout }) {
         isOpen={isAiOpen}
         onClose={() => setIsAiOpen(false)}
         onInsertText={handleInsertAiText}
+      />
+
+      {/* 5. Notion Premium Modals */}
+      <VersionHistoryModal
+        isOpen={activePremiumModal === 'history'}
+        onClose={() => setActivePremiumModal(null)}
+        page={activePage}
+        onRestoreVersion={(ver) => {
+          console.log('[PREMIUM-RESTORE]', ver.label);
+        }}
+      />
+
+      <SharePublishModal
+        isOpen={activePremiumModal === 'share'}
+        onClose={() => setActivePremiumModal(null)}
+        page={activePage}
+      />
+
+      <ExportModal
+        isOpen={activePremiumModal === 'export'}
+        onClose={() => setActivePremiumModal(null)}
+        page={activePage}
+      />
+
+      <KnowledgeGraphModal
+        isOpen={activePremiumModal === 'graph'}
+        onClose={() => setActivePremiumModal(null)}
+        pages={pages}
+        onSelectPage={setActivePageId}
+      />
+
+      <PasskeyEnrollModal
+        isOpen={activePremiumModal === 'passkey'}
+        onClose={() => setActivePremiumModal(null)}
+        user={user}
       />
     </div>
   );

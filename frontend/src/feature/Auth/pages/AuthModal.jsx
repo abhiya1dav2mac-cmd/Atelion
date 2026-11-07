@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Eye, EyeOff } from '../../Landing/components/Icons';
 import { authService } from '../service/authService';
+import { isTempEmail } from '../service/disposableEmailGuard';
+import { passkeyService } from '../service/passkeyService';
 
 export default function AuthModal({
   isOpen,
@@ -52,9 +54,38 @@ export default function AuthModal({
     handleResetForm();
   };
 
+  const handlePasskeyAuth = async () => {
+    setLocalLoading(true);
+    setLocalError(null);
+    try {
+      const user = await passkeyService.loginWithPasskey(email);
+      if (user) {
+        window.location.reload();
+      }
+    } catch (err) {
+      setLocalError(err.message || 'Passkey authentication failed.');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError(null);
+
+    // Strict Anti-Temp / Disposable Email Guard
+    if (isTempEmail(email)) {
+      setLocalError('Temporary/disposable email addresses are strictly prohibited. Please use a permanent email address.');
+      return;
+    }
+    if (role === 'student' && collegeEmail && isTempEmail(collegeEmail)) {
+      setLocalError('Disposable college emails are prohibited. Please provide a genuine university email.');
+      return;
+    }
+    if (role === 'professional' && employeeEmail && isTempEmail(employeeEmail)) {
+      setLocalError('Disposable work emails are prohibited. Please provide your official company email.');
+      return;
+    }
 
     if (mode === 'signin') {
       await onLogin({ email, password });
@@ -219,9 +250,22 @@ export default function AuthModal({
           </div>
         )}
 
-        {/* Google Login for quick access (only in signin or initial state) */}
+        {/* Google & Passkey Login for quick access (in signin mode) */}
         {mode === 'signin' && (
           <>
+            <button
+              type="button"
+              onClick={handlePasskeyAuth}
+              disabled={isLoading || localLoading}
+              className="w-full flex items-center justify-center gap-2.5 py-2.5 sm:py-3 px-4 border border-indigo-200 hover:border-indigo-400 rounded-xl bg-gradient-to-r from-indigo-50/90 via-purple-50/60 to-blue-50/90 text-indigo-950 text-xs sm:text-sm font-semibold transition-all shadow-sm hover:shadow cursor-pointer disabled:opacity-50 mb-2.5"
+            >
+              <span className="text-base">🔐</span>
+              <span>Sign In with Passkey (Face ID / Touch ID)</span>
+              <span className="text-[9px] bg-indigo-200 text-indigo-900 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">
+                FIDO2
+              </span>
+            </button>
+
             <button
               type="button"
               onClick={onGoogleLogin}

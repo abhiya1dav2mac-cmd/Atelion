@@ -8,6 +8,7 @@ const User = require('../models/User');
 const OtpVerification = require('../models/OtpVerification');
 const { sendRegistrationOtpEmail, sendForgotPasswordOtpEmail } = require('../services/emailService');
 const { generateToken, authenticateToken } = require('../middleware/auth');
+const { isDisposableEmail } = require('../utils/disposableEmailBlocker');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -51,6 +52,23 @@ router.post('/register/initiate', async (req, res) => {
     }
     if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
       return res.status(400).json({ error: 'A valid email address is required.' });
+    }
+
+    // Strict Anti-Temp / Disposable Mail Guard
+    if (isDisposableEmail(cleanEmail)) {
+      return res.status(400).json({
+        error: 'Temporary/disposable email addresses are strictly prohibited. Please provide a genuine permanent email address.',
+      });
+    }
+    if (role === 'student' && collegeEmail && isDisposableEmail(collegeEmail)) {
+      return res.status(400).json({
+        error: 'Disposable college emails are prohibited. Please provide a genuine university email.',
+      });
+    }
+    if (role === 'professional' && employeeEmail && isDisposableEmail(employeeEmail)) {
+      return res.status(400).json({
+        error: 'Disposable work emails are prohibited. Please provide your official company email.',
+      });
     }
     if (!mobile || mobile.trim().length < 7) {
       return res.status(400).json({ error: 'A valid mobile number is required.' });
