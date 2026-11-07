@@ -221,7 +221,7 @@ export default function WorkspacePage({ user, onLogout }) {
 
         {/* 3. Document Canvas Area */}
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative bg-white">
-          {activePage && (
+          {activePage ? (
             <DocumentEditor
               page={activePage}
               onUpdatePage={handleUpdatePage}
@@ -230,6 +230,18 @@ export default function WorkspacePage({ user, onLogout }) {
               onOpenAi={() => setIsAiOpen(true)}
               onOpenPremium={setActivePremiumModal}
             />
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-gray-500 bg-white">
+              <span className="text-4xl mb-3">📄</span>
+              <p className="text-sm font-bold text-gray-800 mb-1">Welcome to Atelion Workspace</p>
+              <p className="text-xs text-gray-500 mb-4">Click below to initialize your first page.</p>
+              <button
+                onClick={() => handleCreatePage('New Page', '📄')}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer shadow-md transition-colors"
+              >
+                + Create Page
+              </button>
+            </div>
           )}
 
           {/* Floating Circle to Search / AI Trigger */}

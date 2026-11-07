@@ -184,7 +184,10 @@ export const workspaceService = {
   getPages(role) {
     try {
       const data = localStorage.getItem(STORAGE_KEY);
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch {}
 
     const seed = role === 'student' ? STUDENT_PAGES : INITIAL_PAGES;
@@ -201,7 +204,10 @@ export const workspaceService = {
   getDatabaseItems(role) {
     try {
       const data = localStorage.getItem('atelion_db_items');
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
     } catch {}
 
     const seed = role === 'student' ? STUDENT_DATABASE_ITEMS : INITIAL_DATABASE_ITEMS;
