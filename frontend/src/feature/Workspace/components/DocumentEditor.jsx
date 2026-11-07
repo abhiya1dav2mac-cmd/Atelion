@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Plus, Trash, Sparkles } from './WorkspaceIcons';
 import SlashCommandMenu from './SlashCommandMenu';
 import DatabaseView from './DatabaseView';
+import KatexEquation from './KatexEquation';
 import { PremiumBadge } from './PremiumModals';
 
 export default function DocumentEditor({
@@ -438,20 +439,31 @@ export default function DocumentEditor({
                 )}
 
                 {block.type === 'math' && (
-                  <div className="my-3 p-4 bg-amber-50/70 border border-amber-200 rounded-xl">
-                    <div className="text-[10px] font-mono text-amber-800 font-bold mb-1 uppercase tracking-wider">
-                      LaTeX Math Equation (KaTeX Engine)
+                  <div className="my-3 p-4 bg-gray-50/80 border border-gray-200 rounded-xl shadow-2xs group/math">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-gray-500 font-bold uppercase tracking-wider">
+                        <span>🧮</span>
+                        <span>LaTeX Math Equation (KaTeX Engine)</span>
+                      </div>
+                      <span className="text-[10px] text-gray-400 font-mono">0ms Real-Time KaTeX</span>
                     </div>
-                    <div className="text-base sm:text-lg font-serif text-gray-950 py-2 text-center bg-white rounded-lg border border-amber-200 shadow-xs">
-                      $${block.content}$$
+
+                    {/* True KaTeX Rendered Mathematical Formula */}
+                    <div className="py-4 px-3 text-center bg-white rounded-lg border border-gray-200 shadow-xs overflow-x-auto min-h-[56px] flex items-center justify-center">
+                      <KatexEquation math={block.content} displayMode={true} />
                     </div>
-                    <input
-                      type="text"
-                      value={block.content}
-                      onChange={(e) => handleBlockChange(idx, e.target.value)}
-                      placeholder="Type LaTeX formula (e.g. E = mc^2)..."
-                      className="w-full mt-2 text-xs font-mono text-gray-800 bg-white p-2 rounded border border-amber-200 focus:outline-none"
-                    />
+
+                    {/* Formula Source Editor Input */}
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <span className="text-[10px] font-mono text-gray-400 select-none pl-1">LaTeX:</span>
+                      <input
+                        type="text"
+                        value={block.content}
+                        onChange={(e) => handleBlockChange(idx, e.target.value)}
+                        placeholder="Type LaTeX formula (e.g. E = m c^2)..."
+                        className="flex-1 text-xs font-mono text-gray-800 bg-white px-3 py-1.5 rounded-md border border-gray-200 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/20 shadow-2xs"
+                      />
+                    </div>
                   </div>
                 )}
 
