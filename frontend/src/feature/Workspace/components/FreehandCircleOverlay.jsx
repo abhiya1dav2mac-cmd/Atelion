@@ -31,6 +31,7 @@ export default function FreehandCircleOverlay({
 
   const [strokeCount, setStrokeCount] = useState(0);
   const [isWaitingGrace, setIsWaitingGrace] = useState(false);
+  const [canvasMode, setCanvasMode] = useState('screen'); // 'screen' | 'pad'
 
   const clearGraceTimer = () => {
     if (graceTimerRef.current) {
@@ -107,8 +108,9 @@ export default function FreehandCircleOverlay({
 
     if (!captureBounds) return;
 
-    // 1. Extract underlying DOM text, <input>/<textarea> blocks & KaTeX equations
-    const extractedText = extractDomTextInBounds(captureBounds, 'main');
+    // 1. Extract underlying DOM text, <input>/<textarea> blocks & KaTeX equations (if in Screen mode)
+    const isScreenMode = canvasMode === 'screen';
+    const extractedText = isScreenMode ? extractDomTextInBounds(captureBounds, 'main') : '';
     const textLines = extractedText
       ? extractedText.split('\n').filter(Boolean)
       : [];
@@ -140,12 +142,14 @@ export default function FreehandCircleOverlay({
       onCompleteCapture({
         queryText: extractedText,
         imageBase64: rendered?.dataUrl || null,
-        gestureType: captureBounds.gestureType || 'freehand-structure',
+        gestureType: isScreenMode
+          ? captureBounds.gestureType || 'freehand-structure'
+          : 'freehand-pad-sketch',
         bounds: captureBounds,
-        source: 'home',
+        source: isScreenMode ? 'home' : 'home-pad',
       });
     }
-  }, [onCompleteCapture]);
+  }, [onCompleteCapture, canvasMode]);
 
   // Resize canvas to full viewport & handle Escape key
   useEffect(() => {
@@ -270,10 +274,18 @@ export default function FreehandCircleOverlay({
 
   return (
     <div
-      className="fixed inset-0 z-50 select-none"
+      className="fixed inset-0 z-50 select-none transition-colors duration-150"
       style={{
         cursor: PENCIL_CURSOR_STYLE,
-        backgroundColor: 'rgba(15, 23, 42, 0.06)',
+        backgroundColor:
+          canvasMode === 'pad'
+            ? 'rgba(255, 255, 255, 0.98)'
+            : 'rgba(15, 23, 42, 0.06)',
+        backgroundImage:
+          canvasMode === 'pad'
+            ? 'radial-gradient(circle, #CBD5E1 1px, transparent 1px)'
+            : 'none',
+        backgroundSize: '24px 24px',
         touchAction: 'none',
       }}
     >
@@ -296,25 +308,58 @@ export default function FreehandCircleOverlay({
       {/* Clean White Floating Instruction & Control Pill */}
       <div
         onPointerDown={(e) => e.stopPropagation()}
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-2 bg-white/95 backdrop-blur-md border border-gray-200 rounded-full shadow-xl text-xs text-gray-800 font-sans"
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 bg-white/95 backdrop-blur-md border border-gray-200 rounded-full shadow-xl text-xs text-gray-800 font-sans"
         style={{ cursor: 'default' }}
       >
-        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[11px]">
-          <span>✏️</span>
-          <span>Freehand Pencil</span>
-        </span>
+        {/* 1-Tap Clean Pad vs Screen Draw Toggle */}
+        <div className="flex items-center bg-gray-100 p-0.5 rounded-full border border-gray-200 text-[11px]">
+          <button
+            type="button"
+            onClick={() => {
+              handleClear();
+              setCanvasMode('screen');
+            }}
+            className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold transition-all cursor-pointer ${
+              canvasMode === 'screen'
+                ? 'bg-white text-blue-700 shadow-2xs border border-gray-200'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+            title="Draw directly over screen text, formulas & note blocks"
+          >
+            <span>🖥️</span>
+            <span>Screen Draw</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              handleClear();
+              setCanvasMode('pad');
+            }}
+            className={`flex items-center gap-1 px-2.5 py-0.5 rounded-full font-bold transition-all cursor-pointer ${
+              canvasMode === 'pad'
+                ? 'bg-white text-blue-700 shadow-2xs border border-gray-200'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+            title="Pure white clean drawing pad for freehand formulas & diagrams"
+          >
+            <span>📝</span>
+            <span>Clean Pad</span>
+          </button>
+        </div>
 
-        <span className="text-gray-600 hidden sm:inline">
+        <span className="text-gray-500 hidden md:inline text-[11px]">
           {isWaitingGrace
-            ? '⚡ Multi-stroke ready — releasing to AI...'
-            : 'Underline, bracket, sketch math, circuit or chemical ring — auto-searches on release!'}
+            ? '⚡ Releasing to AI...'
+            : canvasMode === 'screen'
+            ? 'Underline, bracket, or circle any note — auto-solves on release!'
+            : 'Sketch any math formula, circuit or chemical reaction!'}
         </span>
 
         {strokeCount > 0 && (
           <button
             type="button"
             onClick={handleClear}
-            className="px-2 py-0.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium cursor-pointer transition-colors"
+            className="px-2 py-0.5 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium cursor-pointer transition-colors text-[11px]"
           >
             Clear
           </button>
