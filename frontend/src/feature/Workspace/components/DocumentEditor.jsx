@@ -491,7 +491,7 @@ export default function DocumentEditor({
                             {block.title || 'Quantum_Physics_Lecture_Notes.pdf'}
                           </p>
                           <p className="text-[10px] text-gray-500">
-                            Cloudflare R2 Vault • Continuous & Single Page Mode • ✏️ Freehand Pencil Search Ready
+                            Cloudflare R2 Vault • Continuous & Single Page Mode • 🔍 Circle to Search Ready
                           </p>
                         </div>
                       </div>
@@ -501,7 +501,7 @@ export default function DocumentEditor({
                       <span className="truncate">📎 {block.title || 'Quantum_Physics_Lecture_Notes.pdf'}</span>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-sans font-semibold">
-                          ✏️ Instant Pencil Active
+                          🔍 Circle to Search Ready
                         </span>
                         <button
                           onClick={() =>
@@ -511,7 +511,7 @@ export default function DocumentEditor({
                           }
                           className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-sans font-bold text-[11px] rounded-lg cursor-pointer shadow-xs transition-colors"
                         >
-                          Read PDF & Draw ✏️
+                          Read PDF & Search
                         </button>
                       </div>
                     </div>

@@ -472,10 +472,10 @@ export default function CircleSearchModal({
             )}
             <div className="min-w-0 flex-1 text-left">
               <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">
-                Captured Pencil Selection
+                Captured Selection
               </p>
               <p className="text-xs text-gray-800 font-medium line-clamp-2 break-words">
-                {captureData.queryText || 'Freehand drawn structure / diagram / math stroke'}
+                {captureData.queryText || 'Drawn structure / diagram / math stroke'}
               </p>
             </div>
           </div>
@@ -484,7 +484,7 @@ export default function CircleSearchModal({
           {initialLoading && (
             <div className="p-5 rounded-xl bg-gray-50 border border-gray-200 flex items-center gap-3 text-xs text-gray-600">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
-              <span>Analyzing freehand pencil selection with Vision + KaTeX AI...</span>
+              <span>Analyzing selection with Vision + KaTeX AI...</span>
             </div>
           )}
 
@@ -506,7 +506,7 @@ export default function CircleSearchModal({
                     {msg.sketchUrl && (
                       <img
                         src={msg.sketchUrl}
-                        alt="Pencil Pad Sketch"
+                        alt="Drawing Sketch"
                         className="max-h-28 rounded-lg bg-white p-1 border border-blue-400"
                       />
                     )}
@@ -550,12 +550,12 @@ export default function CircleSearchModal({
           <div ref={threadEndRef} />
         </div>
 
-        {/* 3. Built-in ✏️ Pencil Pad (Collapsible Freehand Sketchpad inside Modal) */}
+        {/* 3. Built-in Sketch Pad (Collapsible Freehand Canvas inside Modal) */}
         {isPencilPadOpen && (
           <div className="px-4 py-2.5 border-t border-gray-200 bg-gray-50/90 flex-shrink-0">
             <div className="flex items-center justify-between mb-1.5 text-[11px]">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-gray-800">✏️ Built-in Pencil Pad</span>
+                <span className="font-bold text-gray-800">✏️ Built-in Sketch Pad</span>
                 <span className="text-gray-500 hidden sm:inline">
                   Draw any formula, chemical ring, or circuit
                 </span>
@@ -651,7 +651,7 @@ export default function CircleSearchModal({
                   : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200'
               }`}
             >
-              ✏️ Pencil Pad
+              ✏️ Sketch Pad
             </button>
           </div>
 

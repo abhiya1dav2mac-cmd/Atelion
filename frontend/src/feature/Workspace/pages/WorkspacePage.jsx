@@ -283,23 +283,23 @@ export default function WorkspacePage({ user, onLogout }) {
               <span className="hidden sm:inline">Cold Vault</span>
             </button>
 
-            {/* Read PDF Circle Search Button (Opens PDF Viewer with Instant Freehand Pencil) */}
+            {/* Read PDF Circle Search Button (Opens PDF Viewer with Instant Circle Search) */}
             <button
               onClick={() =>
                 setPdfReaderState({ isOpen: true, title: 'Quantum_Physics_Lecture_Notes.pdf' })
               }
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
-              title="Open Read PDF with Instant Freehand Pencil Circle Search"
+              title="Open Read PDF with Circle to Search"
             >
               <span>📄</span>
               <span className="hidden sm:inline">Read PDF</span>
             </button>
 
-            {/* Home Freehand Pencil Circle Search Button */}
+            {/* Home Circle to Search Button */}
             <button
               onClick={() => setIsCircleOverlayOpen(true)}
               className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-2xs transition-all cursor-pointer"
-              title="Click for Instant Freehand Pencil — Underline, bracket, sketch any shape for direct AI answer"
+              title="Click for Circle to Search — Underline, bracket, or sketch any shape for direct AI answer"
             >
               <span>✏️</span>
               <span className="hidden sm:inline">Circle Search</span>
@@ -387,18 +387,15 @@ export default function WorkspacePage({ user, onLogout }) {
             </div>
           )}
 
-          {/* Floating Freehand Pencil Circle to Search Trigger (Immediate ✏️ Pencil) */}
+          {/* Floating Circle to Search Trigger */}
           <button
             onClick={() => setIsCircleOverlayOpen(true)}
             className="fixed bottom-10 right-6 z-30 px-4 py-2.5 bg-white hover:bg-blue-50 text-gray-900 border border-gray-300 hover:border-blue-400 rounded-full shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 group"
-            title="Click for Instant Freehand Pencil (✏️) — Draw any underline, bracket, diagram, or formula"
+            title="Click for Circle to Search — Draw any underline, bracket, diagram, or formula"
           >
             <span className="text-sm group-hover:-rotate-12 transition-transform">✏️</span>
             <span className="text-xs font-bold text-gray-900 hidden sm:inline">
               Circle to Search
-            </span>
-            <span className="px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-bold hidden sm:inline">
-              Pencil
             </span>
           </button>
         </div>

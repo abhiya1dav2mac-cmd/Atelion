@@ -221,14 +221,14 @@ export default function Sidebar({
             <button
               onClick={() => onOpenPdfReader('Quantum_Physics_Lecture_Notes.pdf')}
               className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md ${theme.navItem} transition-colors cursor-pointer text-left`}
-              title="Open Read PDF with Instant Freehand Pencil Circle Search"
+              title="Open Read PDF Viewer"
             >
               <div className="flex items-center gap-2.5">
                 <span className="text-sm leading-none">📄</span>
                 <span className="font-semibold text-gray-800">Read PDF</span>
               </div>
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                ✏️ Pencil
+                AI Vision
               </span>
             </button>
           )}
@@ -237,7 +237,7 @@ export default function Sidebar({
             <button
               onClick={onOpenCircleSearch}
               className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md ${theme.navItem} transition-colors cursor-pointer text-left`}
-              title="Start Freehand Pencil Circle Search on Home Workspace"
+              title="Start Circle to Search on Home Workspace"
             >
               <div className="flex items-center gap-2.5">
                 <span className="text-sm leading-none">✏️</span>

@@ -317,7 +317,7 @@ function renderAcademicPdfPageToCanvas(canvas, pageSpec, customImageObj = null) 
     ctx.drawImage(customImageObj, (PAGE_WIDTH - dw) / 2, 55, dw, dh);
     ctx.fillStyle = '#64748B';
     ctx.font = '11px monospace';
-    ctx.fillText(`Uploaded Sheet • Circle or underline any structure with ✏️ Freehand Pencil`, 40, 32);
+    ctx.fillText(`Uploaded Sheet • Circle or underline any structure with Circle Search`, 40, 32);
     return;
   }
 
@@ -746,7 +746,7 @@ export default function VirtualPdfReader({
             </div>
           )}
 
-          {/* Direct ✏️ Freehand Pencil Circle Search Button */}
+          {/* Direct Circle Search Button */}
           <button
             type="button"
             onClick={() => setIsPencilActive((prev) => !prev)}
@@ -755,10 +755,10 @@ export default function VirtualPdfReader({
                 ? 'bg-blue-600 text-white border-blue-700'
                 : 'bg-white hover:bg-gray-50 text-gray-800 border-gray-200'
             }`}
-            title="Toggle Freehand Pencil Circle Search"
+            title="Toggle Circle Search"
           >
             <span>✏️</span>
-            <span>{isPencilActive ? 'Pencil Active (Draw Anything)' : 'Circle Search'}</span>
+            <span>Circle Search</span>
           </button>
 
           {/* Upload Custom Diagram / Exam Sheet */}
@@ -790,10 +790,10 @@ export default function VirtualPdfReader({
         </button>
       </header>
 
-      {/* Subtle Helper Banner when Pencil is Active */}
+      {/* Subtle Helper Banner when Circle Search is Active */}
       {isPencilActive && (
         <div className="bg-blue-50 border-b border-blue-100 px-4 py-1.5 text-center text-[11px] text-blue-800 font-medium flex-shrink-0">
-          ✏️ <strong>Freehand Pencil Active ({viewMode === 'continuous' ? 'Continuous Mode' : 'Single Page Mode'})</strong> — Underline text, bracket equations, or draw over any circuit / chemical ring for instant AI result!
+          <strong>Circle to Search Active ({viewMode === 'continuous' ? 'Continuous Mode' : 'Single Page Mode'})</strong> — Underline text, bracket equations, or draw over any circuit / chemical ring for instant AI result!
         </div>
       )}
 

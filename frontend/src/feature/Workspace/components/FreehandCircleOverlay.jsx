@@ -35,7 +35,6 @@ export default function FreehandCircleOverlay({
   const [strokeCount, setStrokeCount] = useState(0);
   const [isWaitingGrace, setIsWaitingGrace] = useState(false);
   const [canvasMode, setCanvasMode] = useState('screen'); // 'screen' | 'pad'
-  const [pointerPos, setPointerPos] = useState({ x: -100, y: -100, visible: false, isDrawing: false });
 
   const clearGraceTimer = () => {
     if (graceTimerRef.current) {
@@ -216,7 +215,6 @@ export default function FreehandCircleOverlay({
 
     activeStrokeRef.current = [{ x, y }];
     safeSetPointerCapture(e.currentTarget, e.pointerId);
-    setPointerPos({ x: e.clientX, y: e.clientY, visible: true, isDrawing: true });
     redrawCanvas();
   };
 
@@ -224,13 +222,6 @@ export default function FreehandCircleOverlay({
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
-    setPointerPos({
-      x: e.clientX,
-      y: e.clientY,
-      visible: true,
-      isDrawing: Boolean(activeStrokeRef.current),
-    });
 
     if (!activeStrokeRef.current) return;
     if (e.cancelable) e.preventDefault();
@@ -244,7 +235,6 @@ export default function FreehandCircleOverlay({
 
   const handlePointerUp = (e) => {
     safeReleasePointerCapture(e?.currentTarget || canvasRef.current, e?.pointerId);
-    setPointerPos((prev) => ({ ...prev, isDrawing: false }));
 
     if (!activeStrokeRef.current) return;
     const finished = activeStrokeRef.current;
@@ -270,7 +260,6 @@ export default function FreehandCircleOverlay({
 
   const handlePointerCancel = (e) => {
     safeReleasePointerCapture(e?.currentTarget || canvasRef.current, e?.pointerId);
-    setPointerPos((prev) => ({ ...prev, isDrawing: false }));
 
     if (activeStrokeRef.current && activeStrokeRef.current.length >= 2) {
       strokesRef.current = [...strokesRef.current, activeStrokeRef.current];
@@ -309,9 +298,8 @@ export default function FreehandCircleOverlay({
         backgroundSize: '24px 24px',
         touchAction: 'none',
       }}
-      onPointerLeave={() => setPointerPos((prev) => ({ ...prev, visible: false }))}
     >
-      {/* Full-Viewport Freehand Pencil Canvas */}
+      {/* Full-Viewport Freehand Canvas */}
       <canvas
         ref={canvasRef}
         onPointerDown={handlePointerDown}
@@ -329,29 +317,6 @@ export default function FreehandCircleOverlay({
           WebkitTouchCallout: 'none',
         }}
       />
-
-      {/* Live Floating ✏️ Pencil Follower Badge right at cursor position */}
-      {pointerPos.visible && (
-        <div
-          className="fixed pointer-events-none z-50 flex items-center gap-1 select-none transition-transform duration-75"
-          style={{
-            left: `${pointerPos.x}px`,
-            top: `${pointerPos.y}px`,
-            transform: 'translate(-3px, -24px)',
-          }}
-        >
-          <span
-            className={`text-xl transition-transform drop-shadow-md ${
-              pointerPos.isDrawing ? 'scale-125 rotate-12' : 'scale-100 -rotate-12'
-            }`}
-          >
-            ✏️
-          </span>
-          {pointerPos.isDrawing && (
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping shadow-xs" />
-          )}
-        </div>
-      )}
 
       {/* Clean White Floating Instruction & Control Pill */}
       <div
@@ -420,7 +385,7 @@ export default function FreehandCircleOverlay({
             onCancel?.();
           }}
           className="p-1 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 cursor-pointer transition-colors"
-          title="Exit Freehand Pencil (Esc)"
+          title="Exit Circle to Search (Esc)"
         >
           <X className="w-3.5 h-3.5" />
         </button>
