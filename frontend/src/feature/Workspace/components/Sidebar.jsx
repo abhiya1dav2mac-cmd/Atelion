@@ -38,14 +38,14 @@ export default function Sidebar({
   onToggleSidebar,
   isPinned = true,
   onTogglePin,
-  sidebarTheme = 'dark',
+  sidebarTheme = 'light',
   onToggleTheme,
 }) {
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [isAppsMenuOpen, setIsAppsMenuOpen] = useState(false);
   const [showInviteToast, setShowInviteToast] = useState(true);
   const [localPinned, setLocalPinned] = useState(true);
-  const [localTheme, setLocalTheme] = useState('dark');
+  const [localTheme, setLocalTheme] = useState('light');
 
   const pinned = onTogglePin ? isPinned : localPinned;
   const togglePin = () => {
@@ -61,39 +61,39 @@ export default function Sidebar({
 
   const isLight = currentTheme === 'light';
 
-  // Dynamic Notion Light vs Notion Dark theme tokens
+  // Dynamic Clean White vs Notion Dark theme tokens
   const theme = isLight
     ? {
-        aside: 'bg-[#F7F7F5] border-r border-[#E9E9E7] text-[#37352F]',
-        headerBrand: 'text-[#37352F]',
-        searchInput: 'bg-[#EEEEEC] hover:bg-[#E5E5E3] border-[#E0E0DE] text-[#6A6965] hover:text-[#37352F]',
-        kbd: 'bg-[#FFFFFF] border-[#DCDCDA] text-[#787774]',
-        navItem: 'hover:bg-[#EBEBE9] text-[#5A5852] hover:text-[#191918]',
-        navItemActive: 'bg-[#E5E5E3] text-[#191918] font-semibold',
-        divider: 'bg-[#E9E9E7]',
-        sectionHeading: 'text-[#9B9A97]',
-        recentItem: 'text-[#5A5852] hover:bg-[#EBEBE9] hover:text-[#191918]',
-        recentItemActive: 'bg-[#E5E5E3] text-[#191918] font-semibold',
-        bottomBar: 'border-t border-[#E9E9E7] bg-[#F1F1EF]',
-        userButton: 'hover:bg-[#E5E5E3] text-[#191918]',
-        userAvatar: 'bg-[#E0E0DE] text-[#37352F]',
-        iconButton: 'text-[#787774] hover:text-[#191918] hover:bg-[#E5E5E3]',
-        inviteBox: 'bg-[#FFFFFF] border-[#E0E0DE] shadow-xs text-[#37352F]',
+        aside: 'bg-white border-r border-gray-200 text-gray-800 shadow-xs',
+        headerBrand: 'text-gray-950 font-bold',
+        searchInput: 'bg-gray-100 hover:bg-gray-200/70 border-gray-200 text-gray-600 hover:text-gray-950',
+        kbd: 'bg-white border-gray-300 text-gray-500 shadow-2xs',
+        navItem: 'hover:bg-gray-100 text-gray-700 hover:text-gray-950',
+        navItemActive: 'bg-gray-100 text-gray-950 font-semibold',
+        divider: 'bg-gray-200',
+        sectionHeading: 'text-gray-400 font-bold',
+        recentItem: 'text-gray-600 hover:bg-gray-100 hover:text-gray-950',
+        recentItemActive: 'bg-gray-100 text-gray-950 font-semibold shadow-2xs',
+        bottomBar: 'border-t border-gray-200 bg-gray-50/90 text-gray-800',
+        userButton: 'hover:bg-gray-200/80 text-gray-900',
+        userAvatar: 'bg-gray-900 text-white font-bold',
+        iconButton: 'text-gray-500 hover:text-gray-950 hover:bg-gray-100',
+        inviteBox: 'bg-white border-gray-200 shadow-sm text-gray-900',
       }
     : {
         aside: 'bg-[#202020] border-r border-[#2c2c2c] text-[#cccccc]',
-        headerBrand: 'text-white',
+        headerBrand: 'text-white font-bold',
         searchInput: 'bg-[#262626] hover:bg-[#2c2c2c] border-[#303030] text-[#888888] hover:text-[#cccccc]',
         kbd: 'bg-[#1d1d1d] border-[#333333] text-[#777777]',
         navItem: 'hover:bg-[#282828] text-[#cccccc] hover:text-white',
         navItemActive: 'bg-[#2c2c2c] text-white font-semibold',
         divider: 'bg-[#282828]',
-        sectionHeading: 'text-[#666666]',
+        sectionHeading: 'text-[#666666] font-bold',
         recentItem: 'text-[#999999] hover:bg-[#262626] hover:text-white',
         recentItemActive: 'bg-[#2c2c2c] text-white font-semibold',
-        bottomBar: 'border-t border-[#2a2a2a] bg-[#1a1a1a]',
+        bottomBar: 'border-t border-[#2a2a2a] bg-[#1a1a1a] text-white',
         userButton: 'hover:bg-[#262626] text-white',
-        userAvatar: 'bg-[#333333] text-white',
+        userAvatar: 'bg-[#333333] text-white font-bold',
         iconButton: 'text-[#888888] hover:text-white hover:bg-[#262626]',
         inviteBox: 'bg-[#262626] border-[#333333] shadow-lg text-white',
       };
@@ -103,6 +103,16 @@ export default function Sidebar({
 
   const recents = pages.slice(0, 5);
   const privatePages = pages;
+
+  // Clean title helper to prevent duplicate emojis (e.g. 📚 📚)
+  const getCleanTitle = (page) => {
+    if (!page || !page.title) return 'Untitled';
+    const icon = page.icon || '';
+    if (icon && page.title.startsWith(icon)) {
+      return page.title.slice(icon.length).trim();
+    }
+    return page.title;
+  };
 
   if (!isOpen) {
     return (
@@ -150,7 +160,9 @@ export default function Sidebar({
               onClick={togglePin}
               className={`p-1 rounded-md transition-all cursor-pointer ${
                 pinned
-                  ? 'text-amber-400 bg-amber-400/20 border border-amber-400/40 shadow-xs'
+                  ? isLight
+                    ? 'text-amber-700 bg-amber-100/90 border border-amber-300 shadow-2xs'
+                    : 'text-amber-400 bg-amber-400/20 border border-amber-400/40 shadow-xs'
                   : theme.iconButton
               }`}
               title={pinned ? 'Sidebar is PINNED (Click to unpin)' : 'Click to PIN sidebar'}
@@ -265,8 +277,8 @@ export default function Sidebar({
                     p.id === activePageId ? theme.recentItemActive : theme.recentItem
                   }`}
                 >
-                  <span className="text-sm select-none">{p.icon || '📄'}</span>
-                  <span className="truncate flex-1">{p.title}</span>
+                  <span className="text-sm select-none flex-shrink-0">{p.icon || '📄'}</span>
+                  <span className="truncate flex-1">{getCleanTitle(p)}</span>
                 </button>
               ))}
             </div>
@@ -312,8 +324,8 @@ export default function Sidebar({
                 }`}
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <span className="text-sm select-none">{p.icon || '📄'}</span>
-                  <span className="truncate">{p.title}</span>
+                  <span className="text-sm select-none flex-shrink-0">{p.icon || '📄'}</span>
+                  <span className="truncate">{getCleanTitle(p)}</span>
                 </div>
                 <button
                   onClick={(e) => {
@@ -413,11 +425,13 @@ export default function Sidebar({
           onClose={() => setIsSwitcherOpen(false)}
           user={user}
           onLogout={onLogout}
+          isLight={isLight}
         />
 
         <AppsMenuModal
           isOpen={isAppsMenuOpen}
           onClose={() => setIsAppsMenuOpen(false)}
+          isLight={isLight}
         />
       </div>
     </aside>

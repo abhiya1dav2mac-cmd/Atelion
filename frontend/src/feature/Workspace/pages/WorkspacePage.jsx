@@ -25,7 +25,7 @@ export default function WorkspacePage({ user, onLogout }) {
   const [databaseItems, setDatabaseItems] = useState(() => workspaceService.getDatabaseItems(userRole));
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSidebarPinned, setIsSidebarPinned] = useState(true);
-  const [sidebarTheme, setSidebarTheme] = useState('dark');
+  const [sidebarTheme, setSidebarTheme] = useState('light');
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isAiPinned, setIsAiPinned] = useState(true);
   const [isCommandSearchOpen, setIsCommandSearchOpen] = useState(false);

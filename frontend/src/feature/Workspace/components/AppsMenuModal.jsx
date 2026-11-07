@@ -13,6 +13,7 @@ export default function AppsMenuModal({
   isOpen,
   onClose,
   onSelectAction,
+  isLight = true,
 }) {
   if (!isOpen) return null;
 
@@ -25,14 +26,22 @@ export default function AppsMenuModal({
     { id: 'trash', label: 'Trash', icon: Trash, desc: 'Archived and deleted pages' },
   ];
 
+  const containerClass = isLight
+    ? 'bg-white border-gray-200 text-gray-800 shadow-2xl'
+    : 'bg-[#202020] border-[#2f2f2f] text-[#d4d4d4] shadow-2xl';
+  const btnHover = isLight
+    ? 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
+    : 'hover:bg-[#2a2a2a] text-[#cccccc] hover:text-white';
+  const dividerClass = isLight ? 'bg-gray-200' : 'bg-[#2a2a2a]';
+
   return (
     <>
       {/* Invisible backdrop */}
       <div className="fixed inset-0 z-40" onClick={onClose} />
 
-      {/* Floating Apps & Skills Popover (Matching Screenshot 3) */}
+      {/* Floating Apps & Skills Popover */}
       <div
-        className="fixed bottom-14 left-44 z-50 w-56 bg-[#202020] border border-[#2f2f2f] rounded-xl shadow-2xl text-[#d4d4d4] text-xs font-sans p-1.5 select-none animate-in fade-in zoom-in-95 duration-100 no-scrollbar"
+        className={`fixed bottom-14 left-44 z-50 w-56 ${containerClass} border rounded-xl p-1.5 select-none animate-in fade-in zoom-in-95 duration-100 no-scrollbar text-xs font-sans`}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -47,9 +56,9 @@ export default function AppsMenuModal({
                   if (onSelectAction) onSelectAction(item.id);
                   else alert(`${item.label} opened: ${item.desc}`);
                 }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-[#2a2a2a] text-[#cccccc] hover:text-white transition-colors cursor-pointer text-left group"
+                className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg ${btnHover} transition-colors cursor-pointer text-left group`}
               >
-                <IconComponent className="w-4 h-4 text-[#888888] group-hover:text-white transition-colors flex-shrink-0" />
+                <IconComponent className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                 <span className="font-medium text-xs">{item.label}</span>
               </button>
             );
@@ -57,16 +66,16 @@ export default function AppsMenuModal({
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-[#2a2a2a] my-1.5" />
+        <div className={`h-px ${dividerClass} my-1.5`} />
 
         <button
           onClick={() => {
             onClose();
             alert('Customize Sidebar: Pin/unpin sections and reorder tabs.');
           }}
-          className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-[#2a2a2a] text-[#888888] hover:text-[#cccccc] transition-colors cursor-pointer text-left text-xs"
+          className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg ${btnHover} opacity-70 hover:opacity-100 transition-colors cursor-pointer text-left text-xs`}
         >
-          <Settings className="w-4 h-4 text-[#777777]" />
+          <Settings className="w-4 h-4 opacity-70" />
           <span>Customize sidebar</span>
         </button>
       </div>
