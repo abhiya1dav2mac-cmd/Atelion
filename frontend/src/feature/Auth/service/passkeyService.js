@@ -3,7 +3,7 @@
  * Works natively with Windows Hello, Apple FaceID / TouchID, and Android Biometrics.
  */
 
-const API_BASE = 'http://localhost:5000/api/auth/passkey';
+const API_BASE = (import.meta.env?.VITE_API_URL || '').replace(/\/$/, '') + '/api/auth/passkey';
 
 // Utility helpers for Base64URL conversions
 function bufferToBase64URL(buffer) {

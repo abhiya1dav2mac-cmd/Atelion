@@ -6,6 +6,8 @@ import {
   drawSmoothStroke,
   renderFreehandStrokesToCanvas,
   extractDomTextInBounds,
+  safeSetPointerCapture,
+  getSafeCanvasDpr,
 } from '../services/circleSearchEngine';
 import { X } from './WorkspaceIcons';
 
@@ -42,7 +44,7 @@ export default function FreehandCircleOverlay({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = getSafeCanvasDpr();
     const w = canvas.width / dpr;
     const h = canvas.height / dpr;
 
@@ -158,18 +160,29 @@ export default function FreehandCircleOverlay({
     const updateCanvasSize = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const dpr = window.devicePixelRatio || 1;
+      const dpr = getSafeCanvasDpr();
       canvas.width = Math.floor(window.innerWidth * dpr);
       canvas.height = Math.floor(window.innerHeight * dpr);
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
       const ctx = canvas.getContext('2d');
+      if (!ctx) return;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       redrawCanvas();
     };
 
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
+
+    // Safari iOS/iPadOS passive:false touch guard to block native scroll/loupe/overscroll
+    const canvasEl = canvasRef.current;
+    const preventSafariScroll = (ev) => {
+      if (ev.cancelable) ev.preventDefault();
+    };
+    if (canvasEl) {
+      canvasEl.addEventListener('touchstart', preventSafariScroll, { passive: false });
+      canvasEl.addEventListener('touchmove', preventSafariScroll, { passive: false });
+    }
 
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
@@ -184,6 +197,10 @@ export default function FreehandCircleOverlay({
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
       window.removeEventListener('keydown', handleKeyDown);
+      if (canvasEl) {
+        canvasEl.removeEventListener('touchstart', preventSafariScroll);
+        canvasEl.removeEventListener('touchmove', preventSafariScroll);
+      }
       clearGraceTimer();
     };
   }, [isOpen, onCancel, redrawCanvas, finalizeFreehandSearch]);
@@ -192,14 +209,16 @@ export default function FreehandCircleOverlay({
 
   const handlePointerDown = (e) => {
     if (e.button !== undefined && e.button !== 0) return;
+    if (e.cancelable) e.preventDefault();
     clearGraceTimer();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
     activeStrokeRef.current = [{ x: e.clientX, y: e.clientY }];
+    safeSetPointerCapture(e.currentTarget, e.pointerId);
     redrawCanvas();
   };
 
   const handlePointerMove = (e) => {
     if (!activeStrokeRef.current) return;
+    if (e.cancelable) e.preventDefault();
     const pts = activeStrokeRef.current;
     const last = pts[pts.length - 1];
     if (!last || Math.hypot(e.clientX - last.x, e.clientY - last.y) >= 2) {
@@ -226,6 +245,20 @@ export default function FreehandCircleOverlay({
     }
   };
 
+  const handlePointerCancel = () => {
+    // Safari iOS/iPadOS pointer cancel handler: only save if stroke has meaningful length
+    if (activeStrokeRef.current && activeStrokeRef.current.length >= 2) {
+      strokesRef.current = [...strokesRef.current, activeStrokeRef.current];
+      setStrokeCount(strokesRef.current.length);
+      setIsWaitingGrace(true);
+      graceTimerRef.current = setTimeout(() => {
+        finalizeFreehandSearch();
+      }, MULTI_STROKE_GRACE_MS);
+    }
+    activeStrokeRef.current = null;
+    redrawCanvas();
+  };
+
   const handleClear = (e) => {
     e.stopPropagation();
     clearGraceTimer();
@@ -250,9 +283,14 @@ export default function FreehandCircleOverlay({
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
         className="absolute inset-0 w-full h-full"
-        style={{ cursor: PENCIL_CURSOR_STYLE, touchAction: 'none' }}
+        style={{
+          cursor: PENCIL_CURSOR_STYLE,
+          touchAction: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+        }}
       />
 
       {/* Clean White Floating Instruction & Control Pill */}

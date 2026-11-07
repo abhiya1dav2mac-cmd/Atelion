@@ -28,15 +28,15 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/atelion';
 app.use(zeroTrustHelmet);
 app.use(zeroTrustAuditMiddleware);
 
-// 2. Cross-Origin Resource Sharing (CORS)
+// 2. Cross-Origin Resource Sharing (CORS — Safari WebKit spec compliant)
 app.use(
   cors({
-    origin: '*', // Or specify process.env.CLIENT_URL
+    origin: true,
     credentials: true,
   })
 );
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 
 // Serve frontend static files with Edge CDN-friendly caching for immutable assets
 const frontendDistPath = path.join(__dirname, '../../frontend');

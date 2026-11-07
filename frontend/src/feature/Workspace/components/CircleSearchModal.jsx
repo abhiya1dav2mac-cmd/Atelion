@@ -5,11 +5,12 @@ import {
   computeFreehandBounds,
   drawSmoothStroke,
   renderFreehandStrokesToCanvas,
+  fetchCircleApi,
+  safeSetPointerCapture,
+  getSafeCanvasDpr,
 } from '../services/circleSearchEngine';
 import RichMathMarkdown from './RichMathMarkdown';
 import { X, ArrowUp, Sparkles, Plus } from './WorkspaceIcons';
-
-const API_BASE = 'http://localhost:5000';
 
 const QUICK_FOLLOWUP_CHIPS = [
   {
@@ -120,7 +121,7 @@ export default function CircleSearchModal({
         captureData;
 
       try {
-        const res = await fetch(`${API_BASE}/api/ai/circle-search`, {
+        const res = await fetchCircleApi('/api/ai/circle-search', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -227,14 +228,25 @@ export default function CircleSearchModal({
     const canvas = padCanvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = getSafeCanvasDpr();
     const width = Math.max(280, Math.floor(rect.width || 560));
     const height = 150;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     redrawPencilPad();
+
+    const preventSafariScroll = (ev) => {
+      if (ev.cancelable) ev.preventDefault();
+    };
+    canvas.addEventListener('touchstart', preventSafariScroll, { passive: false });
+    canvas.addEventListener('touchmove', preventSafariScroll, { passive: false });
+    return () => {
+      canvas.removeEventListener('touchstart', preventSafariScroll);
+      canvas.removeEventListener('touchmove', preventSafariScroll);
+    };
   }, [isPencilPadOpen, redrawPencilPad]);
 
   const exportPadSketchDataUrl = useCallback(() => {
@@ -295,7 +307,7 @@ export default function CircleSearchModal({
       scrollToBottom();
 
       try {
-        const res = await fetch(`${API_BASE}/api/ai/circle-search/chat`, {
+        const res = await fetchCircleApi('/api/ai/circle-search/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -350,17 +362,19 @@ export default function CircleSearchModal({
     ]
   );
 
-  // Pencil Pad pointer handlers
+  // Pencil Pad pointer handlers (Safari WebKit safe)
   const onPadPointerDown = (e) => {
+    if (e.cancelable) e.preventDefault();
     clearPadGraceTimer();
     const rect = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
     padActiveStrokeRef.current = [{ x: e.clientX - rect.left, y: e.clientY - rect.top }];
+    safeSetPointerCapture(e.currentTarget, e.pointerId);
     redrawPencilPad();
   };
 
   const onPadPointerMove = (e) => {
     if (!padActiveStrokeRef.current) return;
+    if (e.cancelable) e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     const pt = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     const pts = padActiveStrokeRef.current;
@@ -602,7 +616,12 @@ export default function CircleSearchModal({
               onPointerUp={onPadPointerUp}
               onPointerCancel={onPadPointerUp}
               className="w-full h-[150px] rounded-xl bg-white border border-gray-200 shadow-inner"
-              style={{ cursor: PENCIL_CURSOR_STYLE, touchAction: 'none' }}
+              style={{
+                cursor: PENCIL_CURSOR_STYLE,
+                touchAction: 'none',
+                WebkitUserSelect: 'none',
+                WebkitTouchCallout: 'none',
+              }}
             />
           </div>
         )}

@@ -41,12 +41,17 @@ const zeroTrustHelmet = helmet({
       ],
       connectSrc: [
         "'self'",
+        'http://localhost:5000',
+        'http://127.0.0.1:5000',
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
         'https://accounts.google.com',
         'https://unpkg.com',
         'https://cdn.jsdelivr.net',
         'ws:',
         'wss:',
         'https:',
+        'http:',
       ],
       frameSrc: [
         "'self'",

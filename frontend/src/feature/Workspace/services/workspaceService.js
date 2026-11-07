@@ -249,7 +249,8 @@ export const workspaceService = {
     clearTimeout(this._syncTimer);
     this._syncTimer = setTimeout(async () => {
       try {
-        await fetch('http://localhost:5000/api/database/save-page', {
+        const base = (import.meta.env?.VITE_API_URL || '').replace(/\/$/, '');
+        await fetch(`${base}/api/database/save-page`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ page }),

@@ -4,7 +4,7 @@
  * with robust offline fallback for seamless zero-friction workspace access.
  */
 
-const API_BASE = 'http://localhost:5000/api/auth';
+const API_BASE = (import.meta.env?.VITE_API_URL || '').replace(/\/$/, '') + '/api/auth';
 
 export const authService = {
   /**

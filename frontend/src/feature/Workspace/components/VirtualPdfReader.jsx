@@ -5,6 +5,8 @@ import {
   computeFreehandBounds,
   drawSmoothStroke,
   renderFreehandStrokesToCanvas,
+  safeSetPointerCapture,
+  getSafeCanvasDpr,
 } from '../services/circleSearchEngine';
 import { X, ChevronRight, Plus } from './WorkspaceIcons';
 
@@ -295,10 +297,11 @@ const BUILTIN_PDF_PAGES = [
  */
 function renderAcademicPdfPageToCanvas(canvas, pageSpec, customImageObj = null) {
   if (!canvas) return;
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const dpr = getSafeCanvasDpr();
   canvas.width = PAGE_WIDTH * dpr;
   canvas.height = PAGE_HEIGHT * dpr;
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // Page paper background
@@ -412,6 +415,7 @@ function PdfPageCanvasWithPencil({
       overlay.height = Math.round(h * dpr);
     }
     const ctx = overlay.getContext('2d');
+    if (!ctx) return;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
@@ -454,7 +458,24 @@ function PdfPageCanvasWithPencil({
       strokesRef.current = [];
       activeStrokeRef.current = null;
       redrawOverlay();
+      return;
     }
+
+    // Safari iOS/iPadOS passive:false touch guard on PDF Pencil overlay
+    const el = overlayCanvasRef.current;
+    const preventSafariScroll = (ev) => {
+      if (ev.cancelable) ev.preventDefault();
+    };
+    if (el) {
+      el.addEventListener('touchstart', preventSafariScroll, { passive: false });
+      el.addEventListener('touchmove', preventSafariScroll, { passive: false });
+    }
+    return () => {
+      if (el) {
+        el.removeEventListener('touchstart', preventSafariScroll);
+        el.removeEventListener('touchmove', preventSafariScroll);
+      }
+    };
   }, [isPencilActive, redrawOverlay]);
 
   const completePdfCapture = useCallback(() => {
@@ -515,15 +536,17 @@ function PdfPageCanvasWithPencil({
   const handlePointerDown = (e) => {
     if (!isPencilActive) return;
     if (e.button !== undefined && e.button !== 0) return;
+    if (e.cancelable) e.preventDefault();
     clearGrace();
     const rect = e.currentTarget.getBoundingClientRect();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
     activeStrokeRef.current = [{ x: e.clientX - rect.left, y: e.clientY - rect.top }];
+    safeSetPointerCapture(e.currentTarget, e.pointerId);
     redrawOverlay();
   };
 
   const handlePointerMove = (e) => {
     if (!isPencilActive || !activeStrokeRef.current) return;
+    if (e.cancelable) e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
     const pt = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     const pts = activeStrokeRef.current;
@@ -548,8 +571,24 @@ function PdfPageCanvasWithPencil({
     }
   };
 
+  const handlePointerCancel = () => {
+    // Safari iOS/iPadOS pointer cancel handler
+    if (activeStrokeRef.current && activeStrokeRef.current.length >= 2) {
+      strokesRef.current = [...strokesRef.current, activeStrokeRef.current];
+      redrawOverlay();
+      graceTimerRef.current = setTimeout(() => {
+        completePdfCapture();
+      }, MULTI_STROKE_GRACE_MS);
+    }
+    activeStrokeRef.current = null;
+    redrawOverlay();
+  };
+
   return (
-    <div className="relative mx-auto w-full max-w-[760px] bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden select-none">
+    <div
+      className="relative mx-auto w-full max-w-[760px] bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden select-none"
+      style={{ touchAction: isPencilActive ? 'none' : 'auto' }}
+    >
       <canvas
         ref={pdfCanvasRef}
         className="block w-full h-auto bg-white"
@@ -560,11 +599,13 @@ function PdfPageCanvasWithPencil({
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
+          onPointerCancel={handlePointerCancel}
           className="absolute inset-0 w-full h-full z-10"
           style={{
             cursor: PENCIL_CURSOR_STYLE,
             touchAction: 'none',
+            WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none',
           }}
         />
       )}

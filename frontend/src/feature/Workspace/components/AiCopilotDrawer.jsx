@@ -15,6 +15,7 @@ import {
   DockPanel,
 } from './WorkspaceIcons';
 import RichMathMarkdown from './RichMathMarkdown';
+import { fetchCircleApi } from '../services/circleSearchEngine';
 
 export default function AiCopilotDrawer({
   isOpen,
@@ -88,8 +89,8 @@ export default function AiCopilotDrawer({
     setIsLoading(true);
 
     try {
-      // Connect to real backend AI Cascade (Groq LPU + Gemini Vision + Turso Edge Cache)
-      const res = await fetch('http://localhost:5000/api/ai/circle-search', {
+      // Connect to real backend AI Cascade (Safari-safe same-origin proxy + fallback)
+      const res = await fetchCircleApi('/api/ai/circle-search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

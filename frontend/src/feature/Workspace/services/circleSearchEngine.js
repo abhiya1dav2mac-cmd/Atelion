@@ -16,12 +16,84 @@
  * ==============================================================================
  */
 
-// Crisp SVG Pencil Cursor (hotspot at pencil tip: x=2, y=22)
-const PENCIL_SVG = `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'><path d='M17.5 2.5L21.5 6.5L8 20L2.5 21.5L4 16L17.5 2.5Z' fill='%232563EB' stroke='%23FFFFFF' stroke-width='1.5' stroke-linejoin='round'/><path d='M15 5L19 9' stroke='%23FFFFFF' stroke-width='1.4'/><path d='M2.5 21.5L5.5 20.7L3.3 18.5L2.5 21.5Z' fill='%230F172A'/></svg>`;
+// Crisp SVG Pencil Cursor (hotspot at pencil tip: x=2, y=22) — Safari & Chromium compatible
+const PENCIL_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M17.5 2.5L21.5 6.5L8 20L2.5 21.5L4 16L17.5 2.5Z" fill="#2563EB" stroke="#FFFFFF" stroke-width="1.5" stroke-linejoin="round"/><path d="M15 5L19 9" stroke="#FFFFFF" stroke-width="1.4"/><path d="M2.5 21.5L5.5 20.7L3.3 18.5L2.5 21.5Z" fill="#0F172A"/></svg>`;
 
-export const PENCIL_CURSOR_STYLE = `url("data:image/svg+xml,${encodeURIComponent(PENCIL_SVG)}") 2 22, crosshair`;
+// Single quotes inside url('...') to ensure WebKit / Safari inline CSS parser compatibility
+export const PENCIL_CURSOR_STYLE = `url('data:image/svg+xml,${encodeURIComponent(PENCIL_SVG)}') 2 22, crosshair`;
 
 export const MULTI_STROKE_GRACE_MS = 650;
+
+/**
+ * Safari-safe API URL resolver:
+ * Uses VITE_API_URL if configured, otherwise same-origin `/api/...` (proxied by Vite/reverse-proxy)
+ * so macOS/iOS Safari never blocks `http://localhost:5000` via Mixed Content / ITP / LAN IP mismatch.
+ */
+export function resolveCircleApiUrl(path = '/api/ai/circle-search') {
+  const envBase = (import.meta.env?.VITE_API_URL || '').trim().replace(/\/$/, '');
+  if (envBase) return `${envBase}${path}`;
+  return path;
+}
+
+/**
+ * Safari-safe API fetch with automatic LAN/port-5000 fallback:
+ * 1. First tries same-origin `/api/...` (works on macOS Safari, iPhone/iPad Safari over Wi-Fi, & HTTPS via proxy)
+ * 2. If not proxied (e.g. static preview on HTTP), falls back to `http://<current-hostname>:5000`
+ */
+export async function fetchCircleApi(path, fetchOptions = {}) {
+  const primaryUrl = resolveCircleApiUrl(path);
+  try {
+    const res = await fetch(primaryUrl, fetchOptions);
+    const contentType = res.headers.get('content-type') || '';
+    if (res.ok && contentType.includes('application/json')) {
+      return res;
+    }
+    // If Vite proxy isn't active and we're on HTTP, try current hostname:5000
+    if (
+      typeof window !== 'undefined' &&
+      window.location.protocol === 'http:' &&
+      !primaryUrl.startsWith('http')
+    ) {
+      const host = window.location.hostname || 'localhost';
+      return await fetch(`http://${host}:5000${path}`, fetchOptions);
+    }
+    return res;
+  } catch (err) {
+    if (
+      typeof window !== 'undefined' &&
+      window.location.protocol === 'http:' &&
+      !primaryUrl.startsWith('http')
+    ) {
+      const host = window.location.hostname || 'localhost';
+      return await fetch(`http://${host}:5000${path}`, fetchOptions);
+    }
+    throw err;
+  }
+}
+
+/**
+ * Safari WebKit safe pointer capture:
+ * Safari throws DOMException (NotFoundError / InvalidStateError) on touch/Apple Pencil pointerIds
+ * if setPointerCapture is not wrapped in try/catch.
+ */
+export function safeSetPointerCapture(target, pointerId) {
+  if (!target || pointerId === undefined || pointerId === null) return;
+  try {
+    if (typeof target.setPointerCapture === 'function') {
+      target.setPointerCapture(pointerId);
+    }
+  } catch {
+    // Ignore Safari WebKit synthetic/touch pointerId exception
+  }
+}
+
+/**
+ * Cap devicePixelRatio at 2 so iOS/iPadOS Safari never exceeds WebKit's 16MP canvas memory ceiling.
+ */
+export function getSafeCanvasDpr() {
+  if (typeof window === 'undefined') return 1;
+  return Math.min(2, window.devicePixelRatio || 1);
+}
 
 /**
  * Normalize strokes input into an array of point arrays: [[{x, y}, ...], ...]
@@ -208,6 +280,7 @@ export function renderFreehandStrokesToCanvas(strokes, bounds, options = {}) {
   offscreen.height = Math.round(outHeight * dpr);
 
   const ctx = offscreen.getContext('2d');
+  if (!ctx) return null;
   ctx.scale(dpr, dpr);
 
   // 1. Clean white background
