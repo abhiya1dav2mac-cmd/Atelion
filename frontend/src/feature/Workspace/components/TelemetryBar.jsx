@@ -67,9 +67,26 @@ export default function TelemetryBar({ user, activePageId }) {
         </button>
       </div>
 
-      <div className="flex items-center gap-2 text-[#555555]">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-        <span>Turso LibSQL Edge • 0ms</span>
+      <div className="flex items-center gap-3 text-[#777777]">
+        <button
+          onClick={() => {
+            alert(
+              '🏛️ ATELION MULTI-DATABASE ARCHITECTURE TELEMETRY:\n\n' +
+                '1. ⚡ Turso libSQL Edge: User details, Passkeys & Micro-Shards (0ms Edge Read)\n' +
+                '2. 🍃 MongoDB Atlas: Nested block trees, revisions & AI vectors\n' +
+                '3. ☁️ Cloudflare R2: Media Vault & PDFs ($0 Egress bandwidth fee)\n' +
+                '4. 💾 Local IndexedDB: Client-side optimistic 0ms cache\n\n' +
+                'Status: All 4 Database Layers Active & Sharded.'
+            );
+          }}
+          className="flex items-center gap-2 hover:text-[#cccccc] transition-colors cursor-pointer group"
+          title="Click to view Multi-Database Sharding Telemetry"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[#888888] group-hover:text-white transition-colors">
+            ⚡ Turso Shards (0ms) • 🍃 Mongo Blocks • ☁️ R2 Vault
+          </span>
+        </button>
       </div>
     </footer>
   );

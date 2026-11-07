@@ -13,8 +13,10 @@ const helpdeskRoutes = require('./routes/helpdesk');
 const syncRoutes = require('./routes/sync');
 const aiRoutes = require('./routes/ai');
 const securityRoutes = require('./routes/security');
+const databaseRoutes = require('./routes/database');
 const { initHelpDeskTables } = require('./services/helpdeskTurso');
 const { initCircleSearchTables } = require('./services/circleSearchTurso');
+const { initShardingTables } = require('./services/tursoShardingService');
 const selfHealingMesh = require('./services/selfHealingMesh');
 const { zeroTrustHelmet, zeroTrustAuditMiddleware } = require('./middleware/zeroTrustHelmet');
 
@@ -67,6 +69,7 @@ app.use('/api/helpdesk', helpdeskRoutes);
 app.use('/api/sync', syncRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/security', securityRoutes);
+app.use('/api/database', databaseRoutes);
 
 // Healthcheck Route
 app.get('/api/health', (req, res) => {
@@ -98,10 +101,11 @@ if (require.main === module) {
 
 // Connect to Databases in Background
 async function initDatabases() {
-  // 1. Initialize Turso Isolated Help Desk & Circle to Search Edge Databases
+  // 1. Initialize Turso Isolated Help Desk, Circle to Search, and Metadata Sharding DBs
   try {
     await initHelpDeskTables();
     await initCircleSearchTables();
+    await initShardingTables();
   } catch (tErr) {
     console.error('[TURSO-INIT-WARN]', tErr.message);
   }
