@@ -9,6 +9,7 @@ import {
   safeSetPointerCapture,
   safeReleasePointerCapture,
   getSafeCanvasDpr,
+  isStylusPalmTouch,
 } from '../services/circleSearchEngine';
 import { X } from './WorkspaceIcons';
 
@@ -205,18 +206,20 @@ export default function FreehandCircleOverlay({
 
   const handlePointerDown = (e) => {
     if (e.button !== undefined && e.button !== 0) return;
+    if (isStylusPalmTouch(e, false)) return;
     if (e.cancelable) e.preventDefault();
     clearGraceTimer();
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    activeStrokeRef.current = [{ x, y }];
+    activeStrokeRef.current = [{ x, y, pressure: e.pressure || 0.5 }];
     safeSetPointerCapture(e.currentTarget, e.pointerId);
     redrawCanvas();
   };
 
   const handlePointerMove = (e) => {
+    if (isStylusPalmTouch(e, Boolean(activeStrokeRef.current))) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -226,7 +229,7 @@ export default function FreehandCircleOverlay({
     const pts = activeStrokeRef.current;
     const last = pts[pts.length - 1];
     if (!last || Math.hypot(x - last.x, y - last.y) >= 1.5) {
-      pts.push({ x, y });
+      pts.push({ x, y, pressure: e.pressure || 0.5 });
       redrawCanvas();
     }
   };

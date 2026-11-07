@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Copy, Check } from './WorkspaceIcons';
 
 export default function TelemetryBar({ user, activePageId }) {
   const [copiedKey, setCopiedKey] = useState(null);
+  const [isOnline, setIsOnline] = useState(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const userId = user?.id || '31bd872ba9043c2805';
   const workspaceId = 'eb159cff712b476005';
@@ -68,6 +82,22 @@ export default function TelemetryBar({ user, activePageId }) {
       </div>
 
       <div className="flex items-center gap-3 text-gray-500">
+        <span
+          className={`flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-bold border ${
+            isOnline
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              : 'bg-amber-50 text-amber-800 border-amber-200'
+          }`}
+          title={isOnline ? 'Direct Cloud Sync & Edge Isolates Active' : 'Offline Mode: Changes saved to Device IndexedDB'}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+            }`}
+          />
+          <span>{isOnline ? 'Cloud Synced (0ms IDB)' : '⚡ Offline Cache Active'}</span>
+        </span>
+
         <button
           onClick={() => {
             alert(

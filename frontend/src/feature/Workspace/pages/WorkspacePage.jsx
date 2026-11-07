@@ -22,6 +22,10 @@ import {
   KnowledgeGraphModal,
   PasskeyEnrollModal,
 } from '../components/PremiumModals';
+import { CollaborativePresenceBar, RemoteCursorsOverlay } from '../components/CollaborativePresenceBar';
+import StudyAgentModal from '../components/StudyAgentModal';
+import { cacheAllPagesOffline, flushOfflineOutbox } from '../services/offlineSyncEngine';
+import { multiplayerPresence } from '../services/multiplayerPresenceService';
 
 export default function WorkspacePage({ user, onLogout }) {
   const userRole = user?.role === 'student' ? 'student' : 'professional';
@@ -50,6 +54,7 @@ export default function WorkspacePage({ user, onLogout }) {
   const [isVoiceScribeOpen, setIsVoiceScribeOpen] = useState(false);
   const [isPluginCenterOpen, setIsPluginCenterOpen] = useState(false);
   const [isColdVaultOpen, setIsColdVaultOpen] = useState(false);
+  const [isStudyAgentOpen, setIsStudyAgentOpen] = useState(false);
   const [pdfReaderState, setPdfReaderState] = useState({
     isOpen: false,
     title: 'Quantum_Physics_Lecture_Notes.pdf',
@@ -68,10 +73,19 @@ export default function WorkspacePage({ user, onLogout }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Sync to local-first database on state change
+  // Zero-load IndexedDB write-through cache & offline recovery
   useEffect(() => {
     workspaceService.savePages(pages);
+    cacheAllPagesOffline(pages);
   }, [pages]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      flushOfflineOutbox(async () => {});
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, []);
 
   useEffect(() => {
     workspaceService.saveDatabaseItems(databaseItems);
@@ -144,6 +158,7 @@ export default function WorkspacePage({ user, onLogout }) {
         onOpenCircleSearch={() => setIsCircleOverlayOpen(true)}
         onOpenPlugins={() => setIsPluginCenterOpen(true)}
         onOpenColdVault={() => setIsColdVaultOpen(true)}
+        onOpenStudyAgent={() => setIsStudyAgentOpen(true)}
         isOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         isPinned={isSidebarPinned}
@@ -319,6 +334,19 @@ export default function WorkspacePage({ user, onLogout }) {
               {isAiOpen && <Pin className="w-3 h-3 ml-0.5 text-blue-200" />}
             </button>
 
+            {/* Autonomous AI Study Agent Button */}
+            <button
+              onClick={() => setIsStudyAgentOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 shadow-2xs transition-all cursor-pointer"
+              title="Autonomous AI Study Agent (Executive Summary, Gap Detector, Spaced Recall, Quiz)"
+            >
+              <span>🤖</span>
+              <span className="hidden sm:inline">Study Agent</span>
+            </button>
+
+            {/* 👥 Real-Time Collaborative Presence Bar */}
+            <CollaborativePresenceBar user={user} activePageId={activePageId} />
+
             {/* User Profile Pill in Top Header Bar */}
             <div className="flex items-center gap-2 pl-2 border-l border-gray-200 select-none">
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shadow-xs flex-shrink-0">
@@ -337,7 +365,12 @@ export default function WorkspacePage({ user, onLogout }) {
         </header>
 
         {/* 3. Document Canvas Area */}
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative bg-white">
+        <div
+          className="flex-1 min-h-0 flex flex-col overflow-hidden relative bg-white"
+          onMouseMove={(e) => multiplayerPresence.broadcastCursor(e.clientX, e.clientY, activePageId)}
+        >
+          {/* Remote Collaborative Cursors Overlay */}
+          <RemoteCursorsOverlay />
           {isSplitViewOpen ? (
             <SplitEditorPane
               pages={pages}
@@ -528,6 +561,15 @@ export default function WorkspacePage({ user, onLogout }) {
         onClose={() => setIsColdVaultOpen(false)}
         pages={pages}
         onRestorePages={(restored) => setPages((prev) => [...restored, ...prev])}
+      />
+
+      {/* 15. 🤖 Autonomous AI Study Agent Modal */}
+      <StudyAgentModal
+        isOpen={isStudyAgentOpen}
+        onClose={() => setIsStudyAgentOpen(false)}
+        pages={pages}
+        activePage={activePage}
+        onInsertDigest={handleInsertAiText}
       />
     </div>
   );

@@ -235,32 +235,72 @@ export function computeFreehandBounds(strokes, options = {}) {
 }
 
 /**
- * Draw smooth quadratic curve for a single stroke onto a 2D canvas context
+ * Hardware Palm & Non-Primary Touch Rejection for Apple Pencil & Stylus
+ * Discards palm resting on iPad / tablet screens (contact radius > 28px)
  */
-export function drawSmoothStroke(ctx, points, offsetX = 0, offsetY = 0, scale = 1) {
+export function isStylusPalmTouch(e, isPenActive = false) {
+  if (!e) return false;
+  if (e.pointerType === 'touch') {
+    if (isPenActive) return true;
+    // Palm detection heuristic: large contact area or non-primary touch
+    if ((e.width && e.width > 28) || (e.height && e.height > 28)) return true;
+  }
+  return false;
+}
+
+/**
+ * Draw smooth quadratic curve with pressure-sensitive ink tapering for stylus/Apple Pencil
+ */
+export function drawSmoothStroke(ctx, points, offsetX = 0, offsetY = 0, scale = 1, baseLineWidth = null) {
   if (!points || points.length === 0) return;
-  ctx.beginPath();
-  if (points.length === 1) {
-    const p = points[0];
-    ctx.arc((p.x - offsetX) * scale, (p.y - offsetY) * scale, 2.2, 0, Math.PI * 2);
-    ctx.fill();
+
+  const hasPressure = points.some((p) => p.pressure && Math.abs(p.pressure - 0.5) > 0.08);
+
+  if (!hasPressure || points.length < 3) {
+    ctx.beginPath();
+    if (points.length === 1) {
+      const p = points[0];
+      const r = 2.2 * (p.pressure ? 0.6 + 0.8 * p.pressure : 1);
+      ctx.arc((p.x - offsetX) * scale, (p.y - offsetY) * scale, r, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+
+    ctx.moveTo((points[0].x - offsetX) * scale, (points[0].y - offsetY) * scale);
+    for (let i = 1; i < points.length - 1; i++) {
+      const midX = ((points[i].x + points[i + 1].x) / 2 - offsetX) * scale;
+      const midY = ((points[i].y + points[i + 1].y) / 2 - offsetY) * scale;
+      ctx.quadraticCurveTo(
+        (points[i].x - offsetX) * scale,
+        (points[i].y - offsetY) * scale,
+        midX,
+        midY
+      );
+    }
+    const last = points[points.length - 1];
+    ctx.lineTo((last.x - offsetX) * scale, (last.y - offsetY) * scale);
+    ctx.stroke();
     return;
   }
 
-  ctx.moveTo((points[0].x - offsetX) * scale, (points[0].y - offsetY) * scale);
-  for (let i = 1; i < points.length - 1; i++) {
-    const midX = ((points[i].x + points[i + 1].x) / 2 - offsetX) * scale;
-    const midY = ((points[i].y + points[i + 1].y) / 2 - offsetY) * scale;
-    ctx.quadraticCurveTo(
-      (points[i].x - offsetX) * scale,
-      (points[i].y - offsetY) * scale,
-      midX,
-      midY
-    );
+  // Pressure-sensitive dynamic stroke tapering (Native zero-load canvas)
+  const nominalWidth = baseLineWidth || ctx.lineWidth || 3.2;
+  const originalWidth = ctx.lineWidth;
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const avgPressure = ((p1.pressure || 0.5) + (p2.pressure || 0.5)) / 2;
+    const dynamicWidth = nominalWidth * (0.35 + 1.15 * avgPressure);
+
+    ctx.beginPath();
+    ctx.lineWidth = dynamicWidth;
+    ctx.moveTo((p1.x - offsetX) * scale, (p1.y - offsetY) * scale);
+    ctx.lineTo((p2.x - offsetX) * scale, (p2.y - offsetY) * scale);
+    ctx.stroke();
   }
-  const last = points[points.length - 1];
-  ctx.lineTo((last.x - offsetX) * scale, (last.y - offsetY) * scale);
-  ctx.stroke();
+
+  ctx.lineWidth = originalWidth;
 }
 
 /**

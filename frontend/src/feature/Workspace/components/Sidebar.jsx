@@ -36,6 +36,7 @@ export default function Sidebar({
   onOpenSearch,
   onOpenPdfReader,
   onOpenCircleSearch,
+  onOpenStudyAgent,
   onOpenPlugins,
   onOpenColdVault,
   isOpen = true,
@@ -245,6 +246,22 @@ export default function Sidebar({
               </div>
               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
                 Any Shape
+              </span>
+            </button>
+          )}
+
+          {onOpenStudyAgent && (
+            <button
+              onClick={onOpenStudyAgent}
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md ${theme.navItem} transition-colors cursor-pointer text-left`}
+              title="Autonomous AI Study Agent (Digest, Gap Detector, Spaced Recall, Quiz)"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-sm leading-none">🤖</span>
+                <span className="font-semibold text-gray-800">Study Agent</span>
+              </div>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200">
+                Auto AI
               </span>
             </button>
           )}
