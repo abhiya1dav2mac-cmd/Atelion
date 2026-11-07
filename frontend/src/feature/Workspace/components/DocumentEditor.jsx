@@ -165,7 +165,7 @@ export default function DocumentEditor({
 
   return (
     <div
-      className="flex-1 overflow-y-auto no-scrollbar bg-[#191919] text-[#e6e6e6] min-h-screen"
+      className="flex-1 overflow-y-auto no-scrollbar bg-white text-gray-900 min-h-screen"
       style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
       {/* 1. Cover Image Banner */}
@@ -178,7 +178,7 @@ export default function DocumentEditor({
             <button
               key={i}
               onClick={() => onUpdatePage(page.id, { cover: grad })}
-              className="w-5 h-5 rounded-full border border-white/40 shadow-sm cursor-pointer hover:scale-110 transition-transform"
+              className="w-5 h-5 rounded-full border border-white/60 shadow-sm cursor-pointer hover:scale-110 transition-transform"
               style={{ background: grad }}
               title="Change banner color"
             />
@@ -191,10 +191,10 @@ export default function DocumentEditor({
         {/* Upper Right Corner PREMIUM Controls */}
         <div className="absolute top-4 right-6 sm:right-12 flex items-center gap-2 z-10">
           <PremiumBadge />
-          <div className="flex items-center gap-1 bg-[#222222] p-1 rounded-xl border border-[#333333] shadow-md">
+          <div className="flex items-center gap-1 bg-white/95 backdrop-blur-sm p-1 rounded-xl border border-gray-200 shadow-sm">
             <button
               onClick={() => onOpenPremium && onOpenPremium('history')}
-              className="p-1.5 hover:bg-[#2e2e2e] text-gray-300 hover:text-amber-400 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="p-1.5 hover:bg-gray-100 text-gray-700 hover:text-amber-600 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
               title="Time Machine Version History"
             >
               <span>🕒</span>
@@ -202,7 +202,7 @@ export default function DocumentEditor({
             </button>
             <button
               onClick={() => onOpenPremium && onOpenPremium('share')}
-              className="p-1.5 hover:bg-[#2e2e2e] text-gray-300 hover:text-amber-400 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="p-1.5 hover:bg-gray-100 text-gray-700 hover:text-amber-600 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
               title="Public Web Share Link"
             >
               <span>🌐</span>
@@ -210,7 +210,7 @@ export default function DocumentEditor({
             </button>
             <button
               onClick={() => onOpenPremium && onOpenPremium('export')}
-              className="p-1.5 hover:bg-[#2e2e2e] text-gray-300 hover:text-amber-400 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="p-1.5 hover:bg-gray-100 text-gray-700 hover:text-amber-600 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
               title="Export Markdown/HTML/PDF"
             >
               <span>📥</span>
@@ -218,7 +218,7 @@ export default function DocumentEditor({
             </button>
             <button
               onClick={() => onOpenPremium && onOpenPremium('graph')}
-              className="p-1.5 hover:bg-[#2e2e2e] text-gray-300 hover:text-amber-400 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="p-1.5 hover:bg-gray-100 text-gray-700 hover:text-amber-600 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
               title="3D Knowledge Graph"
             >
               <span>🕸️</span>
@@ -226,7 +226,7 @@ export default function DocumentEditor({
             </button>
             <button
               onClick={() => onOpenPremium && onOpenPremium('passkey')}
-              className="p-1.5 hover:bg-[#2e2e2e] text-gray-300 hover:text-amber-400 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              className="p-1.5 hover:bg-gray-100 text-gray-700 hover:text-amber-600 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
               title="Enroll Biometric Passkey"
             >
               <span>🔐</span>
@@ -239,14 +239,14 @@ export default function DocumentEditor({
         <div className="-mt-14 mb-4 relative inline-block">
           <button
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="w-14 h-14 rounded-2xl bg-[#222222] shadow-xl border border-[#333333] flex items-center justify-center text-2xl hover:scale-105 transition-transform cursor-pointer"
+            className="w-14 h-14 rounded-2xl bg-white shadow-xl border border-gray-200 flex items-center justify-center text-2xl hover:scale-105 transition-transform cursor-pointer"
             title="Change icon"
           >
             {page.icon || '📄'}
           </button>
 
           {showEmojiPicker && (
-            <div className="absolute top-16 left-0 bg-[#222222] p-2.5 rounded-2xl shadow-2xl border border-[#333333] z-40 flex flex-wrap gap-2 w-56 animate-in fade-in duration-100">
+            <div className="absolute top-16 left-0 bg-white p-2.5 rounded-2xl shadow-2xl border border-gray-200 z-40 flex flex-wrap gap-2 w-56 animate-in fade-in duration-100">
               {EMOJI_OPTIONS.map((emoji) => (
                 <button
                   key={emoji}
@@ -254,7 +254,7 @@ export default function DocumentEditor({
                     onUpdatePage(page.id, { icon: emoji });
                     setShowEmojiPicker(false);
                   }}
-                  className="w-8 h-8 flex items-center justify-center text-xl hover:bg-[#2c2c2c] rounded-lg cursor-pointer"
+                  className="w-8 h-8 flex items-center justify-center text-xl hover:bg-gray-100 rounded-lg cursor-pointer"
                 >
                   {emoji}
                 </button>
@@ -270,12 +270,12 @@ export default function DocumentEditor({
             value={page.title}
             onChange={handleTitleChange}
             placeholder="Untitled Document"
-            className="w-full text-2xl sm:text-4xl font-extrabold text-white bg-transparent border-none focus:outline-none placeholder-[#555555] tracking-tight"
+            className="w-full text-2xl sm:text-4xl font-extrabold text-gray-950 bg-transparent border-none focus:outline-none placeholder-gray-300 tracking-tight"
           />
-          <div className="flex items-center gap-3 mt-2 text-xs text-[#666666] font-mono">
+          <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 font-mono">
             <span>Last edited: {page.updatedAt || 'Just now'}</span>
             <span>•</span>
-            <span className="text-emerald-400 font-semibold flex items-center gap-1">
+            <span className="text-emerald-600 font-semibold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Turso Edge Synced (0ms)
             </span>
@@ -283,10 +283,10 @@ export default function DocumentEditor({
         </div>
 
         {/* 👑 Notion AI Premium Power Bar */}
-        <div className="mb-6 p-2.5 bg-[#202020] border border-amber-500/30 rounded-2xl flex flex-wrap items-center justify-between gap-2 shadow-lg relative overflow-hidden">
+        <div className="mb-6 p-2.5 bg-gradient-to-r from-amber-50/80 via-indigo-50/50 to-blue-50/80 border border-amber-300/60 rounded-2xl flex flex-wrap items-center justify-between gap-2 shadow-sm relative overflow-hidden">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400 text-sm">✨</span>
-            <span className="text-xs font-bold text-white tracking-wide">Notion AI Premium</span>
+            <span className="text-amber-500 text-sm">✨</span>
+            <span className="text-xs font-bold text-gray-900 tracking-wide">Notion AI Premium</span>
             <PremiumBadge className="scale-90" />
           </div>
 
@@ -294,28 +294,28 @@ export default function DocumentEditor({
             <button
               onClick={() => handleAiAction('summarize')}
               disabled={isAiBusy}
-              className="px-2.5 py-1 bg-[#2c2c2c] hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-500/50 text-gray-300 border border-[#3a3a3a] rounded-lg text-[11px] font-semibold transition-all cursor-pointer disabled:opacity-50"
+              className="px-2.5 py-1 bg-white hover:bg-amber-100/60 hover:text-amber-900 text-gray-800 border border-amber-200/80 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-50"
             >
               📝 1-Click Summary
             </button>
             <button
               onClick={() => handleAiAction('improve')}
               disabled={isAiBusy}
-              className="px-2.5 py-1 bg-[#2c2c2c] hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-500/50 text-gray-300 border border-[#3a3a3a] rounded-lg text-[11px] font-semibold transition-all cursor-pointer disabled:opacity-50"
+              className="px-2.5 py-1 bg-white hover:bg-amber-100/60 hover:text-amber-900 text-gray-800 border border-amber-200/80 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-50"
             >
               ✍️ Polish & Grammar
             </button>
             <button
               onClick={() => handleAiAction('action_items')}
               disabled={isAiBusy}
-              className="px-2.5 py-1 bg-[#2c2c2c] hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-500/50 text-gray-300 border border-[#3a3a3a] rounded-lg text-[11px] font-semibold transition-all cursor-pointer disabled:opacity-50"
+              className="px-2.5 py-1 bg-white hover:bg-amber-100/60 hover:text-amber-900 text-gray-800 border border-amber-200/80 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-50"
             >
               ☑️ Extract Todos
             </button>
             <button
               onClick={() => handleAiAction('translate')}
               disabled={isAiBusy}
-              className="px-2.5 py-1 bg-[#2c2c2c] hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-500/50 text-gray-300 border border-[#3a3a3a] rounded-lg text-[11px] font-semibold transition-all cursor-pointer disabled:opacity-50"
+              className="px-2.5 py-1 bg-white hover:bg-amber-100/60 hover:text-amber-900 text-gray-800 border border-amber-200/80 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-50"
             >
               🌐 Translate (Hindi / Multi)
             </button>
@@ -338,14 +338,14 @@ export default function DocumentEditor({
                       targetIndex: idx,
                     });
                   }}
-                  className="p-1 text-[#666666] hover:text-white hover:bg-[#282828] rounded cursor-pointer"
+                  className="p-1 text-gray-400 hover:text-gray-800 hover:bg-gray-100 rounded cursor-pointer"
                   title="Add block below"
                 >
                   <Plus className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => deleteBlock(idx)}
-                  className="p-1 text-[#666666] hover:text-red-400 hover:bg-red-500/10 rounded cursor-pointer"
+                  className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded cursor-pointer"
                   title="Delete block"
                 >
                   <Trash className="w-3.5 h-3.5" />
@@ -360,7 +360,7 @@ export default function DocumentEditor({
                     value={block.content}
                     onChange={(e) => handleBlockChange(idx, e.target.value)}
                     onKeyDown={(e) => handleBlockKeyDown(e, idx)}
-                    className="w-full text-xl sm:text-2xl font-bold text-white bg-transparent border-none focus:outline-none tracking-tight pt-2"
+                    className="w-full text-xl sm:text-2xl font-bold text-gray-950 bg-transparent border-none focus:outline-none tracking-tight pt-2"
                   />
                 )}
 
@@ -370,7 +370,7 @@ export default function DocumentEditor({
                     value={block.content}
                     onChange={(e) => handleBlockChange(idx, e.target.value)}
                     onKeyDown={(e) => handleBlockKeyDown(e, idx)}
-                    className="w-full text-base sm:text-lg font-semibold text-[#eeeeee] bg-transparent border-none focus:outline-none tracking-tight pt-1.5"
+                    className="w-full text-base sm:text-lg font-semibold text-gray-900 bg-transparent border-none focus:outline-none tracking-tight pt-1.5"
                   />
                 )}
 
@@ -380,7 +380,7 @@ export default function DocumentEditor({
                     onChange={(e) => handleBlockChange(idx, e.target.value)}
                     onKeyDown={(e) => handleBlockKeyDown(e, idx)}
                     rows={Math.max(1, Math.ceil(block.content.length / 80))}
-                    className="w-full text-sm text-[#cccccc] bg-transparent border-none focus:outline-none leading-relaxed resize-none py-1"
+                    className="w-full text-sm sm:text-base text-gray-800 bg-transparent border-none focus:outline-none leading-relaxed resize-none py-1"
                   />
                 )}
 
@@ -390,7 +390,7 @@ export default function DocumentEditor({
                       type="checkbox"
                       checked={Boolean(block.checked)}
                       onChange={() => toggleTodo(idx)}
-                      className="w-4 h-4 rounded bg-[#262626] border-[#3a3a3a] text-blue-500 focus:ring-0 cursor-pointer"
+                      className="w-4 h-4 rounded text-blue-600 border-gray-300 focus:ring-blue-500 cursor-pointer"
                     />
                     <input
                       type="text"
@@ -398,28 +398,28 @@ export default function DocumentEditor({
                       onChange={(e) => handleBlockChange(idx, e.target.value)}
                       onKeyDown={(e) => handleBlockKeyDown(e, idx)}
                       className={`w-full text-sm bg-transparent border-none focus:outline-none ${
-                        block.checked ? 'line-through text-[#666666]' : 'text-[#dddddd] font-medium'
+                        block.checked ? 'line-through text-gray-400' : 'text-gray-900 font-medium'
                       }`}
                     />
                   </div>
                 )}
 
                 {block.type === 'callout' && (
-                  <div className="flex items-start gap-3 p-3.5 bg-[#202020] border border-[#2e2e2e] rounded-xl my-2">
+                  <div className="flex items-start gap-3 p-3.5 bg-blue-50/80 border border-blue-200/90 rounded-xl my-2 text-blue-950">
                     <span className="text-lg">{block.icon || '💡'}</span>
                     <textarea
                       value={block.content}
                       onChange={(e) => handleBlockChange(idx, e.target.value)}
                       onKeyDown={(e) => handleBlockKeyDown(e, idx)}
                       rows={Math.max(2, block.content.split('\n').length)}
-                      className="w-full text-xs sm:text-sm text-[#e0e0e0] bg-transparent border-none focus:outline-none resize-none leading-relaxed font-mono"
+                      className="w-full text-xs sm:text-sm text-blue-950 bg-transparent border-none focus:outline-none resize-none leading-relaxed font-mono"
                     />
                   </div>
                 )}
 
                 {block.type === 'code' && (
-                  <div className="my-3 rounded-xl overflow-hidden bg-[#141414] border border-[#262626] text-slate-100 font-mono text-xs">
-                    <div className="px-3 py-1.5 bg-[#1e1e1e] text-[10px] text-[#777777] flex items-center justify-between border-b border-[#262626]">
+                  <div className="my-3 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 text-slate-100 font-mono text-xs shadow-sm">
+                    <div className="px-3 py-1.5 bg-slate-800/80 text-[10px] text-slate-400 flex items-center justify-between border-b border-slate-700/50">
                       <span>{block.language || 'javascript'}</span>
                       <button
                         onClick={() => navigator.clipboard.writeText(block.content)}
@@ -432,17 +432,17 @@ export default function DocumentEditor({
                       value={block.content}
                       onChange={(e) => handleBlockChange(idx, e.target.value)}
                       rows={Math.max(3, block.content.split('\n').length)}
-                      className="w-full p-3 bg-transparent border-none focus:outline-none text-[#4ade80] resize-none leading-relaxed"
+                      className="w-full p-3 bg-transparent border-none focus:outline-none text-emerald-400 resize-none leading-relaxed"
                     />
                   </div>
                 )}
 
                 {block.type === 'math' && (
-                  <div className="my-3 p-4 bg-[#202020] border border-[#2d2d2d] rounded-xl">
-                    <div className="text-[10px] font-mono text-[#fde047] font-bold mb-1 uppercase tracking-wider">
+                  <div className="my-3 p-4 bg-amber-50/70 border border-amber-200 rounded-xl">
+                    <div className="text-[10px] font-mono text-amber-800 font-bold mb-1 uppercase tracking-wider">
                       LaTeX Math Equation (KaTeX Engine)
                     </div>
-                    <div className="text-base sm:text-lg font-serif text-white py-2 text-center bg-[#171717] rounded-lg border border-[#262626] shadow-xs">
+                    <div className="text-base sm:text-lg font-serif text-gray-950 py-2 text-center bg-white rounded-lg border border-amber-200 shadow-xs">
                       $${block.content}$$
                     </div>
                     <input
@@ -450,7 +450,7 @@ export default function DocumentEditor({
                       value={block.content}
                       onChange={(e) => handleBlockChange(idx, e.target.value)}
                       placeholder="Type LaTeX formula (e.g. E = mc^2)..."
-                      className="w-full mt-2 text-xs font-mono text-[#cccccc] bg-[#1a1a1a] p-2 rounded border border-[#2e2e2e] focus:outline-none"
+                      className="w-full mt-2 text-xs font-mono text-gray-800 bg-white p-2 rounded border border-amber-200 focus:outline-none"
                     />
                   </div>
                 )}
@@ -460,22 +460,22 @@ export default function DocumentEditor({
                 )}
 
                 {block.type === 'pdf_embed' && (
-                  <div className="my-3 p-4 bg-[#202020] border border-amber-500/40 rounded-xl relative overflow-hidden">
+                  <div className="my-3 p-4 bg-amber-50/50 border border-amber-300 rounded-xl relative overflow-hidden shadow-xs">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <span className="text-xl">📎</span>
                         <div>
-                          <p className="text-xs font-bold text-white">{block.title || 'PDF Document & Research Vault'}</p>
-                          <p className="text-[10px] text-gray-400">Embedded Edge File Storage • 2.4 MB</p>
+                          <p className="text-xs font-bold text-gray-900">{block.title || 'PDF Document & Research Vault'}</p>
+                          <p className="text-[10px] text-gray-500">Embedded Edge File Storage • 2.4 MB</p>
                         </div>
                       </div>
                       <PremiumBadge />
                     </div>
-                    <div className="bg-[#141414] p-3 rounded-lg border border-[#2a2a2a] text-xs text-gray-300 font-mono flex items-center justify-between">
+                    <div className="bg-white p-3 rounded-lg border border-amber-200 text-xs text-gray-800 font-mono flex items-center justify-between">
                       <span>📄 {block.title || 'Quantum_Physics_Lecture_Notes.pdf'}</span>
                       <button
                         onClick={() => alert(`Opening PDF Document: ${block.title || 'Quantum_Physics_Lecture_Notes.pdf'}`)}
-                        className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-black font-bold text-[11px] rounded cursor-pointer"
+                        className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-black font-bold text-[11px] rounded cursor-pointer shadow-xs"
                       >
                         View PDF
                       </button>
@@ -484,11 +484,11 @@ export default function DocumentEditor({
                 )}
 
                 {block.type === 'backlink' && (
-                  <div className="my-2.5 p-3 bg-[#1e1e1e] border-l-4 border-amber-500 rounded-r-xl flex items-center justify-between">
+                  <div className="my-2.5 p-3 bg-indigo-50/70 border-l-4 border-indigo-600 rounded-r-xl flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="text-amber-400">🔗</span>
-                      <span className="text-gray-400">Wiki Backlink:</span>
-                      <span className="font-bold text-white hover:underline cursor-pointer">
+                      <span className="text-indigo-600">🔗</span>
+                      <span className="text-gray-600">Wiki Backlink:</span>
+                      <span className="font-bold text-indigo-900 hover:underline cursor-pointer">
                         [[{block.content || 'Master Sprint & Project Database'}]]
                       </span>
                     </div>
@@ -497,17 +497,17 @@ export default function DocumentEditor({
                 )}
 
                 {block.type === 'formula_calc' && (
-                  <div className="my-3 p-3.5 bg-[#1b1b1b] border border-amber-500/40 rounded-xl">
+                  <div className="my-3 p-3.5 bg-emerald-50/70 border border-emerald-200 rounded-xl">
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-amber-400 font-mono text-sm">⚡</span>
-                        <span className="text-xs font-bold text-white">Formulas 2.0 Dynamic Calculation</span>
+                        <span className="text-emerald-700 font-mono text-sm">⚡</span>
+                        <span className="text-xs font-bold text-emerald-950">Formulas 2.0 Dynamic Calculation</span>
                       </div>
                       <PremiumBadge />
                     </div>
-                    <div className="p-2.5 bg-[#121212] rounded-lg border border-[#282828] font-mono text-xs text-emerald-400 flex items-center justify-between">
+                    <div className="p-2.5 bg-white rounded-lg border border-emerald-200 font-mono text-xs text-emerald-800 flex items-center justify-between shadow-xs">
                       <span>{block.content || 'format(round(prop("SprintProgress") * 100), "0%") + " [COMPLETED]"'}</span>
-                      <span className="text-amber-300 font-bold">➔ 94% [COMPLETED]</span>
+                      <span className="text-emerald-700 font-bold">➔ 94% [COMPLETED]</span>
                     </div>
                   </div>
                 )}
@@ -518,7 +518,7 @@ export default function DocumentEditor({
           {/* Bottom Add Block Trigger */}
           <button
             onClick={() => handleSlashSelect('paragraph')}
-            className="w-full py-2.5 border border-dashed border-[#2a2a2a] hover:border-[#444444] rounded-xl text-xs text-[#666666] hover:text-[#aaaaaa] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            className="w-full py-2.5 border border-dashed border-gray-200 hover:border-gray-400 rounded-xl text-xs text-gray-400 hover:text-gray-700 flex items-center justify-center gap-1.5 transition-colors cursor-pointer bg-gray-50/30 hover:bg-white"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Click to add a block, or type "/" for commands</span>

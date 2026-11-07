@@ -85,7 +85,7 @@ export default function WorkspacePage({ user, onLogout }) {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#191919] text-[#e6e6e6] font-sans select-none">
+    <div className="flex h-screen w-screen overflow-hidden bg-white text-gray-900 font-sans select-none">
       {/* 1. Collapsible Notion Sidebar (Matching Screenshots 2, 3, 4) */}
       <Sidebar
         pages={pages}
@@ -101,17 +101,17 @@ export default function WorkspacePage({ user, onLogout }) {
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      {/* 2. Main Document Work Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-[#191919]">
-        {/* Top Minimal Dark Navigation Bar (Matching Screenshot 4) */}
-        <header className="h-11 border-b border-[#282828] px-4 flex items-center justify-between bg-[#191919] z-20 select-none text-[#cccccc]">
+      {/* 2. Main Document Work Area (Clean White Canvas) */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative bg-white">
+        {/* Top Minimal Navigation Bar */}
+        <header className="h-11 border-b border-gray-200 px-4 flex items-center justify-between bg-white/95 backdrop-blur-sm z-20 select-none text-gray-800">
           {/* Breadcrumb Navigation */}
-          <div className="flex items-center gap-2 text-xs font-medium text-[#888888] truncate">
-            <span className="text-[#666666] hover:text-[#aaaaaa] transition-colors cursor-pointer">
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-500 truncate">
+            <span className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">
               Atelion
             </span>
-            <ChevronRight className="w-3 h-3 text-[#444444]" />
-            <span className="flex items-center gap-1.5 font-semibold text-[#eeeeee] truncate">
+            <ChevronRight className="w-3 h-3 text-gray-300" />
+            <span className="flex items-center gap-1.5 font-semibold text-gray-900 truncate">
               <span>{activePage?.icon || '📄'}</span>
               <span className="truncate">{activePage?.title || 'Workspace'}</span>
             </span>
@@ -124,32 +124,32 @@ export default function WorkspacePage({ user, onLogout }) {
             {/* Quick ⌘K Search Pill in Header */}
             <button
               onClick={() => setIsCommandSearchOpen(true)}
-              className="hidden md:flex items-center gap-2 px-2.5 py-1 bg-[#222222] hover:bg-[#2a2a2a] text-[#888888] hover:text-white rounded-lg text-xs border border-[#303030] transition-colors cursor-pointer"
+              className="hidden md:flex items-center gap-2 px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-gray-900 rounded-lg text-xs border border-gray-200 transition-colors cursor-pointer"
             >
-              <Search className="w-3 h-3 text-[#777777]" />
+              <Search className="w-3 h-3 text-gray-400" />
               <span>Search</span>
-              <kbd className="text-[10px] bg-[#1a1a1a] px-1 rounded border border-[#3a3a3a] text-[#777777] font-mono">
+              <kbd className="text-[10px] bg-white px-1 rounded border border-gray-300 text-gray-500 font-mono">
                 ⌘K
               </kbd>
             </button>
 
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-[#1a2e1d] text-emerald-400 rounded-full text-[11px] font-mono border border-emerald-900/60">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[11px] font-mono border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Turso Edge 0ms</span>
             </div>
 
             <button
               onClick={() => setIsAiOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-blue-900/50 to-indigo-900/50 hover:from-blue-800/60 hover:to-indigo-800/60 text-blue-300 border border-blue-700/50 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs"
             >
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               <span className="hidden sm:inline">Ask Notion AI</span>
             </button>
           </div>
         </header>
 
         {/* 3. Document Canvas Area */}
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative">
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative bg-white">
           {activePage && (
             <DocumentEditor
               page={activePage}
