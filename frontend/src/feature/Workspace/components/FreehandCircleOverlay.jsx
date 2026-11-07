@@ -143,7 +143,6 @@ export default function FreehandCircleOverlay({
     strokesRef.current = [];
     activeStrokeRef.current = null;
     setStrokeCount(0);
-    setPointerPos((prev) => ({ ...prev, isDrawing: false }));
 
     if (onCompleteCapture) {
       onCompleteCapture({
@@ -165,7 +164,6 @@ export default function FreehandCircleOverlay({
       strokesRef.current = [];
       activeStrokeRef.current = null;
       setStrokeCount(0);
-      setPointerPos({ x: -100, y: -100, visible: false, isDrawing: false });
       return;
     }
 
