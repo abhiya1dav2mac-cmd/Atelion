@@ -25,7 +25,13 @@ export default function WorkspacePage({ user, onLogout }) {
   const [databaseItems, setDatabaseItems] = useState(() => workspaceService.getDatabaseItems(userRole));
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSidebarPinned, setIsSidebarPinned] = useState(true);
-  const [sidebarTheme, setSidebarTheme] = useState('light');
+  const [sidebarTheme, setSidebarTheme] = useState(() => {
+    try {
+      return localStorage.getItem('atelion_sidebar_theme') || 'light';
+    } catch {
+      return 'light';
+    }
+  });
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [isAiPinned, setIsAiPinned] = useState(true);
   const [isCommandSearchOpen, setIsCommandSearchOpen] = useState(false);
@@ -51,6 +57,12 @@ export default function WorkspacePage({ user, onLogout }) {
   useEffect(() => {
     workspaceService.saveDatabaseItems(databaseItems);
   }, [databaseItems]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('atelion_sidebar_theme', sidebarTheme);
+    } catch {}
+  }, [sidebarTheme]);
 
   const activePage = pages.find((p) => p.id === activePageId) || pages[0];
 

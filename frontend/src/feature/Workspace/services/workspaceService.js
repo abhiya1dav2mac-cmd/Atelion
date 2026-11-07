@@ -8,10 +8,21 @@
 
 const STORAGE_KEY = 'atelion_notion_pages';
 
+/**
+ * Universal helper to strip redundant leading emojis from titles.
+ * Handles single emojis, multi-byte pictographs, and variation selectors (\uFE0E, \uFE0F).
+ */
+export function stripLeadingEmoji(text) {
+  if (!text || typeof text !== 'string') return '';
+  const regex = /^[\p{Extended_Pictographic}\p{Emoji}\uFE0E\uFE0F\u200D\u20E3\s]+/u;
+  const stripped = text.replace(regex, '').trim();
+  return stripped || text;
+}
+
 export const STUDENT_PAGES = [
   {
     id: 'page_student_hub',
-    title: '📚 Course Notes & Lecture Hub',
+    title: 'Course Notes & Lecture Hub',
     icon: '📚',
     cover: 'linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4F46E5 100%)',
     favorite: true,
@@ -28,7 +39,7 @@ export const STUDENT_PAGES = [
   },
   {
     id: 'page_math',
-    title: '🧪 Quantum Physics & Applied Mathematics',
+    title: 'Quantum Physics & Applied Mathematics',
     icon: '🧪',
     cover: 'linear-gradient(135deg, #042F2E 0%, #0F766E 50%, #14B8A6 100%)',
     favorite: true,
@@ -46,7 +57,7 @@ export const STUDENT_PAGES = [
   },
   {
     id: 'page_student_db',
-    title: '🗂️ Academic Course & Exam Tracker',
+    title: 'Academic Course & Exam Tracker',
     icon: '🗂️',
     cover: 'linear-gradient(135deg, #064E3B 0%, #047857 50%, #10B981 100%)',
     favorite: false,
@@ -133,7 +144,7 @@ export const INITIAL_PAGES = [
   },
   {
     id: 'page_database',
-    title: '🗄️ Master Sprint & Project Database',
+    title: 'Master Sprint & Project Database',
     icon: '🗄️',
     cover: 'linear-gradient(135deg, #1E1B4B 0%, #4338CA 50%, #6366F1 100%)',
     favorite: true,
@@ -146,7 +157,7 @@ export const INITIAL_PAGES = [
   },
   {
     id: 'page_math',
-    title: '🧪 Quantum Physics & Applied Mathematics',
+    title: 'Quantum Physics & Applied Mathematics',
     icon: '🧪',
     cover: 'linear-gradient(135deg, #042F2E 0%, #0F766E 50%, #14B8A6 100%)',
     favorite: false,
@@ -186,11 +197,21 @@ export const workspaceService = {
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
         const parsed = JSON.parse(data);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Auto-sanitize and remove any legacy duplicate emojis
+          const cleaned = parsed.map((p) => ({
+            ...p,
+            title: stripLeadingEmoji(p.title) || 'Untitled Note',
+          }));
+          return cleaned;
+        }
       }
     } catch {}
 
-    const seed = role === 'student' ? STUDENT_PAGES : INITIAL_PAGES;
+    const seed = (role === 'student' ? STUDENT_PAGES : INITIAL_PAGES).map((p) => ({
+      ...p,
+      title: stripLeadingEmoji(p.title) || 'Untitled Note',
+    }));
     this.savePages(seed);
     return seed;
   },

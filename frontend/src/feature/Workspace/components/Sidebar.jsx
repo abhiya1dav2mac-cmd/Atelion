@@ -106,12 +106,16 @@ export default function Sidebar({
 
   // Clean title helper to prevent duplicate emojis (e.g. 📚 📚)
   const getCleanTitle = (page) => {
-    if (!page || !page.title) return 'Untitled';
+    if (!page || !page.title) return 'Untitled Note';
+    let text = page.title;
     const icon = page.icon || '';
-    if (icon && page.title.startsWith(icon)) {
-      return page.title.slice(icon.length).trim();
+    if (icon && text.startsWith(icon)) {
+      text = text.slice(icon.length).trim();
     }
-    return page.title;
+    // Universal regex to strip any remaining leading emoji / unicode pictograph
+    const emojiRegex = /^[\p{Extended_Pictographic}\p{Emoji}\uFE0E\uFE0F\u200D\u20E3\s]+/u;
+    const stripped = text.replace(emojiRegex, '').trim();
+    return stripped || text || 'Untitled Note';
   };
 
   if (!isOpen) {
