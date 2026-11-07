@@ -32,6 +32,7 @@ export default function Sidebar({
   onDeletePage,
   user,
   onLogout,
+  onGoToLanding,
   onOpenAi,
   onOpenSearch,
   onOpenPdfReader,
@@ -457,8 +458,16 @@ export default function Sidebar({
             <ChevronDown className="w-3 h-3 opacity-60 flex-shrink-0" />
           </button>
 
-          {/* Quick Icons: Help (?) and Apps Menu (::) */}
+          {/* Quick Icons: Website (🌐), Help (?), and Apps Menu (::) */}
           <div className="flex items-center gap-1">
+            <button
+              onClick={onGoToLanding}
+              className={`p-1.5 ${theme.iconButton} rounded-md transition-colors cursor-pointer`}
+              title="Go to Landing Page"
+            >
+              <span className="text-xs">🌐</span>
+            </button>
+
             <button
               onClick={() => {
                 alert('Atelion Help: Press Ctrl+K for search, / for block commands, or ask AI Copilot.');
@@ -489,6 +498,7 @@ export default function Sidebar({
           onClose={() => setIsSwitcherOpen(false)}
           user={user}
           onLogout={onLogout}
+          onGoToLanding={onGoToLanding}
           isLight={isLight}
         />
 

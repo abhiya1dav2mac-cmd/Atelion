@@ -27,7 +27,7 @@ import StudyAgentModal from '../components/StudyAgentModal';
 import { cacheAllPagesOffline, flushOfflineOutbox } from '../services/offlineSyncEngine';
 import { multiplayerPresence } from '../services/multiplayerPresenceService';
 
-export default function WorkspacePage({ user, onLogout }) {
+export default function WorkspacePage({ user, onLogout, onGoToLanding }) {
   const userRole = user?.role === 'student' ? 'student' : 'professional';
   const [pages, setPages] = useState(() => workspaceService.getPages(userRole));
   const [activePageId, setActivePageId] = useState(() => {
@@ -150,6 +150,7 @@ export default function WorkspacePage({ user, onLogout }) {
         onDeletePage={handleDeletePage}
         user={user}
         onLogout={onLogout}
+        onGoToLanding={onGoToLanding}
         onOpenAi={() => setIsAiOpen(true)}
         onOpenSearch={() => setIsCommandSearchOpen(true)}
         onOpenPdfReader={(title) =>
@@ -234,92 +235,16 @@ export default function WorkspacePage({ user, onLogout }) {
               <span>Turso Edge 0ms</span>
             </div>
 
-            {/* 🪟 Dual Split-Pane Side-by-Side Editor Button */}
+            {/* Go to Website Button */}
             <button
-              onClick={() => setIsSplitViewOpen((prev) => !prev)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs border ${
-                isSplitViewOpen
-                  ? 'bg-purple-600 text-white border-purple-700 shadow-xs'
-                  : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-200'
-              }`}
-              title="Split View: Edit 2 Notes or Scratchpad Side-by-Side"
+              onClick={onGoToLanding}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg text-xs font-medium transition-colors cursor-pointer"
+              title="View Public Landing Page"
             >
-              <span>🪟</span>
-              <span className="hidden sm:inline">Split View</span>
+              <span>🌐 Website</span>
             </button>
 
-            {/* 🧠 1-Click AI Flashcards Button */}
-            <button
-              onClick={() => setIsFlashcardsOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
-              title="1-Click AI Flashcards & Active Recall with Spaced Repetition"
-            >
-              <span>🧠</span>
-              <span className="hidden sm:inline">Flashcards</span>
-            </button>
-
-            {/* 🎙️ Voice-to-Notion AI Scribe Button */}
-            <button
-              onClick={() => setIsVoiceScribeOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
-              title="Voice-to-Notion AI Scribe (Groq Whisper Speech-to-Text)"
-            >
-              <span>🎙️</span>
-              <span className="hidden sm:inline">Voice Scribe</span>
-            </button>
-
-            {/* 🕸️ Interactive Knowledge Graph Button */}
-            <button
-              onClick={() => setActivePremiumModal('graph')}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
-              title="Interactive 2D/3D Knowledge Graph"
-            >
-              <span>🕸️</span>
-              <span className="hidden sm:inline">Graph</span>
-            </button>
-
-            {/* 🧩 Unified MCP Plugins & Integrations Center */}
-            <button
-              onClick={() => setIsPluginCenterOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
-              title="Unified MCP Plugins (Drive, Sheets, Meet, Calendar, GitHub, Slack)"
-            >
-              <span>🧩</span>
-              <span className="hidden sm:inline">Plugins</span>
-            </button>
-
-            {/* 📦 GramJS MTProto Cold Storage Vault */}
-            <button
-              onClick={() => setIsColdVaultOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
-              title="GramJS MTProto Cold Storage & Telegram Private Vault"
-            >
-              <span>📦</span>
-              <span className="hidden sm:inline">Cold Vault</span>
-            </button>
-
-            {/* Read PDF Circle Search Button (Opens PDF Viewer with Instant Circle Search) */}
-            <button
-              onClick={() =>
-                setPdfReaderState({ isOpen: true, title: 'Quantum_Physics_Lecture_Notes.pdf' })
-              }
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
-              title="Open Read PDF with Circle to Search"
-            >
-              <span>📄</span>
-              <span className="hidden sm:inline">Read PDF</span>
-            </button>
-
-            {/* Home Circle to Search Button */}
-            <button
-              onClick={() => setIsCircleOverlayOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-2xs transition-all cursor-pointer"
-              title="Click for Circle to Search — Underline, bracket, or sketch any shape for direct AI answer"
-            >
-              <span>✏️</span>
-              <span className="hidden sm:inline">Circle Search</span>
-            </button>
-
+            {/* Toggle AI Side Panel Button */}
             <button
               onClick={() => setIsAiOpen((prev) => !prev)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-xs border ${

@@ -13,7 +13,7 @@ import Footer from '../components/Footer';
 import AuthModal from '../../Auth/pages/AuthModal';
 import { useAuth } from '../../Auth/hook/useAuth';
 
-export default function LandingPage() {
+export default function LandingPage({ user, onLogout, onGoToWorkspace }) {
   const {
     isOpen: isAuthOpen,
     mode: authMode,
@@ -31,7 +31,12 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen text-[#111827] relative selection:bg-blue-600 selection:text-white">
       {/* Header & Navbar */}
-      <Navbar onOpenAuth={openAuth} />
+      <Navbar
+        onOpenAuth={openAuth}
+        user={user}
+        onLogout={onLogout}
+        onGoToWorkspace={onGoToWorkspace}
+      />
 
       {/* Main Sections */}
       <main>

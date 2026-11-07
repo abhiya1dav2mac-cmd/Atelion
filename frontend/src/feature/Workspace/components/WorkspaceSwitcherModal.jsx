@@ -14,6 +14,7 @@ export default function WorkspaceSwitcherModal({
   onClose,
   user,
   onLogout,
+  onGoToLanding,
   onUpgrade,
   onSettings,
   onInviteMembers,
@@ -147,6 +148,20 @@ export default function WorkspaceSwitcherModal({
 
         {/* Divider */}
         <div className={`h-px ${dividerClass} my-2`} />
+
+        {/* View Public Website / Landing Page */}
+        {onGoToLanding && (
+          <button
+            onClick={() => {
+              onClose();
+              onGoToLanding();
+            }}
+            className={`w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md ${btnHover} font-medium transition-colors cursor-pointer text-left mb-1`}
+          >
+            <span className="text-sm">🌐</span>
+            <span>View Landing Page</span>
+          </button>
+        )}
 
         {/* Log Out */}
         <button
