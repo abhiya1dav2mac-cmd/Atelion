@@ -27,18 +27,55 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-      /* Hide native browser scrollbars globally */
+      /* Complete Scrollbar Obliteration - 100% Invisible across all browsers and OS */
+      html, body, #root, * {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar,
+      #root::-webkit-scrollbar,
+      *::-webkit-scrollbar,
       ::-webkit-scrollbar {
+        width: 0px !important;
+        height: 0px !important;
+        max-width: 0px !important;
+        max-height: 0px !important;
+        display: none !important;
+        background: transparent !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+      ::-webkit-scrollbar-track,
+      *::-webkit-scrollbar-track,
+      ::-webkit-scrollbar-track-piece,
+      *::-webkit-scrollbar-track-piece {
+        display: none !important;
+        background: transparent !important;
+        width: 0px !important;
+      }
+      ::-webkit-scrollbar-thumb,
+      *::-webkit-scrollbar-thumb {
+        display: none !important;
+        background: transparent !important;
+        width: 0px !important;
+        height: 0px !important;
+      }
+      ::-webkit-scrollbar-button,
+      *::-webkit-scrollbar-button {
         display: none !important;
         width: 0px !important;
         height: 0px !important;
       }
-      * {
-        scrollbar-width: none !important;
-        -ms-overflow-style: none !important;
+      ::-webkit-scrollbar-corner,
+      *::-webkit-scrollbar-corner {
+        display: none !important;
+        background: transparent !important;
       }
       .no-scrollbar::-webkit-scrollbar {
         display: none !important;
+        width: 0px !important;
+        height: 0px !important;
       }
       .no-scrollbar {
         scrollbar-width: none !important;

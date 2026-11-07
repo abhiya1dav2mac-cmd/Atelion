@@ -176,10 +176,26 @@ export default function AuthModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl max-w-[520px] w-full p-5 sm:p-7 shadow-2xl border border-gray-100 relative text-center animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto no-scrollbar"
+        className="bg-white rounded-3xl max-w-[540px] w-full p-5 sm:p-6 shadow-2xl border border-gray-100 relative text-center animate-in zoom-in-95 duration-150 max-h-[92vh] overflow-y-auto auth-modal-scroll"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         onClick={(e) => e.stopPropagation()}
       >
+        <style>{`
+          .auth-modal-scroll::-webkit-scrollbar,
+          .auth-modal-scroll *::-webkit-scrollbar,
+          .auth-modal-scroll::-webkit-scrollbar-thumb,
+          .auth-modal-scroll::-webkit-scrollbar-track,
+          .auth-modal-scroll::-webkit-scrollbar-button {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+          }
+          .auth-modal-scroll {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+          }
+        `}</style>
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -491,50 +507,90 @@ export default function AuthModal({
 
             {/* STUDENT SPECIFIC FIELDS */}
             {mode === 'signup' && role === 'student' && (
-              <div className="space-y-2.5 pt-0.5">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    College / University Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={collegeName}
-                    onChange={(e) => setCollegeName(e.target.value)}
-                    placeholder="e.g. Stanford University / IIT Delhi / Oxford"
-                    className="w-full px-3 py-2 text-xs sm:text-sm border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-blue-50/20 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
-                  />
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      College / University <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={collegeName}
+                      onChange={(e) => setCollegeName(e.target.value)}
+                      placeholder="e.g. IIT Delhi / Oxford"
+                      className="w-full px-3 py-2 text-xs sm:text-sm border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-blue-50/20 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Student Email <span className="text-gray-400 font-normal">(Optional)</span>
+                    </label>
+                    <input
+                      type="email"
+                      value={collegeEmail}
+                      onChange={(e) => setCollegeEmail(e.target.value)}
+                      placeholder="student@univ.edu"
+                      className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Student / Institutional Email <span className="text-gray-400 font-normal">(Optional)</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={collegeEmail}
-                    onChange={(e) => setCollegeEmail(e.target.value)}
-                    placeholder="student@university.edu"
-                    className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Personal Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Password <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Min 6 chars"
+                        className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400 pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+                        aria-label="Toggle password visibility"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
 
             {/* PROFESSIONAL SPECIFIC FIELDS */}
             {mode === 'signup' && role === 'professional' && (
-              <div className="space-y-2.5 pt-0.5">
+              <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
                     <label className="block text-xs font-semibold text-gray-700 mb-1">
-                      Company / Organization <span className="text-red-500">*</span>
+                      Company / Org <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       required
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
-                      placeholder="e.g. Google / Stripe / Startup"
+                      placeholder="e.g. Google / Stripe"
                       className="w-full px-3 py-2 text-xs sm:text-sm border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-indigo-50/20 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
                     />
                   </div>
@@ -547,79 +603,118 @@ export default function AuthModal({
                       required
                       value={designation}
                       onChange={(e) => setDesignation(e.target.value)}
-                      placeholder="e.g. Senior Software Engineer"
+                      placeholder="e.g. Lead Engineer"
                       className="w-full px-3 py-2 text-xs sm:text-sm border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-indigo-50/20 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Work Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={employeeEmail}
+                      onChange={(e) => setEmployeeEmail(e.target.value)}
+                      placeholder="name@company.com"
+                      className="w-full px-3 py-2 text-xs sm:text-sm border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-indigo-50/20 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">
+                      Personal Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="name@personal.com"
+                      className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    Official Work Email ID <span className="text-red-500">*</span>
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+                      aria-label="Toggle password visibility"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* SIGNIN ONLY FIELDS */}
+            {mode === 'signin' && (
+              <>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Email address <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
                     required
-                    value={employeeEmail}
-                    onChange={(e) => setEmployeeEmail(e.target.value)}
-                    placeholder="name@company.com"
-                    className="w-full px-3 py-2 text-xs sm:text-sm border border-indigo-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-indigo-50/20 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@example.com"
+                    className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
                   />
                 </div>
-              </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-semibold text-gray-700">
+                      Password <span className="text-red-500">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => alert('Password reset link sent to your email!')}
+                      className="text-[11px] text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+                      aria-label="Toggle password visibility"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
-
-            {/* Email Address */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1">
-                {mode === 'signup' ? 'Personal Email Address' : 'Email address'}{' '}
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-xs font-semibold text-gray-700">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                {mode === 'signin' && (
-                  <button
-                    type="button"
-                    onClick={() => alert('Password reset link sent to your email!')}
-                    className="text-[11px] text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
-                  >
-                    Forgot password?
-                  </button>
-                )}
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
-                  className="w-full px-3 py-2 text-xs sm:text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-gray-50/50 hover:bg-white transition-all text-gray-900 placeholder:text-gray-400 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
-                  aria-label="Toggle password visibility"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
 
             {/* Submit Button */}
             <button

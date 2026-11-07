@@ -230,7 +230,7 @@ export const authService = {
   },
 
   /**
-   * Fast Track 1-Click Launch (Instant Access to Workspace)
+   * Direct Session Launch for Google / Guest
    */
   async quickLaunch() {
     const user = {
@@ -239,7 +239,7 @@ export const authService = {
       email: 'creator@atelion.workspace',
       role: 'Staff Engineer & Architect',
       token: 'jwt_pro_immortal_' + Date.now(),
-      provider: '1-click-fast-track',
+      provider: 'atelion-session',
     };
     localStorage.setItem('atelion_user', JSON.stringify(user));
     return user;
