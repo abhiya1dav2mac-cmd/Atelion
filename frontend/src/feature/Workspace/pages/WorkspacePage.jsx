@@ -154,19 +154,6 @@ export default function WorkspacePage({ user, onLogout }) {
               </span>
             </button>
 
-            {/* 🌓 Sidebar Theme Quick Switcher in Header */}
-            <button
-              onClick={() => setSidebarTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-              className="p-1 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors cursor-pointer border border-transparent hover:border-gray-200"
-              title={
-                sidebarTheme === 'dark'
-                  ? 'Side panel is Dark (#202020) - click for Light'
-                  : 'Side panel is Light (#F7F7F5) - click for Dark'
-              }
-            >
-              <SunMoon className="w-3.5 h-3.5" />
-            </button>
-
             <span className="text-gray-300">|</span>
 
             <span className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer">

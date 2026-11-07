@@ -59,44 +59,26 @@ export default function Sidebar({
     else setLocalTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const isLight = currentTheme === 'light';
+  const isLight = true;
 
-  // Dynamic Clean White vs Notion Dark theme tokens
-  const theme = isLight
-    ? {
-        aside: 'bg-white border-r border-gray-200 text-gray-800 shadow-xs',
-        headerBrand: 'text-gray-950 font-bold',
-        searchInput: 'bg-gray-100 hover:bg-gray-200/70 border-gray-200 text-gray-600 hover:text-gray-950',
-        kbd: 'bg-white border-gray-300 text-gray-500 shadow-2xs',
-        navItem: 'hover:bg-gray-100 text-gray-700 hover:text-gray-950',
-        navItemActive: 'bg-gray-100 text-gray-950 font-semibold',
-        divider: 'bg-gray-200',
-        sectionHeading: 'text-gray-400 font-bold',
-        recentItem: 'text-gray-600 hover:bg-gray-100 hover:text-gray-950',
-        recentItemActive: 'bg-gray-100 text-gray-950 font-semibold shadow-2xs',
-        bottomBar: 'border-t border-gray-200 bg-gray-50/90 text-gray-800',
-        userButton: 'hover:bg-gray-200/80 text-gray-900',
-        userAvatar: 'bg-gray-900 text-white font-bold',
-        iconButton: 'text-gray-500 hover:text-gray-950 hover:bg-gray-100',
-        inviteBox: 'bg-white border-gray-200 shadow-sm text-gray-900',
-      }
-    : {
-        aside: 'bg-[#202020] border-r border-[#2c2c2c] text-[#cccccc]',
-        headerBrand: 'text-white font-bold',
-        searchInput: 'bg-[#262626] hover:bg-[#2c2c2c] border-[#303030] text-[#888888] hover:text-[#cccccc]',
-        kbd: 'bg-[#1d1d1d] border-[#333333] text-[#777777]',
-        navItem: 'hover:bg-[#282828] text-[#cccccc] hover:text-white',
-        navItemActive: 'bg-[#2c2c2c] text-white font-semibold',
-        divider: 'bg-[#282828]',
-        sectionHeading: 'text-[#666666] font-bold',
-        recentItem: 'text-[#999999] hover:bg-[#262626] hover:text-white',
-        recentItemActive: 'bg-[#2c2c2c] text-white font-semibold',
-        bottomBar: 'border-t border-[#2a2a2a] bg-[#1a1a1a] text-white',
-        userButton: 'hover:bg-[#262626] text-white',
-        userAvatar: 'bg-[#333333] text-white font-bold',
-        iconButton: 'text-[#888888] hover:text-white hover:bg-[#262626]',
-        inviteBox: 'bg-[#262626] border-[#333333] shadow-lg text-white',
-      };
+  // Clean White theme tokens (Pure Notion Light Mode)
+  const theme = {
+    aside: 'bg-white border-r border-gray-200 text-gray-800 shadow-xs',
+    headerBrand: 'text-gray-950 font-bold',
+    searchInput: 'bg-gray-100 hover:bg-gray-200/70 border-gray-200 text-gray-600 hover:text-gray-950',
+    kbd: 'bg-white border-gray-300 text-gray-500 shadow-2xs',
+    navItem: 'hover:bg-gray-100 text-gray-700 hover:text-gray-950',
+    navItemActive: 'bg-gray-100 text-gray-950 font-semibold',
+    divider: 'bg-gray-200',
+    sectionHeading: 'text-gray-400 font-bold',
+    recentItem: 'text-gray-600 hover:bg-gray-100 hover:text-gray-950',
+    recentItemActive: 'bg-gray-100 text-gray-950 font-semibold shadow-2xs',
+    bottomBar: 'border-t border-gray-200 bg-gray-50/90 text-gray-800',
+    userButton: 'hover:bg-gray-200/80 text-gray-900',
+    userAvatar: 'bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold',
+    iconButton: 'text-gray-500 hover:text-gray-950 hover:bg-gray-100',
+    inviteBox: 'bg-white border-gray-200 shadow-sm text-gray-900',
+  };
 
   const displayName = user?.name || (user?.role === 'student' ? 'Student Scholar' : 'Abhishek yadav');
   const initial = displayName.charAt(0).toUpperCase();
@@ -164,23 +146,12 @@ export default function Sidebar({
               onClick={togglePin}
               className={`p-1 rounded-md transition-all cursor-pointer ${
                 pinned
-                  ? isLight
-                    ? 'text-amber-700 bg-amber-100/90 border border-amber-300 shadow-2xs'
-                    : 'text-amber-400 bg-amber-400/20 border border-amber-400/40 shadow-xs'
+                  ? 'text-amber-700 bg-amber-100/90 border border-amber-300 shadow-2xs'
                   : theme.iconButton
               }`}
               title={pinned ? 'Sidebar is PINNED (Click to unpin)' : 'Click to PIN sidebar'}
             >
               <Pin className="w-3.5 h-3.5" />
-            </button>
-
-            {/* 🌓 Sidebar Theme Toggle (Notion Dark vs Notion White/Light) */}
-            <button
-              onClick={toggleTheme}
-              className={`p-1 rounded-md transition-colors cursor-pointer ${theme.iconButton}`}
-              title={isLight ? 'Switch to Notion Dark (#202020)' : 'Switch to Notion Light (#F7F7F5)'}
-            >
-              <SunMoon className="w-3.5 h-3.5" />
             </button>
 
             {/* ⮜⮜ Quick Collapse Sidebar Button */}
@@ -407,7 +378,7 @@ export default function Sidebar({
               title="Help & documentation"
             >
               <HelpCircle className="w-4 h-4" />
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#3B82F6] rounded-full ring-2 ring-[#1a1a1a]" />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-600 rounded-full ring-2 ring-white" />
             </button>
 
             <button

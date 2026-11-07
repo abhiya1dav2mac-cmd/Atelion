@@ -25,19 +25,11 @@ export default function WorkspaceSwitcherModal({
   const displayEmail = user?.email || 'abhiya1dav2mac@gmail.com';
   const initial = displayName.charAt(0).toUpperCase();
 
-  const containerClass = isLight
-    ? 'bg-white border-gray-200 text-gray-800 shadow-2xl'
-    : 'bg-[#202020] border-[#2f2f2f] text-[#d4d4d4] shadow-2xl';
-  const cardClass = isLight
-    ? 'bg-gray-50 border-gray-200'
-    : 'bg-[#262626]/70 border-[#2e2e2e]/80';
-  const btnHover = isLight
-    ? 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
-    : 'hover:bg-[#2a2a2a] text-[#cccccc] hover:text-white';
-  const dividerClass = isLight ? 'bg-gray-200' : 'bg-[#2a2a2a]';
-  const activeWsClass = isLight
-    ? 'bg-gray-100 text-gray-950 font-medium'
-    : 'bg-[#2a2a2a] text-white font-medium';
+  const containerClass = 'bg-white border-gray-200 text-gray-800 shadow-2xl';
+  const cardClass = 'bg-gray-50 border-gray-200';
+  const btnHover = 'hover:bg-gray-100 text-gray-700 hover:text-gray-900';
+  const dividerClass = 'bg-gray-200';
+  const activeWsClass = 'bg-gray-100 text-gray-950 font-medium';
 
   return (
     <>

@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Copy,
 } from './WorkspaceIcons';
+import { stripLeadingEmoji } from '../services/workspaceService';
 
 export default function CommandPaletteModal({
   isOpen,
@@ -65,39 +66,39 @@ export default function CommandPaletteModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 select-none animate-in fade-in duration-150"
       onClick={onClose}
     >
-      {/* Dual-Pane Notion Command Search (Matching Screenshot 4) */}
+      {/* Dual-Pane Clean White Notion Command Search */}
       <div
-        className="w-full max-w-4xl h-[560px] bg-[#202020] border border-[#333333] rounded-2xl shadow-2xl flex flex-col overflow-hidden text-[#d4d4d4] font-sans"
+        className="w-full max-w-4xl h-[560px] bg-white border border-gray-200 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-gray-800 font-sans"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Search Input & Controls */}
-        <div className="p-3 border-b border-[#2c2c2c] flex items-center gap-3">
-          <Search className="w-4 h-4 text-[#888888] flex-shrink-0" />
+        <div className="p-3 border-b border-gray-200 flex items-center gap-3 bg-white">
+          <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
           <input
             type="text"
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Open in new tab..."
-            className="flex-1 bg-transparent text-sm text-white placeholder-[#666666] outline-none font-sans"
+            placeholder="Search pages or type a command..."
+            className="flex-1 bg-transparent text-sm text-gray-900 placeholder-gray-400 outline-none font-sans"
           />
-          <div className="flex items-center gap-2 text-[#888888]">
+          <div className="flex items-center gap-2 text-gray-400">
             <button
               onClick={() => {
                 if (activePage) onSelectPage(activePage.id);
                 onClose();
               }}
-              title="Open in new tab"
-              className="p-1 hover:text-white rounded hover:bg-[#2c2c2c] cursor-pointer"
+              title="Open page"
+              className="p-1.5 hover:text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
             >
               <ExternalLink className="w-4 h-4" />
             </button>
             <button
               onClick={onClose}
-              className="p-1 hover:text-white rounded hover:bg-[#2c2c2c] cursor-pointer"
+              className="p-1.5 hover:text-gray-900 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -105,42 +106,42 @@ export default function CommandPaletteModal({
         </div>
 
         {/* Filter Pills Bar */}
-        <div className="px-3 py-2 border-b border-[#2a2a2a] flex items-center gap-2 text-xs overflow-x-auto no-scrollbar">
+        <div className="px-3 py-2 border-b border-gray-100 flex items-center gap-2 text-xs overflow-x-auto no-scrollbar bg-gray-50/60">
           <button
             onClick={() => setTitleOnlyFilter(!titleOnlyFilter)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium cursor-pointer transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-colors ${
               titleOnlyFilter
-                ? 'bg-[#3B82F6]/20 text-[#60A5FA] border border-[#3B82F6]/50'
-                : 'bg-[#282828] text-[#999999] hover:text-white border border-[#333333]'
+                ? 'bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs'
+                : 'bg-white text-gray-600 hover:text-gray-900 border border-gray-200 shadow-2xs hover:bg-gray-50'
             }`}
           >
             <span>Aa Title only</span>
           </button>
 
-          <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#282828] text-[#cccccc] hover:text-white border border-[#333333] transition-colors cursor-pointer text-xs">
+          <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white text-gray-700 hover:text-gray-950 border border-gray-200 shadow-2xs hover:bg-gray-50 transition-colors cursor-pointer text-xs">
             <span className="w-3.5 h-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">
               {(user?.name || 'Abhishek yadav').charAt(0).toUpperCase()}
             </span>
             <span>{user?.name || 'Abhishek yadav'}</span>
-            <ChevronDown className="w-3 h-3 text-[#777777]" />
+            <ChevronDown className="w-3 h-3 text-gray-400" />
           </button>
 
-          <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#282828] text-[#999999] hover:text-white border border-[#333333] transition-colors cursor-pointer">
+          <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white text-gray-600 hover:text-gray-900 border border-gray-200 shadow-2xs hover:bg-gray-50 transition-colors cursor-pointer">
             <span>In</span>
-            <ChevronDown className="w-3 h-3" />
+            <ChevronDown className="w-3 h-3 text-gray-400" />
           </button>
 
-          <button className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#282828] text-[#999999] hover:text-white border border-[#333333] transition-colors cursor-pointer">
-            <Plus className="w-3 h-3" />
+          <button className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white text-gray-600 hover:text-gray-900 border border-gray-200 shadow-2xs hover:bg-gray-50 transition-colors cursor-pointer">
+            <Plus className="w-3 h-3 text-gray-400" />
             <span>Filter</span>
           </button>
         </div>
 
         {/* Dual Panel Body */}
-        <div className="flex-1 flex min-h-0 overflow-hidden">
+        <div className="flex-1 flex min-h-0 overflow-hidden bg-white">
           {/* Left Panel: Search Results List */}
           <div
-            className="w-1/2 border-r border-[#2c2c2c] overflow-y-auto no-scrollbar p-2 space-y-3"
+            className="w-1/2 border-r border-gray-200 overflow-y-auto no-scrollbar p-2.5 space-y-3 bg-white"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {/* Quick Actions */}
@@ -150,10 +151,10 @@ export default function CommandPaletteModal({
                   onClose();
                   if (onOpenAi) onOpenAi();
                 }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-[#2b2b2b] text-[#cccccc] hover:text-white transition-colors cursor-pointer text-left text-xs group"
+                className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-950 transition-colors cursor-pointer text-left text-xs group"
               >
-                <MessageSquare className="w-4 h-4 text-[#3B82F6]" />
-                <span className="font-semibold text-white">New chat</span>
+                <MessageSquare className="w-4 h-4 text-blue-600" />
+                <span className="font-semibold text-blue-600">New chat</span>
               </button>
 
               <button
@@ -161,9 +162,9 @@ export default function CommandPaletteModal({
                   onClose();
                   if (onCreatePage) onCreatePage();
                 }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-[#2b2b2b] text-[#cccccc] hover:text-white transition-colors cursor-pointer text-left text-xs group"
+                className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 text-gray-700 hover:text-gray-950 transition-colors cursor-pointer text-left text-xs group"
               >
-                <Plus className="w-4 h-4 text-[#888888] group-hover:text-white" />
+                <Plus className="w-4 h-4 text-gray-400 group-hover:text-gray-700" />
                 <span>New page</span>
               </button>
             </div>
@@ -171,7 +172,7 @@ export default function CommandPaletteModal({
             {/* Past 30 Days Section */}
             {past30DaysPages.length > 0 && (
               <div>
-                <p className="px-2.5 py-1 text-[10px] font-bold text-[#666666] uppercase tracking-wider">
+                <p className="px-2.5 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                   Past 30 days
                 </p>
                 <div className="space-y-0.5">
@@ -186,12 +187,12 @@ export default function CommandPaletteModal({
                       onMouseEnter={() => setSelectedPageId(page.id)}
                       className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors cursor-pointer ${
                         selectedPageId === page.id
-                          ? 'bg-[#2e2e2e] text-white font-medium'
-                          : 'text-[#aaaaaa] hover:bg-[#282828] hover:text-[#e0e0e0]'
+                          ? 'bg-gray-100 text-gray-950 font-semibold shadow-2xs'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'
                       }`}
                     >
-                      <span className="text-sm select-none">{page.icon || '📄'}</span>
-                      <span className="truncate flex-1">{page.title}</span>
+                      <span className="text-sm select-none flex-shrink-0">{page.icon || '📄'}</span>
+                      <span className="truncate flex-1">{stripLeadingEmoji(page.title)}</span>
                     </button>
                   ))}
                 </div>
@@ -201,7 +202,7 @@ export default function CommandPaletteModal({
             {/* Older Section */}
             {olderPages.length > 0 && (
               <div>
-                <p className="px-2.5 py-1 text-[10px] font-bold text-[#666666] uppercase tracking-wider">
+                <p className="px-2.5 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                   Older
                 </p>
                 <div className="space-y-0.5">
@@ -216,12 +217,12 @@ export default function CommandPaletteModal({
                       onMouseEnter={() => setSelectedPageId(page.id)}
                       className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors cursor-pointer ${
                         selectedPageId === page.id
-                          ? 'bg-[#2e2e2e] text-white font-medium'
-                          : 'text-[#aaaaaa] hover:bg-[#282828] hover:text-[#e0e0e0]'
+                          ? 'bg-gray-100 text-gray-950 font-semibold shadow-2xs'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-950'
                       }`}
                     >
-                      <span className="text-sm select-none">{page.icon || '📄'}</span>
-                      <span className="truncate flex-1">{page.title}</span>
+                      <span className="text-sm select-none flex-shrink-0">{page.icon || '📄'}</span>
+                      <span className="truncate flex-1">{stripLeadingEmoji(page.title)}</span>
                     </button>
                   ))}
                 </div>
@@ -229,44 +230,46 @@ export default function CommandPaletteModal({
             )}
           </div>
 
-          {/* Right Panel: Live Page Preview (Matching Screenshot 4) */}
+          {/* Right Panel: Live Page Preview */}
           <div
-            className="w-1/2 p-4 overflow-y-auto no-scrollbar bg-[#181818] flex flex-col text-left border-l border-[#262626]"
+            className="w-1/2 p-4 overflow-y-auto no-scrollbar bg-gray-50/70 flex flex-col text-left border-l border-gray-200"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {activePage ? (
               <div className="space-y-3.5 flex-1 flex flex-col">
-                {/* Preview Card Mock (Matching Screenshot 4) */}
-                <div className="p-4 rounded-xl bg-[#202020] border border-[#2d2d2d] space-y-3 shadow-inner">
+                {/* Preview Card Mock */}
+                <div className="p-4 rounded-xl bg-white border border-gray-200 space-y-3 shadow-xs">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-[#2e2e2e] flex items-center justify-center text-sm shadow">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-sm shadow-2xs">
                       {activePage.icon || '📄'}
                     </div>
                     <div className="space-y-1 flex-1 min-w-0">
-                      <div className="h-3 w-3/4 bg-[#333333] rounded" />
-                      <div className="h-2 w-1/2 bg-[#2a2a2a] rounded" />
+                      <div className="h-3 w-3/4 bg-gray-200 rounded" />
+                      <div className="h-2 w-1/2 bg-gray-100 rounded" />
                     </div>
                   </div>
                   <div className="space-y-1.5 pt-1">
-                    <div className="h-2 w-full bg-[#292929] rounded" />
-                    <div className="h-2 w-5/6 bg-[#262626] rounded" />
-                    <div className="h-2 w-4/6 bg-[#262626] rounded" />
+                    <div className="h-2 w-full bg-gray-100 rounded" />
+                    <div className="h-2 w-5/6 bg-gray-100 rounded" />
+                    <div className="h-2 w-4/6 bg-gray-100 rounded" />
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between text-xs pt-1">
-                  <span className="font-bold text-white truncate text-xs">{activePage.title}</span>
-                  <span className="text-[10px] text-[#666666] font-mono">
+                  <span className="font-bold text-gray-900 truncate text-xs">
+                    {stripLeadingEmoji(activePage.title)}
+                  </span>
+                  <span className="text-[10px] text-gray-400 font-mono">
                     {activePage.updatedAt || 'Active'}
                   </span>
                 </div>
 
                 {/* Actual Excerpt Blocks Preview */}
-                <div className="space-y-1.5 text-xs text-[#999999] leading-relaxed flex-1 overflow-hidden">
-                  {(activePage.blocks || []).slice(0, 4).map((b, idx) => (
+                <div className="space-y-1.5 text-xs text-gray-600 leading-relaxed flex-1 overflow-hidden">
+                  {(activePage.blocks || []).slice(0, 5).map((b, idx) => (
                     <div
                       key={idx}
-                      className="p-2 rounded-lg bg-[#202020]/70 border border-[#262626] text-[#cccccc] text-[11px] truncate"
+                      className="p-2.5 rounded-lg bg-white border border-gray-200 text-gray-800 text-[11px] truncate shadow-2xs"
                     >
                       {b.content || (b.type === 'database' ? '📊 Relational Database Embed' : '📝 Block content')}
                     </div>
@@ -274,7 +277,7 @@ export default function CommandPaletteModal({
                 </div>
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-xs text-[#666666]">
+              <div className="flex-1 flex items-center justify-center text-xs text-gray-400">
                 Select a page to preview contents
               </div>
             )}
@@ -282,13 +285,13 @@ export default function CommandPaletteModal({
         </div>
 
         {/* Bottom Shortcuts Legend */}
-        <div className="px-4 py-2 border-t border-[#2a2a2a] bg-[#1a1a1a] flex items-center justify-between text-[11px] text-[#777777] font-mono">
+        <div className="px-4 py-2 border-t border-gray-200 bg-gray-50 flex items-center justify-between text-[11px] text-gray-500 font-mono">
           <div className="flex items-center gap-4">
             <span>↵ Open in new tab</span>
             <span>Ctrl+L Copy link</span>
             <span>Ctrl+K Command Search</span>
           </div>
-          <span className="text-[#555555]">Esc to close</span>
+          <span className="text-gray-400">Esc to close</span>
         </div>
       </div>
     </div>

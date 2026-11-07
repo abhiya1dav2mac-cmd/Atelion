@@ -26,13 +26,9 @@ export default function AppsMenuModal({
     { id: 'trash', label: 'Trash', icon: Trash, desc: 'Archived and deleted pages' },
   ];
 
-  const containerClass = isLight
-    ? 'bg-white border-gray-200 text-gray-800 shadow-2xl'
-    : 'bg-[#202020] border-[#2f2f2f] text-[#d4d4d4] shadow-2xl';
-  const btnHover = isLight
-    ? 'hover:bg-gray-100 text-gray-700 hover:text-gray-900'
-    : 'hover:bg-[#2a2a2a] text-[#cccccc] hover:text-white';
-  const dividerClass = isLight ? 'bg-gray-200' : 'bg-[#2a2a2a]';
+  const containerClass = 'bg-white border-gray-200 text-gray-800 shadow-2xl';
+  const btnHover = 'hover:bg-gray-100 text-gray-700 hover:text-gray-900';
+  const dividerClass = 'bg-gray-200';
 
   return (
     <>

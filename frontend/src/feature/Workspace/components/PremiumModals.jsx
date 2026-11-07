@@ -8,7 +8,7 @@ import { passkeyService } from '../../Auth/service/passkeyService';
 export function PremiumBadge({ className = '' }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-sm border border-amber-300/40 select-none ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white shadow-xs border border-amber-300/40 select-none ${className}`}
     >
       <span className="text-[11px]">👑</span>
       <span>PREMIUM</span>
@@ -17,7 +17,7 @@ export function PremiumBadge({ className = '' }) {
 }
 
 /**
- * 👑 VERSION HISTORY & TIME MACHINE MODAL
+ * 👑 VERSION HISTORY & TIME MACHINE MODAL (CLEAN WHITE)
  */
 export function VersionHistoryModal({ isOpen, onClose, page, onRestoreVersion }) {
   const [selectedVersionId, setSelectedVersionId] = useState('v_now');
@@ -71,11 +71,11 @@ export function VersionHistoryModal({ isOpen, onClose, page, onRestoreVersion })
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="bg-[#202020] rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#333333] relative text-left text-white animate-in zoom-in-95 duration-150 no-scrollbar"
+        className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 relative text-left text-gray-900 animate-in zoom-in-95 duration-150 no-scrollbar font-sans"
         onClick={(e) => e.stopPropagation()}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -86,21 +86,21 @@ export function VersionHistoryModal({ isOpen, onClose, page, onRestoreVersion })
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#2c2c2c] cursor-pointer"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🕒</span>
-          <h3 className="text-lg font-bold">Document Version History</h3>
+          <h3 className="text-lg font-bold text-gray-900">Document Version History</h3>
         </div>
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-xs text-gray-500 mb-4">
           Time-travel snapshot engine. View and restore any previous state with zero data loss.
         </p>
 
         {restoredNotice && (
-          <div className="mb-4 p-3 bg-emerald-950/80 border border-emerald-500/50 rounded-xl text-emerald-300 text-xs font-semibold flex items-center gap-2">
+          <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center gap-2">
             <span>✅</span>
             <span>Document restored successfully to snapshot!</span>
           </div>
@@ -113,18 +113,18 @@ export function VersionHistoryModal({ isOpen, onClose, page, onRestoreVersion })
               onClick={() => setSelectedVersionId(v.id)}
               className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                 selectedVersionId === v.id
-                  ? 'border-amber-500/80 bg-amber-500/10'
-                  : 'border-[#2d2d2d] bg-[#1a1a1a] hover:border-[#444444]'
+                  ? 'border-amber-400 bg-amber-50/70 shadow-xs'
+                  : 'border-gray-200 bg-gray-50/60 hover:bg-gray-100/70 hover:border-gray-300'
               }`}
             >
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs font-bold text-white">{v.label}</p>
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#333333] text-gray-300 font-mono">
+                  <p className="text-xs font-bold text-gray-900">{v.label}</p>
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-gray-200 text-gray-700 font-mono">
                     {v.tag}
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-400 mt-0.5">
+                <p className="text-[11px] text-gray-500 mt-0.5">
                   {v.time} • by {v.author} • {v.blocksCount} blocks
                 </p>
               </div>
@@ -133,7 +133,7 @@ export function VersionHistoryModal({ isOpen, onClose, page, onRestoreVersion })
                 <button
                   type="button"
                   onClick={() => handleRestore(v)}
-                  className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                  className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer shadow-xs"
                 >
                   Restore
                 </button>
@@ -142,11 +142,11 @@ export function VersionHistoryModal({ isOpen, onClose, page, onRestoreVersion })
           ))}
         </div>
 
-        <div className="flex items-center justify-between text-xs text-gray-400 border-t border-[#333333] pt-3">
+        <div className="flex items-center justify-between text-xs text-gray-500 border-t border-gray-100 pt-3">
           <span>Enterprise Unlimited Retention</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-[#2a2a2a] hover:bg-[#333333] text-white rounded-lg cursor-pointer"
+            className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg cursor-pointer transition-colors"
           >
             Close
           </button>
@@ -157,7 +157,7 @@ export function VersionHistoryModal({ isOpen, onClose, page, onRestoreVersion })
 }
 
 /**
- * 👑 PUBLIC WEB SHARE & GUEST COLLABORATION MODAL
+ * 👑 PUBLIC WEB SHARE & GUEST COLLABORATION MODAL (CLEAN WHITE)
  */
 export function SharePublishModal({ isOpen, onClose, page }) {
   const [copied, setCopied] = useState(false);
@@ -178,11 +178,11 @@ export function SharePublishModal({ isOpen, onClose, page }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="bg-[#202020] rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-[#333333] relative text-left text-white animate-in zoom-in-95 duration-150 no-scrollbar"
+        className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-200 relative text-left text-gray-900 animate-in zoom-in-95 duration-150 no-scrollbar font-sans"
         onClick={(e) => e.stopPropagation()}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -193,35 +193,35 @@ export function SharePublishModal({ isOpen, onClose, page }) {
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#2c2c2c] cursor-pointer"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🌐</span>
-          <h3 className="text-lg font-bold">Publish to Web & Share Link</h3>
+          <h3 className="text-lg font-bold text-gray-900">Publish to Web & Share Link</h3>
         </div>
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-xs text-gray-500 mb-4">
           Instantly publish this document to the edge with custom SEO metadata and sub-millisecond Turso replication.
         </p>
 
         {/* Live Link Input */}
         <div className="mb-5">
-          <label className="block text-xs font-semibold text-gray-300 mb-1.5">Public Edge URL</label>
+          <label className="block text-xs font-semibold text-gray-700 mb-1.5">Public Edge URL</label>
           <div className="flex items-center gap-2">
             <input
               type="text"
               readOnly
               value={publicUrl}
-              className="flex-1 px-3 py-2 text-xs bg-[#151515] border border-[#333333] rounded-xl text-gray-200 font-mono select-all focus:outline-none"
+              className="flex-1 px-3 py-2 text-xs bg-gray-50 border border-gray-200 rounded-xl text-gray-800 font-mono select-all focus:outline-none"
             />
             <button
               onClick={handleCopy}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs ${
                 copied
                   ? 'bg-emerald-600 text-white'
-                  : 'bg-amber-500 hover:bg-amber-600 text-black'
+                  : 'bg-amber-500 hover:bg-amber-600 text-white'
               }`}
             >
               {copied ? '✓ Copied' : 'Copy'}
@@ -230,39 +230,39 @@ export function SharePublishModal({ isOpen, onClose, page }) {
         </div>
 
         {/* Permissions Toggles */}
-        <div className="space-y-3 mb-6 bg-[#161616] p-4 rounded-xl border border-[#2b2b2b]">
+        <div className="space-y-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-white">Live Public Edge CDN</p>
-              <p className="text-[11px] text-gray-400">Anyone with the URL can view without signing in</p>
+              <p className="text-xs font-bold text-gray-900">Live Public Edge CDN</p>
+              <p className="text-[11px] text-gray-500">Anyone with the URL can view without signing in</p>
             </div>
             <button
               onClick={() => setIsPublished(!isPublished)}
               className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                isPublished ? 'bg-amber-500' : 'bg-gray-700'
+                isPublished ? 'bg-amber-500' : 'bg-gray-300'
               }`}
             >
               <span
-                className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${
+                className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform shadow-xs ${
                   isPublished ? 'right-0.5' : 'left-0.5'
                 }`}
               />
             </button>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-[#262626]">
+          <div className="flex items-center justify-between pt-2 border-t border-gray-200">
             <div>
-              <p className="text-xs font-bold text-white">Allow Public Guest Edits</p>
-              <p className="text-[11px] text-gray-400">Collaborative live typing for link recipients</p>
+              <p className="text-xs font-bold text-gray-900">Allow Public Guest Edits</p>
+              <p className="text-[11px] text-gray-500">Collaborative live typing for link recipients</p>
             </div>
             <button
               onClick={() => setAllowEditing(!allowEditing)}
               className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
-                allowEditing ? 'bg-amber-500' : 'bg-gray-700'
+                allowEditing ? 'bg-amber-500' : 'bg-gray-300'
               }`}
             >
               <span
-                className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform ${
+                className={`w-4 h-4 rounded-full bg-white absolute top-0.5 transition-transform shadow-xs ${
                   allowEditing ? 'right-0.5' : 'left-0.5'
                 }`}
               />
@@ -273,7 +273,7 @@ export function SharePublishModal({ isOpen, onClose, page }) {
         <div className="flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-white text-gray-900 font-bold text-xs rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+            className="px-4 py-2 bg-gray-900 text-white font-bold text-xs rounded-xl hover:bg-black transition-colors cursor-pointer shadow-xs"
           >
             Done
           </button>
@@ -284,7 +284,7 @@ export function SharePublishModal({ isOpen, onClose, page }) {
 }
 
 /**
- * 👑 MULTI-FORMAT WORKSPACE EXPORT ENGINE
+ * 👑 MULTI-FORMAT WORKSPACE EXPORT ENGINE (CLEAN WHITE)
  */
 export function ExportModal({ isOpen, onClose, page }) {
   const [downloading, setDownloading] = useState(null);
@@ -365,11 +365,11 @@ export function ExportModal({ isOpen, onClose, page }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="bg-[#202020] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#333333] relative text-left text-white animate-in zoom-in-95 duration-150 no-scrollbar"
+        className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 relative text-left text-gray-900 animate-in zoom-in-95 duration-150 no-scrollbar font-sans"
         onClick={(e) => e.stopPropagation()}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -380,65 +380,65 @@ export function ExportModal({ isOpen, onClose, page }) {
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#2c2c2c] cursor-pointer"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">📥</span>
-          <h3 className="text-lg font-bold">Export Document</h3>
+          <h3 className="text-lg font-bold text-gray-900">Export Document</h3>
         </div>
-        <p className="text-xs text-gray-400 mb-5">
+        <p className="text-xs text-gray-500 mb-5">
           Enterprise multi-format export. Download your notes with full LaTeX and block preservation.
         </p>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
           <button
             onClick={handleExportMarkdown}
-            className="p-3.5 bg-[#181818] hover:bg-[#262626] border border-[#333333] rounded-xl text-left transition-colors cursor-pointer"
+            className="p-3.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-left transition-colors cursor-pointer shadow-2xs"
           >
-            <p className="text-sm font-bold text-white flex items-center gap-1.5">
+            <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
               <span>📄</span> Markdown (.md)
             </p>
-            <p className="text-[10px] text-gray-400 mt-1">Obsidian & GitHub standard</p>
+            <p className="text-[10px] text-gray-500 mt-1">Obsidian & GitHub standard</p>
           </button>
 
           <button
             onClick={handleExportHtml}
-            className="p-3.5 bg-[#181818] hover:bg-[#262626] border border-[#333333] rounded-xl text-left transition-colors cursor-pointer"
+            className="p-3.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-left transition-colors cursor-pointer shadow-2xs"
           >
-            <p className="text-sm font-bold text-white flex items-center gap-1.5">
+            <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
               <span>🌐</span> Web HTML (.html)
             </p>
-            <p className="text-[10px] text-gray-400 mt-1">Standalone web package</p>
+            <p className="text-[10px] text-gray-500 mt-1">Standalone web package</p>
           </button>
 
           <button
             onClick={handlePrintPdf}
-            className="p-3.5 bg-[#181818] hover:bg-[#262626] border border-[#333333] rounded-xl text-left transition-colors cursor-pointer"
+            className="p-3.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-left transition-colors cursor-pointer shadow-2xs"
           >
-            <p className="text-sm font-bold text-white flex items-center gap-1.5">
+            <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
               <span>🖨️</span> Printable PDF
             </p>
-            <p className="text-[10px] text-gray-400 mt-1">High-res vector print format</p>
+            <p className="text-[10px] text-gray-500 mt-1">High-res vector print format</p>
           </button>
 
           <button
             onClick={handleExportJson}
-            className="p-3.5 bg-[#181818] hover:bg-[#262626] border border-[#333333] rounded-xl text-left transition-colors cursor-pointer"
+            className="p-3.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-left transition-colors cursor-pointer shadow-2xs"
           >
-            <p className="text-sm font-bold text-white flex items-center gap-1.5">
+            <p className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
               <span>🗄️</span> Raw AST (.json)
             </p>
-            <p className="text-[10px] text-gray-400 mt-1">Full database blocks tree</p>
+            <p className="text-[10px] text-gray-500 mt-1">Full database blocks tree</p>
           </button>
         </div>
 
         <div className="flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-[#2c2c2c] hover:bg-[#383838] text-white text-xs font-semibold rounded-xl cursor-pointer"
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl cursor-pointer transition-colors"
           >
             Cancel
           </button>
@@ -449,18 +449,18 @@ export function ExportModal({ isOpen, onClose, page }) {
 }
 
 /**
- * 👑 BI-DIRECTIONAL KNOWLEDGE GRAPH VISUALIZER MODAL
+ * 👑 BI-DIRECTIONAL KNOWLEDGE GRAPH VISUALIZER MODAL (CLEAN WHITE)
  */
 export function KnowledgeGraphModal({ isOpen, onClose, pages, onSelectPage }) {
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="bg-[#1c1c1c] rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-[#333333] relative text-left text-white animate-in zoom-in-95 duration-150 no-scrollbar"
+        className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 relative text-left text-gray-900 animate-in zoom-in-95 duration-150 no-scrollbar font-sans"
         onClick={(e) => e.stopPropagation()}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -471,38 +471,38 @@ export function KnowledgeGraphModal({ isOpen, onClose, pages, onSelectPage }) {
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#2c2c2c] cursor-pointer"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🕸️</span>
-          <h3 className="text-lg font-bold">Interactive 3D Knowledge Graph</h3>
+          <h3 className="text-lg font-bold text-gray-900">Interactive 3D Knowledge Graph</h3>
         </div>
-        <p className="text-xs text-gray-400 mb-5">
+        <p className="text-xs text-gray-500 mb-5">
           Visualizing bi-directional links, relational databases, and cross-document references.
         </p>
 
         {/* Visual Graph Nodes Mesh */}
-        <div className="h-72 bg-[#121212] rounded-xl border border-[#2b2b2b] relative overflow-hidden flex items-center justify-center">
-          <div className="absolute inset-0 opacity-20 pointer-events-none bg-[radial-gradient(#amber-500_1px,transparent_1px)] [background-size:16px_16px]" />
+        <div className="h-72 bg-gray-50/80 rounded-xl border border-gray-200 relative overflow-hidden flex items-center justify-center">
+          <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#amber-500_1px,transparent_1px)] [background-size:16px_16px]" />
 
           <div className="flex flex-wrap items-center justify-center gap-4 p-6 z-10">
-            {pages.map((p, idx) => (
+            {pages.map((p) => (
               <div
                 key={p.id}
                 onClick={() => {
                   onSelectPage(p.id);
                   onClose();
                 }}
-                className="group p-3 rounded-2xl bg-[#222222] border-2 border-amber-500/40 hover:border-amber-400 shadow-lg cursor-pointer hover:scale-105 transition-all text-center flex flex-col items-center max-w-[130px]"
+                className="group p-3 rounded-2xl bg-white border-2 border-amber-300 hover:border-amber-500 shadow-sm cursor-pointer hover:scale-105 transition-all text-center flex flex-col items-center max-w-[130px]"
               >
                 <span className="text-2xl mb-1">{p.icon || '📄'}</span>
-                <p className="text-[11px] font-bold text-white truncate w-full group-hover:text-amber-400">
+                <p className="text-[11px] font-bold text-gray-900 truncate w-full group-hover:text-amber-600">
                   {p.title}
                 </p>
-                <span className="text-[9px] text-amber-500/80 mt-0.5 font-mono">
+                <span className="text-[9px] text-amber-600 mt-0.5 font-mono">
                   {p.blocks?.length || 0} blocks
                 </span>
               </div>
@@ -510,11 +510,11 @@ export function KnowledgeGraphModal({ isOpen, onClose, pages, onSelectPage }) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-gray-400 mt-4">
+        <div className="flex items-center justify-between text-xs text-gray-500 mt-4">
           <span>Click any node to navigate instantly</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 bg-[#2a2a2a] hover:bg-[#333333] text-white rounded-lg cursor-pointer"
+            className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg cursor-pointer transition-colors"
           >
             Close Graph
           </button>
@@ -525,7 +525,7 @@ export function KnowledgeGraphModal({ isOpen, onClose, pages, onSelectPage }) {
 }
 
 /**
- * 👑 BIOMETRIC PASSKEY ENROLLMENT MODAL
+ * 👑 BIOMETRIC PASSKEY ENROLLMENT MODAL (CLEAN WHITE)
  */
 export function PasskeyEnrollModal({ isOpen, onClose, user }) {
   const [loading, setLoading] = useState(false);
@@ -549,11 +549,11 @@ export function PasskeyEnrollModal({ isOpen, onClose, user }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="bg-[#202020] rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#333333] relative text-left text-white animate-in zoom-in-95 duration-150 no-scrollbar"
+        className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-200 relative text-left text-gray-900 animate-in zoom-in-95 duration-150 no-scrollbar font-sans"
         onClick={(e) => e.stopPropagation()}
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -564,16 +564,16 @@ export function PasskeyEnrollModal({ isOpen, onClose, user }) {
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-[#2c2c2c] cursor-pointer"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🔐</span>
-          <h3 className="text-lg font-bold">FIDO2 Biometric Passkey</h3>
+          <h3 className="text-lg font-bold text-gray-900">FIDO2 Biometric Passkey</h3>
         </div>
-        <p className="text-xs text-gray-400 mb-4">
+        <p className="text-xs text-gray-500 mb-4">
           Replace passwords with native Apple Face ID, Touch ID, or Windows Hello. Zero phishing risk.
         </p>
 
@@ -581,33 +581,33 @@ export function PasskeyEnrollModal({ isOpen, onClose, user }) {
           <div
             className={`mb-4 p-3 rounded-xl text-xs font-semibold ${
               status.type === 'success'
-                ? 'bg-emerald-950/80 border border-emerald-500/50 text-emerald-300'
-                : 'bg-red-950/80 border border-red-500/50 text-red-300'
+                ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                : 'bg-red-50 border border-red-200 text-red-700'
             }`}
           >
             {status.msg}
           </div>
         )}
 
-        <div className="bg-[#151515] p-4 rounded-xl border border-[#2c2c2c] mb-6 space-y-2 text-xs">
+        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6 space-y-2 text-xs">
           <div className="flex items-center justify-between">
-            <span className="text-gray-400">Account:</span>
-            <span className="font-semibold text-white">{user?.email || 'current_user'}</span>
+            <span className="text-gray-500">Account:</span>
+            <span className="font-semibold text-gray-900">{user?.email || 'current_user'}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-400">Security Standard:</span>
-            <span className="font-mono text-amber-400">WebAuthn Level 3 (ES256)</span>
+            <span className="text-gray-500">Security Standard:</span>
+            <span className="font-mono text-amber-600 font-bold">WebAuthn Level 3 (ES256)</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-400">Device Hardware:</span>
-            <span className="text-gray-200">Secure Enclave / TPM 2.0</span>
+            <span className="text-gray-500">Device Hardware:</span>
+            <span className="text-gray-700">Secure Enclave / TPM 2.0</span>
           </div>
         </div>
 
         <button
           onClick={handleEnroll}
           disabled={loading}
-          className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold text-sm rounded-xl transition-all shadow-md cursor-pointer disabled:opacity-50"
+          className="w-full py-3 px-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-sm rounded-xl transition-all shadow-md cursor-pointer disabled:opacity-50"
         >
           {loading ? 'Initiating Sensor...' : '⚡ Enroll This Device with Touch ID / Face ID'}
         </button>

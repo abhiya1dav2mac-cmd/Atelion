@@ -15,59 +15,59 @@ export default function TelemetryBar({ user, activePageId }) {
   };
 
   return (
-    <footer className="h-6 border-t border-[#262626] bg-[#161616] px-3 flex items-center justify-between text-[10px] text-[#666666] font-mono select-none z-30">
+    <footer className="h-6 border-t border-gray-200 bg-gray-50 px-3 flex items-center justify-between text-[10px] text-gray-500 font-mono select-none z-30">
       <div className="flex items-center gap-3">
         {/* User Chip */}
         <button
           onClick={() => handleCopy('user', userId)}
-          className="flex items-center gap-1 hover:text-[#aaaaaa] transition-colors cursor-pointer"
+          className="flex items-center gap-1 hover:text-gray-900 transition-colors cursor-pointer"
           title="Click to copy User ID"
         >
-          <span className="text-[#888888] font-bold">USER</span>
+          <span className="text-gray-400 font-bold">USER</span>
           <span>{userId.slice(0, 8)}...{userId.slice(-6)}</span>
           {copiedKey === 'user' ? (
-            <Check className="w-2.5 h-2.5 text-emerald-400" />
+            <Check className="w-2.5 h-2.5 text-emerald-600" />
           ) : (
-            <Copy className="w-2.5 h-2.5 text-[#555555] hover:text-[#888888]" />
+            <Copy className="w-2.5 h-2.5 text-gray-400 hover:text-gray-700" />
           )}
         </button>
 
-        <span className="text-[#333333]">|</span>
+        <span className="text-gray-300">|</span>
 
         {/* Workspace Chip */}
         <button
           onClick={() => handleCopy('ws', workspaceId)}
-          className="flex items-center gap-1 hover:text-[#aaaaaa] transition-colors cursor-pointer"
+          className="flex items-center gap-1 hover:text-gray-900 transition-colors cursor-pointer"
           title="Click to copy Workspace ID"
         >
-          <span className="text-[#888888] font-bold">WORKSPACE</span>
+          <span className="text-gray-400 font-bold">WORKSPACE</span>
           <span>{workspaceId.slice(0, 8)}...{workspaceId.slice(-6)}</span>
           {copiedKey === 'ws' ? (
-            <Check className="w-2.5 h-2.5 text-emerald-400" />
+            <Check className="w-2.5 h-2.5 text-emerald-600" />
           ) : (
-            <Copy className="w-2.5 h-2.5 text-[#555555] hover:text-[#888888]" />
+            <Copy className="w-2.5 h-2.5 text-gray-400 hover:text-gray-700" />
           )}
         </button>
 
-        <span className="text-[#333333]">|</span>
+        <span className="text-gray-300">|</span>
 
         {/* Page Chip */}
         <button
           onClick={() => handleCopy('page', pageId)}
-          className="flex items-center gap-1 hover:text-[#aaaaaa] transition-colors cursor-pointer"
+          className="flex items-center gap-1 hover:text-gray-900 transition-colors cursor-pointer"
           title="Click to copy Page ID"
         >
-          <span className="text-[#888888] font-bold">PAGE</span>
+          <span className="text-gray-400 font-bold">PAGE</span>
           <span>{pageId}</span>
           {copiedKey === 'page' ? (
-            <Check className="w-2.5 h-2.5 text-emerald-400" />
+            <Check className="w-2.5 h-2.5 text-emerald-600" />
           ) : (
-            <Copy className="w-2.5 h-2.5 text-[#555555] hover:text-[#888888]" />
+            <Copy className="w-2.5 h-2.5 text-gray-400 hover:text-gray-700" />
           )}
         </button>
       </div>
 
-      <div className="flex items-center gap-3 text-[#777777]">
+      <div className="flex items-center gap-3 text-gray-500">
         <button
           onClick={() => {
             alert(
@@ -75,16 +75,17 @@ export default function TelemetryBar({ user, activePageId }) {
                 '1. ⚡ Turso libSQL Edge: User details, Passkeys & Micro-Shards (0ms Edge Read)\n' +
                 '2. 🍃 MongoDB Atlas: Nested block trees, revisions & AI vectors\n' +
                 '3. ☁️ Cloudflare R2: Media Vault & PDFs ($0 Egress bandwidth fee)\n' +
-                '4. 💾 Local IndexedDB: Client-side optimistic 0ms cache\n\n' +
-                'Status: All 4 Database Layers Active & Sharded.'
+                '4. 💾 Local IndexedDB: Client-side optimistic 0ms cache\n' +
+                '5. ⏱️ Multi-Layer TTL: Firebase token cache (15m), Mongo draft auto-purge (7d)\n\n' +
+                'Status: All Multi-Database & TTL Layers Active.'
             );
           }}
-          className="flex items-center gap-2 hover:text-[#cccccc] transition-colors cursor-pointer group"
+          className="flex items-center gap-2 hover:text-gray-950 transition-colors cursor-pointer group"
           title="Click to view Multi-Database Sharding Telemetry"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[#888888] group-hover:text-white transition-colors">
-            ⚡ Turso Shards (0ms) • 🍃 Mongo Blocks • ☁️ R2 Vault
+          <span className="text-gray-600 group-hover:text-gray-950 transition-colors font-medium">
+            ⚡ Turso Shards (0ms) • 🍃 Mongo Blocks • ☁️ R2 Vault • ⏱️ TTL Engine
           </span>
         </button>
       </div>

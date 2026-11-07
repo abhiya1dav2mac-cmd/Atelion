@@ -25,10 +25,10 @@ export default function SlashCommandMenu({ position, onSelect, onClose }) {
 
   return (
     <div
-      className="fixed z-50 bg-[#202020] rounded-xl shadow-2xl border border-[#333333] w-64 overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-100 text-[#d4d4d4] font-sans no-scrollbar"
+      className="fixed z-50 bg-white rounded-xl shadow-2xl border border-gray-200 w-64 overflow-hidden py-1.5 animate-in fade-in zoom-in-95 duration-100 text-gray-800 font-sans no-scrollbar"
       style={{ top: position.y, left: position.x, scrollbarWidth: 'none', msOverflowStyle: 'none' }}
     >
-      <div className="px-3 py-1.5 border-b border-[#2c2c2c] text-[10px] font-bold text-[#777777] uppercase tracking-wider">
+      <div className="px-3 py-1.5 border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
         Slash Commands
       </div>
       <div className="max-h-64 overflow-y-auto no-scrollbar py-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
@@ -36,21 +36,21 @@ export default function SlashCommandMenu({ position, onSelect, onClose }) {
           <button
             key={cmd.type}
             onClick={() => onSelect(cmd.type)}
-            className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-[#2c2c2c] transition-colors cursor-pointer group"
+            className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-100 transition-colors cursor-pointer group"
           >
-            <span className="w-6 h-6 rounded flex items-center justify-center bg-[#292929] group-hover:bg-[#333333] text-xs font-mono shadow-xs text-white">
+            <span className="w-6 h-6 rounded flex items-center justify-center bg-gray-100 group-hover:bg-gray-200 border border-gray-200 text-xs font-mono shadow-2xs text-gray-800">
               {cmd.icon}
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-white leading-tight">{cmd.label}</p>
+                <p className="text-xs font-semibold text-gray-900 leading-tight">{cmd.label}</p>
                 {cmd.premium && (
-                  <span className="text-[8px] font-extrabold uppercase px-1.5 py-0.2 bg-gradient-to-r from-amber-500 to-orange-500 text-black rounded font-mono shadow-xs">
+                  <span className="text-[8px] font-extrabold uppercase px-1.5 py-0.2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded font-mono shadow-xs">
                     👑 PREMIUM
                   </span>
                 )}
               </div>
-              <p className="text-[10px] text-[#777777] truncate">{cmd.desc}</p>
+              <p className="text-[10px] text-gray-500 truncate">{cmd.desc}</p>
             </div>
           </button>
         ))}
