@@ -4,6 +4,8 @@ import DocumentEditor from '../components/DocumentEditor';
 import SplitEditorPane from '../components/SplitEditorPane';
 import FlashcardsModal from '../components/FlashcardsModal';
 import VoiceScribeModal from '../components/VoiceScribeModal';
+import PluginCenterModal from '../components/PluginCenterModal';
+import ColdStorageVaultModal from '../components/ColdStorageVaultModal';
 import AiCopilotDrawer from '../components/AiCopilotDrawer';
 import CommandPaletteModal from '../components/CommandPaletteModal';
 import TelemetryBar from '../components/TelemetryBar';
@@ -46,6 +48,8 @@ export default function WorkspacePage({ user, onLogout }) {
   const [isSplitViewOpen, setIsSplitViewOpen] = useState(false);
   const [isFlashcardsOpen, setIsFlashcardsOpen] = useState(false);
   const [isVoiceScribeOpen, setIsVoiceScribeOpen] = useState(false);
+  const [isPluginCenterOpen, setIsPluginCenterOpen] = useState(false);
+  const [isColdVaultOpen, setIsColdVaultOpen] = useState(false);
   const [pdfReaderState, setPdfReaderState] = useState({
     isOpen: false,
     title: 'Quantum_Physics_Lecture_Notes.pdf',
@@ -138,6 +142,8 @@ export default function WorkspacePage({ user, onLogout }) {
           setPdfReaderState({ isOpen: true, title: title || 'Quantum_Physics_Lecture_Notes.pdf' })
         }
         onOpenCircleSearch={() => setIsCircleOverlayOpen(true)}
+        onOpenPlugins={() => setIsPluginCenterOpen(true)}
+        onOpenColdVault={() => setIsColdVaultOpen(true)}
         isOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         isPinned={isSidebarPinned}
@@ -255,6 +261,26 @@ export default function WorkspacePage({ user, onLogout }) {
             >
               <span>🕸️</span>
               <span className="hidden sm:inline">Graph</span>
+            </button>
+
+            {/* 🧩 Unified MCP Plugins & Integrations Center */}
+            <button
+              onClick={() => setIsPluginCenterOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+              title="Unified MCP Plugins (Drive, Sheets, Meet, Calendar, GitHub, Slack)"
+            >
+              <span>🧩</span>
+              <span className="hidden sm:inline">Plugins</span>
+            </button>
+
+            {/* 📦 GramJS MTProto Cold Storage Vault */}
+            <button
+              onClick={() => setIsColdVaultOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+              title="GramJS MTProto Cold Storage & Telegram Private Vault"
+            >
+              <span>📦</span>
+              <span className="hidden sm:inline">Cold Vault</span>
             </button>
 
             {/* Read PDF Circle Search Button (Opens PDF Viewer with Instant Freehand Pencil) */}
@@ -491,6 +517,20 @@ export default function WorkspacePage({ user, onLogout }) {
         activePage={activePage}
         onInsertBlocks={handleInsertBlocks}
         onCreateNewPage={(title) => handleCreatePage(title, '🎙️')}
+      />
+
+      {/* 13. 🧩 Unified MCP Plugins & Integrations Modal */}
+      <PluginCenterModal
+        isOpen={isPluginCenterOpen}
+        onClose={() => setIsPluginCenterOpen(false)}
+      />
+
+      {/* 14. 📦 GramJS MTProto Cold Storage Vault Modal */}
+      <ColdStorageVaultModal
+        isOpen={isColdVaultOpen}
+        onClose={() => setIsColdVaultOpen(false)}
+        pages={pages}
+        onRestorePages={(restored) => setPages((prev) => [...restored, ...prev])}
       />
     </div>
   );

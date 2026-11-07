@@ -36,6 +36,8 @@ export default function Sidebar({
   onOpenSearch,
   onOpenPdfReader,
   onOpenCircleSearch,
+  onOpenPlugins,
+  onOpenColdVault,
   isOpen = true,
   onToggleSidebar,
   isPinned = true,
@@ -259,17 +261,53 @@ export default function Sidebar({
           {/* Upcoming Events Section (Matching Screenshot 4) */}
           <div className="space-y-1">
             <p className={`px-2.5 text-[10px] font-bold ${theme.sectionHeading} uppercase tracking-wider`}>
-              Upcoming events
+              Upcoming events & Integrations
             </p>
             <button
               onClick={() => {
-                alert('Connect your Google Calendar or Outlook to sync live schedule and AI meeting notes.');
+                if (onOpenPlugins) onOpenPlugins();
+                else alert('Connect your Google Calendar or Outlook to sync live schedule and AI meeting notes.');
               }}
-              className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md ${theme.navItem} text-[#3B82F6] hover:text-[#60A5FA] text-xs font-medium transition-colors cursor-pointer text-left`}
+              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md ${theme.navItem} text-[#3B82F6] hover:text-[#60A5FA] text-xs font-medium transition-colors cursor-pointer text-left`}
             >
-              <Calendar className="w-3.5 h-3.5 text-[#3B82F6]" />
-              <span className="truncate">Connect your calendar</span>
+              <div className="flex items-center gap-2 truncate">
+                <Calendar className="w-3.5 h-3.5 text-[#3B82F6]" />
+                <span className="truncate">Connect your calendar</span>
+              </div>
+              <span className="text-[9px] font-mono bg-blue-50 text-blue-700 px-1 rounded border border-blue-200">
+                Google Meet
+              </span>
             </button>
+
+            {onOpenPlugins && (
+              <button
+                onClick={onOpenPlugins}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md ${theme.navItem} text-gray-700 text-xs font-medium transition-colors cursor-pointer text-left`}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <span>🧩</span>
+                  <span className="truncate">MCP Plugins Center</span>
+                </div>
+                <span className="text-[9px] font-mono bg-gray-100 text-gray-600 px-1 rounded">
+                  6 APIs
+                </span>
+              </button>
+            )}
+
+            {onOpenColdVault && (
+              <button
+                onClick={onOpenColdVault}
+                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md ${theme.navItem} text-gray-700 text-xs font-medium transition-colors cursor-pointer text-left`}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  <span>📦</span>
+                  <span className="truncate">GramJS Cold Vault</span>
+                </div>
+                <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 px-1 rounded border border-emerald-200">
+                  Telegram
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Recents Section (Matching Screenshot 4) */}
