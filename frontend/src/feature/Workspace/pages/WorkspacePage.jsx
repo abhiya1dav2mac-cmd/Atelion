@@ -145,6 +145,21 @@ export default function WorkspacePage({ user, onLogout }) {
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
               <span className="hidden sm:inline">Ask Notion AI</span>
             </button>
+
+            {/* User Profile Pill in Top Header Bar */}
+            <div className="flex items-center gap-2 pl-2 border-l border-gray-200 select-none">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shadow-xs flex-shrink-0">
+                {(user?.name || 'Abhishek yadav').charAt(0).toUpperCase()}
+              </div>
+              <div className="hidden lg:flex flex-col text-left leading-tight">
+                <span className="text-xs font-bold text-gray-900 truncate max-w-[130px]">
+                  {user?.name || 'Abhishek yadav'}
+                </span>
+                <span className="text-[10px] text-gray-500 font-medium truncate max-w-[130px]">
+                  {user?.role === 'student' ? 'Student Scholar' : 'Enterprise Architect'}
+                </span>
+              </div>
+            </div>
           </div>
         </header>
 
@@ -182,6 +197,7 @@ export default function WorkspacePage({ user, onLogout }) {
         onClose={() => setIsAiOpen(false)}
         onInsertText={handleInsertAiText}
         activePage={activePage}
+        user={user}
       />
 
       {/* 6. Universal Command Search & Quick Switcher (Matching Screenshot 4) */}
@@ -198,6 +214,7 @@ export default function WorkspacePage({ user, onLogout }) {
           setIsCommandSearchOpen(false);
           setIsAiOpen(true);
         }}
+        user={user}
       />
 
       {/* 7. Notion Premium Modals */}

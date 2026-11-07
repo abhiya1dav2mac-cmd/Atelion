@@ -13,7 +13,7 @@ import {
   Check,
 } from './WorkspaceIcons';
 
-export default function AiCopilotDrawer({ isOpen, onClose, onInsertText, activePage }) {
+export default function AiCopilotDrawer({ isOpen, onClose, onInsertText, activePage, user }) {
   const [messages, setMessages] = useState([]);
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);

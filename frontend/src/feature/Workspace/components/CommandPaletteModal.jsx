@@ -18,6 +18,7 @@ export default function CommandPaletteModal({
   onSelectPage,
   onCreatePage,
   onOpenAi,
+  user,
 }) {
   const [query, setQuery] = useState('');
   const [selectedPageId, setSelectedPageId] = useState(null);
@@ -116,9 +117,12 @@ export default function CommandPaletteModal({
             <span>Aa Title only</span>
           </button>
 
-          <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#282828] text-[#999999] hover:text-white border border-[#333333] transition-colors cursor-pointer">
-            <span>Created by</span>
-            <ChevronDown className="w-3 h-3" />
+          <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#282828] text-[#cccccc] hover:text-white border border-[#333333] transition-colors cursor-pointer text-xs">
+            <span className="w-3.5 h-3.5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">
+              {(user?.name || 'Abhishek yadav').charAt(0).toUpperCase()}
+            </span>
+            <span>{user?.name || 'Abhishek yadav'}</span>
+            <ChevronDown className="w-3 h-3 text-[#777777]" />
           </button>
 
           <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#282828] text-[#999999] hover:text-white border border-[#333333] transition-colors cursor-pointer">

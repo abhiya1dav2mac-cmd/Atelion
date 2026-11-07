@@ -38,7 +38,7 @@ export default function Sidebar({
   const [isAppsMenuOpen, setIsAppsMenuOpen] = useState(false);
   const [showInviteToast, setShowInviteToast] = useState(true);
 
-  const displayName = user?.name || (user?.role === 'student' ? 'Student Scholar' : 'Enterprise Architect');
+  const displayName = user?.name || (user?.role === 'student' ? 'Student Scholar' : 'Abhishek yadav');
   const initial = displayName.charAt(0).toUpperCase();
 
   const recents = pages.slice(0, 5);
@@ -268,12 +268,13 @@ export default function Sidebar({
               setIsAppsMenuOpen(false);
             }}
             className="flex items-center gap-2 min-w-0 p-1.5 rounded-lg hover:bg-[#262626] text-left transition-colors cursor-pointer group flex-1 mr-1"
+            title={`${displayName}'s Space`}
           >
             <div className="w-5 h-5 rounded bg-[#333333] text-[10px] font-bold text-white flex items-center justify-center flex-shrink-0">
               {initial}
             </div>
             <span className="truncate text-xs font-semibold text-white group-hover:text-[#60A5FA] transition-colors">
-              {displayName}'...
+              {displayName}'s Space
             </span>
             <ChevronDown className="w-3 h-3 text-[#777777] flex-shrink-0" />
           </button>

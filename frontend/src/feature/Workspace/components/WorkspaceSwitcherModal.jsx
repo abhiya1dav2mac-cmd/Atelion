@@ -20,8 +20,8 @@ export default function WorkspaceSwitcherModal({
 }) {
   if (!isOpen) return null;
 
-  const displayName = user?.name || (user?.role === 'student' ? 'Student Scholar' : 'Enterprise Architect');
-  const displayEmail = user?.email || 'architect@atelion.workspace';
+  const displayName = user?.name || (user?.role === 'student' ? 'Student Scholar' : 'Abhishek yadav');
+  const displayEmail = user?.email || 'abhiya1dav2mac@gmail.com';
   const initial = displayName.charAt(0).toUpperCase();
 
   return (

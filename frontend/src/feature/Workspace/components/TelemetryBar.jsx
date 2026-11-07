@@ -24,7 +24,7 @@ export default function TelemetryBar({ user, activePageId }) {
           title="Click to copy User ID"
         >
           <span className="text-[#888888] font-bold">USER</span>
-          <span>{userId.slice(0, 10)}...{userId.slice(-6)}</span>
+          <span>{userId.slice(0, 8)}...{userId.slice(-6)}</span>
           {copiedKey === 'user' ? (
             <Check className="w-2.5 h-2.5 text-emerald-400" />
           ) : (
