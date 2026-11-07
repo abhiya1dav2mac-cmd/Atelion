@@ -127,4 +127,32 @@ http://localhost:5000
 | `/api/helpdesk/tickets/:id/status` | `PATCH` | Update ticket status in Turso DB |
 | `/api/auth/me` | `GET` | Returns authenticated user profile |
 | `/api/health` | `GET` | Health status of API and MongoDB connection |
+| `/api/ai/circle-search` | `POST` | Instant Freehand Pencil gesture recognition, LaTeX math OCR & AI solution |
+| `/api/ai/circle-search/chat` | `POST` | Multi-turn follow-up chat, Hinglish explanations, & inline Pencil Pad vision |
+
+---
+
+## 🎨 Enterprise Notion-Grade Workspace Architecture (v2.0)
+
+### 1. Pure Clean-White Notion Theme
+- **100% Light Mode Surfaces:** Pure white backgrounds (`#FFFFFF`), light gray utility panels (`#F9FAFB`), subtle borders (`#E5E7EB`), and charcoal text (`#111827`) across Command Palette (⌘K), Sidebar, AI Copilot Drawer, Slash Menu, and all modal dialogs.
+- **Visual Polish:** Eliminates dark contrast boxes, delivering a cohesive Notion aesthetic.
+
+### 2. Zero-Latency KaTeX Mathematical Formula Engine
+- **True LaTeX Rendering:** Integrates KaTeX for inline (`$...$`) and display (`$$...$$`) math formulas (Schrödinger Wave Equation, Gaussian Integrals, Maxwell's Equations).
+- **Dual-Pane Math Editor:** Displays formatted mathematical notation alongside editable raw LaTeX markup.
+
+### 3. Dedicated Turso LibSQL Sharding & Edge Router
+- **Edge Micro-Shards:** User profiles and page trees resolve at edge speed (`~1ms`) through isolated Turso libSQL micro-databases.
+- **Multi-Tenant Isolation:** Prevents cross-tenant query latency and data leakage.
+
+### 4. Apple Safari & WebKit Native Compatibility
+- **CORS & ITP Bypass:** Uses Vite's same-origin proxy (`/api/...`) to prevent WebKit Local Network Privacy blocks on macOS, iPhone, and iPad.
+- **Gesture Guard:** Integrates `touch-action: none` and safe pointer cancellation to protect freehand strokes from iOS rubber-band overscroll.
+- **Retina DPR Alignment:** Caps devicePixelRatio at 2 to operate within WebKit's 16MP canvas memory threshold.
+
+### 5. Instant Freehand Pencil Circle to Search
+- **Shape-Agnostic Recognition:** Underlines, lines, brackets, circuits, chemical rings, or handwritten formulas trigger AI analysis after a 650ms stroke grace period.
+- **Dual-Mode Virtual PDF Reader:** Supports Continuous Scroll Mode and Single Page Mode with instant freehand pencil annotation and high-DPI canvas export.
+- **Multi-Turn Interactive Chatbox:** Features 4 quick follow-up chips (`💡 Hinglish me samjhao`, `📝 Short exam points`, `🧮 Numerical example`, `❓ Viva questions`) and an inline Pencil Pad.
 
