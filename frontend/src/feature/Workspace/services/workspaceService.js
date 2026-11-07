@@ -34,6 +34,7 @@ export const STUDENT_PAGES = [
       { id: 'b_sh_4', type: 'todo', content: 'Implement Graph Dijkstra algorithm in C++/Python', checked: false },
       { id: 'b_sh_5', type: 'todo', content: 'Circle to Search: OCR handwritten notes from lecture 14', checked: false },
       { id: 'b_sh_6', type: 'heading_2', content: 'Active Course Syllabi & References' },
+      { id: 'b_sh_pdf', type: 'pdf_embed', title: 'Quantum_Physics_Lecture_Notes.pdf' },
       { id: 'b_sh_7', type: 'paragraph', content: 'Type "/" anywhere to insert LaTeX formulas, todo checklists, code blocks or relational database views.' },
     ],
   },

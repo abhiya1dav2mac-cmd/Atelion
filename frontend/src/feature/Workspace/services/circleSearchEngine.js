@@ -1,0 +1,335 @@
+/**
+ * ==============================================================================
+ * ATELION FREEHAND PENCIL CIRCLE SEARCH ENGINE (circleSearchEngine.js)
+ * Shared Core Engine for:
+ *   1. Home / Workspace Circle Search (FreehandCircleOverlay.jsx)
+ *   2. Read PDF Circle Search (VirtualPdfReader.jsx — Continuous & Single Page)
+ *   3. Inline Modal Pencil Pad (CircleSearchModal.jsx)
+ *
+ * Key Capabilities:
+ *   - PENCIL_CURSOR_STYLE: Immediate ✏️ Pencil cursor on click
+ *   - computeFreehandBounds: Bounding box + gesture classification for ANY shape
+ *     (underline, line, bracket, diagram, circuit, chemical ring, handwritten math)
+ *   - renderFreehandStrokesToCanvas: High-DPI stroke + underlying PDF/DOM composite
+ *   - extractDomTextInBounds: Reads <input>, <textarea>, KaTeX LaTeX annotations,
+ *     and text elements intersecting the drawn freehand bounds
+ * ==============================================================================
+ */
+
+// Crisp SVG Pencil Cursor (hotspot at pencil tip: x=2, y=22)
+const PENCIL_SVG = `<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'><path d='M17.5 2.5L21.5 6.5L8 20L2.5 21.5L4 16L17.5 2.5Z' fill='%232563EB' stroke='%23FFFFFF' stroke-width='1.5' stroke-linejoin='round'/><path d='M15 5L19 9' stroke='%23FFFFFF' stroke-width='1.4'/><path d='M2.5 21.5L5.5 20.7L3.3 18.5L2.5 21.5Z' fill='%230F172A'/></svg>`;
+
+export const PENCIL_CURSOR_STYLE = `url("data:image/svg+xml,${encodeURIComponent(PENCIL_SVG)}") 2 22, crosshair`;
+
+export const MULTI_STROKE_GRACE_MS = 650;
+
+/**
+ * Normalize strokes input into an array of point arrays: [[{x, y}, ...], ...]
+ */
+export function normalizeStrokes(strokes) {
+  if (!Array.isArray(strokes) || strokes.length === 0) return [];
+  // Single flat array of points [{x, y}, ...]
+  if (strokes[0] && typeof strokes[0].x === 'number' && typeof strokes[0].y === 'number') {
+    return [strokes];
+  }
+  return strokes
+    .map((s) => (Array.isArray(s) ? s : Array.isArray(s?.points) ? s.points : []))
+    .filter((pts) => pts.length > 0);
+}
+
+/**
+ * Compute intelligent bounding box & gesture type for ANY freehand pencil structure:
+ * - Underline / straight line -> expands upward to capture underlined text/formula
+ * - Bracket -> expands horizontally to capture bracketed lines
+ * - Circle / Box / Diagram / Circuit / Chemical Ring / Handwritten Math -> padded bounds
+ */
+export function computeFreehandBounds(strokes, options = {}) {
+  const {
+    padding = 18,
+    minWidth = 64,
+    minHeight = 44,
+    expandUnderlineUpward = true,
+    maxWidth = Infinity,
+    maxHeight = Infinity,
+  } = options;
+
+  const normalized = normalizeStrokes(strokes);
+  if (normalized.length === 0) return null;
+
+  let rawMinX = Infinity;
+  let rawMinY = Infinity;
+  let rawMaxX = -Infinity;
+  let rawMaxY = -Infinity;
+  let pointCount = 0;
+
+  for (const pts of normalized) {
+    for (const p of pts) {
+      if (typeof p.x !== 'number' || typeof p.y !== 'number') continue;
+      if (p.x < rawMinX) rawMinX = p.x;
+      if (p.y < rawMinY) rawMinY = p.y;
+      if (p.x > rawMaxX) rawMaxX = p.x;
+      if (p.y > rawMaxY) rawMaxY = p.y;
+      pointCount++;
+    }
+  }
+
+  if (pointCount < 2 || !Number.isFinite(rawMinX)) return null;
+
+  const rawWidth = Math.max(1, rawMaxX - rawMinX);
+  const rawHeight = Math.max(1, rawMaxY - rawMinY);
+
+  // Classify freehand gesture shape
+  let gestureType = 'freehand-structure';
+  if (normalized.length === 1 && rawWidth > 36 && rawHeight < Math.max(22, rawWidth * 0.22)) {
+    gestureType = 'underline';
+  } else if (normalized.length === 1 && rawHeight > 36 && rawWidth < Math.max(24, rawHeight * 0.3)) {
+    gestureType = 'bracket';
+  } else if (normalized.length === 1 && pointCount >= 12) {
+    const first = normalized[0][0];
+    const last = normalized[0][normalized[0].length - 1];
+    const closeDist = Math.hypot(last.x - first.x, last.y - first.y);
+    if (closeDist < Math.max(rawWidth, rawHeight) * 0.42) {
+      gestureType = 'enclosure';
+    }
+  }
+
+  let minX = rawMinX - padding;
+  let maxX = rawMaxX + padding;
+  let minY = rawMinY - padding;
+  let maxY = rawMaxY + padding;
+
+  // If user drew an underline, expand upward so the underlined line/equation is captured!
+  if (gestureType === 'underline' && expandUnderlineUpward) {
+    minY = rawMinY - 48;
+    maxY = rawMaxY + 16;
+  } else if (gestureType === 'bracket') {
+    maxX = rawMaxX + 220;
+    minX = rawMinX - 24;
+  }
+
+  // Enforce minimum dimensions centered on stroke bounds
+  const curW = maxX - minX;
+  if (curW < minWidth) {
+    const extra = (minWidth - curW) / 2;
+    minX -= extra;
+    maxX += extra;
+  }
+  const curH = maxY - minY;
+  if (curH < minHeight) {
+    const extra = (minHeight - curH) / 2;
+    minY -= extra;
+    maxY += extra;
+  }
+
+  minX = Math.max(0, minX);
+  minY = Math.max(0, minY);
+  if (Number.isFinite(maxWidth)) maxX = Math.min(maxWidth, maxX);
+  if (Number.isFinite(maxHeight)) maxY = Math.min(maxHeight, maxY);
+
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    x: minX,
+    y: minY,
+    width: Math.max(16, maxX - minX),
+    height: Math.max(16, maxY - minY),
+    rawMinX,
+    rawMinY,
+    rawMaxX,
+    rawMaxY,
+    rawWidth,
+    rawHeight,
+    pointCount,
+    strokeCount: normalized.length,
+    gestureType,
+  };
+}
+
+/**
+ * Draw smooth quadratic curve for a single stroke onto a 2D canvas context
+ */
+export function drawSmoothStroke(ctx, points, offsetX = 0, offsetY = 0, scale = 1) {
+  if (!points || points.length === 0) return;
+  ctx.beginPath();
+  if (points.length === 1) {
+    const p = points[0];
+    ctx.arc((p.x - offsetX) * scale, (p.y - offsetY) * scale, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+
+  ctx.moveTo((points[0].x - offsetX) * scale, (points[0].y - offsetY) * scale);
+  for (let i = 1; i < points.length - 1; i++) {
+    const midX = ((points[i].x + points[i + 1].x) / 2 - offsetX) * scale;
+    const midY = ((points[i].y + points[i + 1].y) / 2 - offsetY) * scale;
+    ctx.quadraticCurveTo(
+      (points[i].x - offsetX) * scale,
+      (points[i].y - offsetY) * scale,
+      midX,
+      midY
+    );
+  }
+  const last = points[points.length - 1];
+  ctx.lineTo((last.x - offsetX) * scale, (last.y - offsetY) * scale);
+  ctx.stroke();
+}
+
+/**
+ * Render freehand strokes (and optional underlying PDF/DOM canvas crop + text)
+ * into a clean offscreen canvas and export PNG data URL for Vision AI.
+ */
+export function renderFreehandStrokesToCanvas(strokes, bounds, options = {}) {
+  const {
+    sourceCanvas = null,
+    sourceScaleX = 1,
+    sourceScaleY = 1,
+    strokeColor = '#1D4ED8',
+    strokeWidth = 3,
+    backgroundColor = '#FFFFFF',
+    overlayTextLines = [],
+    drawStrokesOnCrop = true,
+  } = options;
+
+  const normalized = normalizeStrokes(strokes);
+  const b = bounds || computeFreehandBounds(normalized, { expandUnderlineUpward: false });
+  if (!b) return null;
+
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const outWidth = Math.min(900, Math.max(120, Math.round(b.width)));
+  const outHeight = Math.min(700, Math.max(80, Math.round(b.height)));
+  const renderScaleX = outWidth / b.width;
+  const renderScaleY = outHeight / b.height;
+  const uniformScale = Math.min(renderScaleX, renderScaleY);
+
+  const offscreen = document.createElement('canvas');
+  offscreen.width = Math.round(outWidth * dpr);
+  offscreen.height = Math.round(outHeight * dpr);
+
+  const ctx = offscreen.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // 1. Clean white background
+  ctx.fillStyle = backgroundColor;
+  ctx.fillRect(0, 0, outWidth, outHeight);
+
+  // 2. If cropping from a PDF/diagram <canvas>, composite exact pixels
+  if (sourceCanvas) {
+    try {
+      const sx = Math.max(0, b.minX * sourceScaleX);
+      const sy = Math.max(0, b.minY * sourceScaleY);
+      const sw = Math.min(sourceCanvas.width - sx, b.width * sourceScaleX);
+      const sh = Math.min(sourceCanvas.height - sy, b.height * sourceScaleY);
+      if (sw > 2 && sh > 2) {
+        ctx.drawImage(sourceCanvas, sx, sy, sw, sh, 0, 0, outWidth, outHeight);
+      }
+    } catch (e) {
+      // Ignore cross-origin taint if any
+    }
+  } else if (Array.isArray(overlayTextLines) && overlayTextLines.length > 0) {
+    // Render subtle underlying text context onto crop for Vision + thumbnail clarity
+    ctx.fillStyle = '#111827';
+    ctx.font = '500 13px system-ui, -apple-system, sans-serif';
+    let ty = 22;
+    for (const line of overlayTextLines.slice(0, 5)) {
+      ctx.fillText(String(line).slice(0, 85), 12, ty);
+      ty += 19;
+    }
+  }
+
+  // 3. Render user's freehand pencil strokes smoothly
+  if (drawStrokesOnCrop && normalized.length > 0) {
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = strokeColor;
+    ctx.fillStyle = strokeColor;
+    ctx.lineWidth = strokeWidth;
+    for (const pts of normalized) {
+      drawSmoothStroke(ctx, pts, b.minX, b.minY, uniformScale);
+    }
+    ctx.restore();
+  }
+
+  let dataUrl = '';
+  try {
+    dataUrl = offscreen.toDataURL('image/png', 0.92);
+  } catch (e) {
+    dataUrl = '';
+  }
+
+  return {
+    canvas: offscreen,
+    dataUrl,
+    width: outWidth,
+    height: outHeight,
+    gestureType: b.gestureType,
+    bounds: b,
+  };
+}
+
+/**
+ * Extract visible DOM text, <input>/<textarea> block content, and KaTeX LaTeX formulas
+ * intersecting viewport bounds { minX, minY, maxX, maxY }
+ */
+export function extractDomTextInBounds(bounds, rootSelector = 'main') {
+  if (!bounds || typeof document === 'undefined') return '';
+
+  const root = document.querySelector(rootSelector) || document.body;
+  const collected = [];
+  const seen = new Set();
+
+  const intersects = (rect) => {
+    if (!rect || rect.width <= 0 || rect.height <= 0) return false;
+    return !(
+      rect.right < bounds.minX ||
+      rect.left > bounds.maxX ||
+      rect.bottom < bounds.minY ||
+      rect.top > bounds.maxY
+    );
+  };
+
+  // 1. Capture exact KaTeX LaTeX formulas first
+  const katexBlocks = root.querySelectorAll('.katex');
+  katexBlocks.forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (intersects(rect)) {
+      const annotation = el.querySelector('annotation[encoding="application/x-tex"]');
+      const tex = annotation?.textContent?.trim();
+      if (tex && !seen.has(tex)) {
+        seen.add(tex);
+        collected.push(`$$${tex}$$`);
+      }
+    }
+  });
+
+  // 2. Capture DocumentEditor <input> and <textarea> block values
+  const inputs = root.querySelectorAll('input[type="text"], textarea');
+  inputs.forEach((el) => {
+    const rect = el.getBoundingClientRect();
+    if (intersects(rect)) {
+      const val = (el.value || '').trim();
+      if (val && !seen.has(val)) {
+        seen.add(val);
+        collected.push(val);
+      }
+    }
+  });
+
+  // 3. Capture standard headings, table cells, callouts, and text paragraphs
+  const textEls = root.querySelectorAll('h1, h2, h3, h4, p, li, td, th, code, [data-pdf-text]');
+  textEls.forEach((el) => {
+    if (el.closest('.katex')) return;
+    const rect = el.getBoundingClientRect();
+    if (intersects(rect)) {
+      const txt = (el.innerText || el.textContent || '').trim();
+      if (txt && txt.length > 1 && txt.length < 400 && !seen.has(txt)) {
+        seen.add(txt);
+        collected.push(txt);
+      }
+    }
+  });
+
+  return collected.slice(0, 8).join('\n').trim();
+}

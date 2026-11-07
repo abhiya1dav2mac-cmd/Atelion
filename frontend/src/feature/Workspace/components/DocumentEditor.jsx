@@ -12,6 +12,8 @@ export default function DocumentEditor({
   onUpdateDatabaseItems,
   onOpenAi,
   onOpenPremium,
+  onOpenPdfReader,
+  onOpenCircleSearch,
 }) {
   const [slashMenu, setSlashMenu] = useState({ isOpen: false, x: 0, y: 0, targetIndex: null });
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -472,25 +474,38 @@ export default function DocumentEditor({
                 )}
 
                 {block.type === 'pdf_embed' && (
-                  <div className="my-3 p-4 bg-amber-50/50 border border-amber-300 rounded-xl relative overflow-hidden shadow-xs">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">📎</span>
+                  <div className="my-3 p-4 bg-white border border-gray-200 rounded-xl relative overflow-hidden shadow-xs hover:border-blue-300 transition-colors">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl">📄</span>
                         <div>
-                          <p className="text-xs font-bold text-gray-900">{block.title || 'PDF Document & Research Vault'}</p>
-                          <p className="text-[10px] text-gray-500">Embedded Edge File Storage • 2.4 MB</p>
+                          <p className="text-xs font-bold text-gray-900">
+                            {block.title || 'Quantum_Physics_Lecture_Notes.pdf'}
+                          </p>
+                          <p className="text-[10px] text-gray-500">
+                            Cloudflare R2 Vault • Continuous & Single Page Mode • ✏️ Freehand Pencil Search Ready
+                          </p>
                         </div>
                       </div>
                       <PremiumBadge />
                     </div>
-                    <div className="bg-white p-3 rounded-lg border border-amber-200 text-xs text-gray-800 font-mono flex items-center justify-between">
-                      <span>📄 {block.title || 'Quantum_Physics_Lecture_Notes.pdf'}</span>
-                      <button
-                        onClick={() => alert(`Opening PDF Document: ${block.title || 'Quantum_Physics_Lecture_Notes.pdf'}`)}
-                        className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-black font-bold text-[11px] rounded cursor-pointer shadow-xs"
-                      >
-                        View PDF
-                      </button>
+                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs text-gray-800 font-mono flex flex-wrap items-center justify-between gap-2">
+                      <span className="truncate">📎 {block.title || 'Quantum_Physics_Lecture_Notes.pdf'}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-sans font-semibold">
+                          ✏️ Instant Pencil Active
+                        </span>
+                        <button
+                          onClick={() =>
+                            onOpenPdfReader
+                              ? onOpenPdfReader(block.title || 'Quantum_Physics_Lecture_Notes.pdf')
+                              : alert(`Opening PDF Document: ${block.title || 'Quantum_Physics_Lecture_Notes.pdf'}`)
+                          }
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-sans font-bold text-[11px] rounded-lg cursor-pointer shadow-xs transition-colors"
+                        >
+                          Read PDF & Draw ✏️
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

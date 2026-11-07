@@ -4,6 +4,9 @@ import DocumentEditor from '../components/DocumentEditor';
 import AiCopilotDrawer from '../components/AiCopilotDrawer';
 import CommandPaletteModal from '../components/CommandPaletteModal';
 import TelemetryBar from '../components/TelemetryBar';
+import FreehandCircleOverlay from '../components/FreehandCircleOverlay';
+import VirtualPdfReader from '../components/VirtualPdfReader';
+import CircleSearchModal from '../components/CircleSearchModal';
 import { workspaceService } from '../services/workspaceService';
 import { Sparkles, Search, ChevronRight, Pin, SidebarToggle, SunMoon } from '../components/WorkspaceIcons';
 import {
@@ -36,6 +39,12 @@ export default function WorkspacePage({ user, onLogout }) {
   const [isAiPinned, setIsAiPinned] = useState(true);
   const [isCommandSearchOpen, setIsCommandSearchOpen] = useState(false);
   const [activePremiumModal, setActivePremiumModal] = useState(null); // 'history' | 'share' | 'export' | 'graph' | 'passkey'
+  const [isCircleOverlayOpen, setIsCircleOverlayOpen] = useState(false);
+  const [pdfReaderState, setPdfReaderState] = useState({
+    isOpen: false,
+    title: 'Quantum_Physics_Lecture_Notes.pdf',
+  });
+  const [circleCaptureData, setCircleCaptureData] = useState(null);
 
   // Global Ctrl+K / Cmd+K listener for Notion Command Search
   useEffect(() => {
@@ -112,6 +121,10 @@ export default function WorkspacePage({ user, onLogout }) {
         onLogout={onLogout}
         onOpenAi={() => setIsAiOpen(true)}
         onOpenSearch={() => setIsCommandSearchOpen(true)}
+        onOpenPdfReader={(title) =>
+          setPdfReaderState({ isOpen: true, title: title || 'Quantum_Physics_Lecture_Notes.pdf' })
+        }
+        onOpenCircleSearch={() => setIsCircleOverlayOpen(true)}
         isOpen={isSidebarOpen}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         isPinned={isSidebarPinned}
@@ -182,10 +195,32 @@ export default function WorkspacePage({ user, onLogout }) {
               </kbd>
             </button>
 
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[11px] font-mono border border-emerald-200">
+            <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[11px] font-mono border border-emerald-200">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span>Turso Edge 0ms</span>
             </div>
+
+            {/* Read PDF Circle Search Button (Opens PDF Viewer with Instant Freehand Pencil) */}
+            <button
+              onClick={() =>
+                setPdfReaderState({ isOpen: true, title: 'Quantum_Physics_Lecture_Notes.pdf' })
+              }
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+              title="Open Read PDF with Instant Freehand Pencil Circle Search"
+            >
+              <span>📄</span>
+              <span className="hidden sm:inline">Read PDF</span>
+            </button>
+
+            {/* Home Freehand Pencil Circle Search Button */}
+            <button
+              onClick={() => setIsCircleOverlayOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 shadow-2xs transition-all cursor-pointer"
+              title="Click for Instant Freehand Pencil — Underline, bracket, sketch any shape for direct AI answer"
+            >
+              <span>✏️</span>
+              <span className="hidden sm:inline">Circle Search</span>
+            </button>
 
             <button
               onClick={() => setIsAiOpen((prev) => !prev)}
@@ -228,6 +263,13 @@ export default function WorkspacePage({ user, onLogout }) {
               onUpdateDatabaseItems={setDatabaseItems}
               onOpenAi={() => setIsAiOpen(true)}
               onOpenPremium={setActivePremiumModal}
+              onOpenPdfReader={(title) =>
+                setPdfReaderState({
+                  isOpen: true,
+                  title: title || 'Quantum_Physics_Lecture_Notes.pdf',
+                })
+              }
+              onOpenCircleSearch={() => setIsCircleOverlayOpen(true)}
             />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-gray-500 bg-white">
@@ -243,14 +285,19 @@ export default function WorkspacePage({ user, onLogout }) {
             </div>
           )}
 
-          {/* Floating Circle to Search / AI Trigger */}
+          {/* Floating Freehand Pencil Circle to Search Trigger (Immediate ✏️ Pencil) */}
           <button
-            onClick={() => setIsAiOpen(true)}
-            className="fixed bottom-10 right-6 z-40 p-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 group border border-white/20"
-            title="Circle to Search & AI Assistant"
+            onClick={() => setIsCircleOverlayOpen(true)}
+            className="fixed bottom-10 right-6 z-30 px-4 py-2.5 bg-white hover:bg-blue-50 text-gray-900 border border-gray-300 hover:border-blue-400 rounded-full shadow-xl hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center gap-2 group"
+            title="Click for Instant Freehand Pencil (✏️) — Draw any underline, bracket, diagram, or formula"
           >
-            <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-            <span className="text-xs font-bold pr-1 hidden sm:inline">Circle to Search</span>
+            <span className="text-sm group-hover:-rotate-12 transition-transform">✏️</span>
+            <span className="text-xs font-bold text-gray-900 hidden sm:inline">
+              Circle to Search
+            </span>
+            <span className="px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[9px] font-bold hidden sm:inline">
+              Pencil
+            </span>
           </button>
         </div>
 
@@ -318,6 +365,39 @@ export default function WorkspacePage({ user, onLogout }) {
       <PasskeyEnrollModal
         isOpen={activePremiumModal === 'passkey'}
         onClose={() => setActivePremiumModal(null)}
+        user={user}
+      />
+
+      {/* 8. Home / Workspace Instant Freehand Pencil Circle Search Overlay */}
+      <FreehandCircleOverlay
+        isOpen={isCircleOverlayOpen}
+        onCancel={() => setIsCircleOverlayOpen(false)}
+        onCompleteCapture={(payload) => {
+          setIsCircleOverlayOpen(false);
+          setCircleCaptureData({
+            ...payload,
+            pageTitle: activePage?.title || 'Workspace',
+          });
+        }}
+      />
+
+      {/* 9. Read PDF Viewer (Continuous + Single Page Mode with Instant Freehand Pencil) */}
+      <VirtualPdfReader
+        isOpen={pdfReaderState.isOpen}
+        title={pdfReaderState.title}
+        initialPencilActive={true}
+        onClose={() => setPdfReaderState((prev) => ({ ...prev, isOpen: false }))}
+        onTriggerCircleSearch={(payload) => setCircleCaptureData(payload)}
+      />
+
+      {/* 10. Unified Circle Search Result & Multi-Turn Follow-Up Chat Modal */}
+      <CircleSearchModal
+        isOpen={Boolean(circleCaptureData)}
+        captureData={circleCaptureData}
+        onClose={() => setCircleCaptureData(null)}
+        onInsertToPage={(text) => {
+          handleInsertAiText(text);
+        }}
         user={user}
       />
     </div>

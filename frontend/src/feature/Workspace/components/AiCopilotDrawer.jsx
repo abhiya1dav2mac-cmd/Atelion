@@ -14,6 +14,7 @@ import {
   Pin,
   DockPanel,
 } from './WorkspaceIcons';
+import RichMathMarkdown from './RichMathMarkdown';
 
 export default function AiCopilotDrawer({
   isOpen,
@@ -305,13 +306,17 @@ export default function AiCopilotDrawer({
                 }`}
               >
                 <div
-                  className={`max-w-[90%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
+                  className={`max-w-[92%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
                     m.sender === 'user'
                       ? 'bg-blue-600 text-white shadow-xs'
                       : 'bg-gray-50 border border-gray-200 text-gray-800 shadow-2xs'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{m.text}</p>
+                  {m.sender === 'user' ? (
+                    <p className="whitespace-pre-wrap">{m.text}</p>
+                  ) : (
+                    <RichMathMarkdown content={m.text} />
+                  )}
                 </div>
 
                 {/* AI Footer with 1-Click "Insert into page" */}
