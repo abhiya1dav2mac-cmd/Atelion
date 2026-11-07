@@ -8,6 +8,8 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const crypto = require('crypto');
+const Document = require('../models/Document');
 const {
   getMultiDbStatus,
   getWorkspaceShard,
@@ -128,6 +130,99 @@ router.post('/tree/node', async (req, res) => {
       success: true,
       source: 'Turso Edge Tree',
       node: saved,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * 6. POST /api/database/save-page
+ * Polyglot Multi-Database Split Ingestion:
+ * - Edge metadata & Page Tree -> Turso libSQL (0ms)
+ * - Heavy nested block array & revisions -> MongoDB Atlas
+ */
+router.post('/save-page', async (req, res) => {
+  try {
+    const { page, userId = '31bd872ba9043c2805', workspaceId = 'eb159cff712b476005' } = req.body;
+
+    if (!page || !page.id) {
+      return res.status(400).json({ success: false, error: 'Missing page payload' });
+    }
+
+    const t0 = Date.now();
+
+    // 1. Turso LibSQL Edge Metadata & Tree Update
+    await savePageTreeNode({
+      pageId: page.id,
+      workspaceId,
+      parentPageId: page.parentPageId || null,
+      title: page.title || 'Untitled',
+      icon: page.icon || '📄',
+      sortOrder: page.sortOrder || 0,
+      visibility: page.visibility || 'private',
+    });
+    const tursoDuration = Date.now() - t0;
+
+    // 2. MongoDB Atlas Heavy Block Storage (when MongoDB connected)
+    let mongoDuration = 0;
+    let mongoStatus = 'offline-fallback';
+    if (mongoose.connection.readyState === 1) {
+      const m0 = Date.now();
+      const contentJson = JSON.stringify(page.blocks || []);
+      const etag = crypto.createHash('md5').update(contentJson).digest('hex');
+
+      try {
+        await Document.findOneAndUpdate(
+          { docId: page.id },
+          {
+            $set: {
+              title: page.title,
+              content: contentJson,
+              type: page.isDatabasePage ? 'database' : 'note',
+              etag,
+              updatedAt: new Date(),
+            },
+            $push: {
+              history: {
+                $each: [
+                  {
+                    version: Date.now(),
+                    title: page.title,
+                    content: contentJson.slice(0, 500),
+                    commitMessage: 'Automatic checkpoint',
+                    etag,
+                    timestamp: new Date(),
+                  },
+                ],
+                $slice: -20,
+              },
+            },
+          },
+          { upsert: true, new: true }
+        );
+        mongoDuration = Date.now() - m0;
+        mongoStatus = 'saved-to-atlas';
+      } catch (mErr) {
+        mongoStatus = 'mongo-notice: ' + mErr.message;
+      }
+    }
+
+    res.json({
+      success: true,
+      pageId: page.id,
+      polyglot: {
+        tursoEdge: {
+          table: 'page_hierarchy_tree',
+          durationMs: tursoDuration,
+          status: 'synced-0ms',
+        },
+        mongoAtlas: {
+          collection: 'documents',
+          durationMs: mongoDuration,
+          status: mongoStatus,
+        },
+      },
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

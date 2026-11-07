@@ -221,6 +221,23 @@ export const workspaceService = {
     } catch {}
   },
 
+  // Background debounced polyglot sync to Turso Edge & MongoDB Atlas
+  syncToBackend(page) {
+    if (typeof window === 'undefined' || !page) return;
+    clearTimeout(this._syncTimer);
+    this._syncTimer = setTimeout(async () => {
+      try {
+        await fetch('http://localhost:5000/api/database/save-page', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ page }),
+        });
+      } catch (err) {
+        // Silently handled by local-first persistence
+      }
+    }, 500);
+  },
+
   createPage(title = 'Untitled Note', icon = '📄') {
     const pages = this.getPages();
     const newPage = {
@@ -236,6 +253,7 @@ export const workspaceService = {
     };
     pages.unshift(newPage);
     this.savePages(pages);
+    this.syncToBackend(newPage);
     return newPage;
   },
 
@@ -245,6 +263,7 @@ export const workspaceService = {
     if (idx !== -1) {
       pages[idx] = { ...pages[idx], ...updates, updatedAt: 'Just now' };
       this.savePages(pages);
+      this.syncToBackend(pages[idx]);
       return pages[idx];
     }
     return null;
