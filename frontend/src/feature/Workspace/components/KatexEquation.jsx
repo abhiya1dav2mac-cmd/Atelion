@@ -2,16 +2,14 @@ import React, { useMemo } from 'react';
 import katex from 'katex';
 
 /**
- * Clean redundant delimiters ($$, \[, \], etc.) from math formula
+ * Universal math delimiter cleaner.
+ * Reliably removes leading/trailing $$, $, \[, \], \(, \) without distorting internal math.
  */
-function cleanMathDelimiters(text) {
+export function cleanMathDelimiters(text) {
   if (!text || typeof text !== 'string') return '';
   let str = text.trim();
-  // Strip leading and trailing $$ or \[ \]
-  str = str.replace(/^\$\$([\s\S]*?)\$\$$/, '$1');
-  str = str.replace(/^\\\[([\s\S]*?)\\\]$/, '$1');
-  str = str.replace(/^\\\(([\s\S]*?)\\\)$/, '$1');
-  str = str.replace(/^\$([\s\S]*?)\$$/, '$1');
+  // Strip outer delimiters
+  str = str.replace(/^(\$\$|\$|\\\[|\\\()[\s]*/, '').replace(/[\s]*(\$\$|\$|\\\]|\\\))$/, '');
   return str.trim();
 }
 
@@ -27,7 +25,7 @@ export default function KatexEquation({
   const renderedHtml = useMemo(() => {
     const formula = cleanMathDelimiters(math);
     if (!formula) {
-      return '<span style="color: #9ca3af; font-style: italic;">Empty equation</span>';
+      return '<span style="color: #9ca3af; font-style: italic; font-size: 13px;">Empty equation</span>';
     }
 
     try {
@@ -43,7 +41,7 @@ export default function KatexEquation({
 
   return (
     <div
-      className={`katex-equation-container overflow-x-auto py-2.5 px-3 select-text ${className}`}
+      className={`katex-equation-container overflow-x-auto py-1.5 px-2 select-text ${className}`}
       dangerouslySetInnerHTML={{ __html: renderedHtml }}
     />
   );

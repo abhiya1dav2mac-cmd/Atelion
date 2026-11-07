@@ -306,3 +306,11 @@ export function SunMoon({ className = "w-4 h-4", ...props }) {
     </svg>
   );
 }
+
+export function Play({ className = "w-4 h-4", ...props }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import DocumentEditor from '../components/DocumentEditor';
+import SplitEditorPane from '../components/SplitEditorPane';
+import FlashcardsModal from '../components/FlashcardsModal';
+import VoiceScribeModal from '../components/VoiceScribeModal';
 import AiCopilotDrawer from '../components/AiCopilotDrawer';
 import CommandPaletteModal from '../components/CommandPaletteModal';
 import TelemetryBar from '../components/TelemetryBar';
@@ -40,6 +43,9 @@ export default function WorkspacePage({ user, onLogout }) {
   const [isCommandSearchOpen, setIsCommandSearchOpen] = useState(false);
   const [activePremiumModal, setActivePremiumModal] = useState(null); // 'history' | 'share' | 'export' | 'graph' | 'passkey'
   const [isCircleOverlayOpen, setIsCircleOverlayOpen] = useState(false);
+  const [isSplitViewOpen, setIsSplitViewOpen] = useState(false);
+  const [isFlashcardsOpen, setIsFlashcardsOpen] = useState(false);
+  const [isVoiceScribeOpen, setIsVoiceScribeOpen] = useState(false);
   const [pdfReaderState, setPdfReaderState] = useState({
     isOpen: false,
     title: 'Quantum_Physics_Lecture_Notes.pdf',
@@ -105,6 +111,13 @@ export default function WorkspacePage({ user, onLogout }) {
     };
     handleUpdatePage(activePage.id, {
       blocks: [...activePage.blocks, newBlock],
+    });
+  };
+
+  const handleInsertBlocks = (newBlocks) => {
+    if (!activePage || !Array.isArray(newBlocks)) return;
+    handleUpdatePage(activePage.id, {
+      blocks: [...(activePage.blocks || []), ...newBlocks],
     });
   };
 
@@ -200,6 +213,50 @@ export default function WorkspacePage({ user, onLogout }) {
               <span>Turso Edge 0ms</span>
             </div>
 
+            {/* 🪟 Dual Split-Pane Side-by-Side Editor Button */}
+            <button
+              onClick={() => setIsSplitViewOpen((prev) => !prev)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer shadow-2xs border ${
+                isSplitViewOpen
+                  ? 'bg-purple-600 text-white border-purple-700 shadow-xs'
+                  : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-200'
+              }`}
+              title="Split View: Edit 2 Notes or Scratchpad Side-by-Side"
+            >
+              <span>🪟</span>
+              <span className="hidden sm:inline">Split View</span>
+            </button>
+
+            {/* 🧠 1-Click AI Flashcards Button */}
+            <button
+              onClick={() => setIsFlashcardsOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+              title="1-Click AI Flashcards & Active Recall with Spaced Repetition"
+            >
+              <span>🧠</span>
+              <span className="hidden sm:inline">Flashcards</span>
+            </button>
+
+            {/* 🎙️ Voice-to-Notion AI Scribe Button */}
+            <button
+              onClick={() => setIsVoiceScribeOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+              title="Voice-to-Notion AI Scribe (Groq Whisper Speech-to-Text)"
+            >
+              <span>🎙️</span>
+              <span className="hidden sm:inline">Voice Scribe</span>
+            </button>
+
+            {/* 🕸️ Interactive Knowledge Graph Button */}
+            <button
+              onClick={() => setActivePremiumModal('graph')}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white hover:bg-gray-100 text-gray-800 border border-gray-200 shadow-2xs transition-all cursor-pointer"
+              title="Interactive 2D/3D Knowledge Graph"
+            >
+              <span>🕸️</span>
+              <span className="hidden sm:inline">Graph</span>
+            </button>
+
             {/* Read PDF Circle Search Button (Opens PDF Viewer with Instant Freehand Pencil) */}
             <button
               onClick={() =>
@@ -255,7 +312,25 @@ export default function WorkspacePage({ user, onLogout }) {
 
         {/* 3. Document Canvas Area */}
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden relative bg-white">
-          {activePage ? (
+          {isSplitViewOpen ? (
+            <SplitEditorPane
+              pages={pages}
+              primaryPage={activePage}
+              onUpdatePrimaryPage={handleUpdatePage}
+              databaseItems={databaseItems}
+              onUpdateDatabaseItems={setDatabaseItems}
+              onOpenAi={() => setIsAiOpen(true)}
+              onOpenPremium={setActivePremiumModal}
+              onOpenPdfReader={(title) =>
+                setPdfReaderState({
+                  isOpen: true,
+                  title: title || 'Quantum_Physics_Lecture_Notes.pdf',
+                })
+              }
+              onOpenCircleSearch={() => setIsCircleOverlayOpen(true)}
+              onCloseSplit={() => setIsSplitViewOpen(false)}
+            />
+          ) : activePage ? (
             <DocumentEditor
               page={activePage}
               onUpdatePage={handleUpdatePage}
@@ -270,6 +345,7 @@ export default function WorkspacePage({ user, onLogout }) {
                 })
               }
               onOpenCircleSearch={() => setIsCircleOverlayOpen(true)}
+              onOpenFlashcards={() => setIsFlashcardsOpen(true)}
             />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-gray-500 bg-white">
@@ -399,6 +475,22 @@ export default function WorkspacePage({ user, onLogout }) {
           handleInsertAiText(text);
         }}
         user={user}
+      />
+
+      {/* 11. 🧠 1-Click AI Flashcards & Active Recall Spaced Repetition Modal */}
+      <FlashcardsModal
+        isOpen={isFlashcardsOpen}
+        onClose={() => setIsFlashcardsOpen(false)}
+        page={activePage}
+      />
+
+      {/* 12. 🎙️ Voice-to-Notion AI Scribe Modal */}
+      <VoiceScribeModal
+        isOpen={isVoiceScribeOpen}
+        onClose={() => setIsVoiceScribeOpen(false)}
+        activePage={activePage}
+        onInsertBlocks={handleInsertBlocks}
+        onCreateNewPage={(title) => handleCreatePage(title, '🎙️')}
       />
     </div>
   );

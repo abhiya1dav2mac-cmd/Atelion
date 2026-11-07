@@ -448,80 +448,13 @@ export function ExportModal({ isOpen, onClose, page }) {
   );
 }
 
+import KnowledgeGraphModalComponent from './KnowledgeGraphModal';
+
 /**
  * 👑 BI-DIRECTIONAL KNOWLEDGE GRAPH VISUALIZER MODAL (CLEAN WHITE)
  */
-export function KnowledgeGraphModal({ isOpen, onClose, pages, onSelectPage }) {
-  if (!isOpen) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-gray-200 relative text-left text-gray-900 animate-in zoom-in-95 duration-150 no-scrollbar font-sans"
-        onClick={(e) => e.stopPropagation()}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {/* Upper Right Corner PREMIUM Badge */}
-        <div className="absolute top-5 right-12">
-          <PremiumBadge />
-        </div>
-
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-xl">🕸️</span>
-          <h3 className="text-lg font-bold text-gray-900">Interactive 3D Knowledge Graph</h3>
-        </div>
-        <p className="text-xs text-gray-500 mb-5">
-          Visualizing bi-directional links, relational databases, and cross-document references.
-        </p>
-
-        {/* Visual Graph Nodes Mesh */}
-        <div className="h-72 bg-gray-50/80 rounded-xl border border-gray-200 relative overflow-hidden flex items-center justify-center">
-          <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#amber-500_1px,transparent_1px)] [background-size:16px_16px]" />
-
-          <div className="flex flex-wrap items-center justify-center gap-4 p-6 z-10">
-            {pages.map((p) => (
-              <div
-                key={p.id}
-                onClick={() => {
-                  onSelectPage(p.id);
-                  onClose();
-                }}
-                className="group p-3 rounded-2xl bg-white border-2 border-amber-300 hover:border-amber-500 shadow-sm cursor-pointer hover:scale-105 transition-all text-center flex flex-col items-center max-w-[130px]"
-              >
-                <span className="text-2xl mb-1">{p.icon || '📄'}</span>
-                <p className="text-[11px] font-bold text-gray-900 truncate w-full group-hover:text-amber-600">
-                  {p.title}
-                </p>
-                <span className="text-[9px] text-amber-600 mt-0.5 font-mono">
-                  {p.blocks?.length || 0} blocks
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between text-xs text-gray-500 mt-4">
-          <span>Click any node to navigate instantly</span>
-          <button
-            onClick={onClose}
-            className="px-4 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg cursor-pointer transition-colors"
-          >
-            Close Graph
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+export function KnowledgeGraphModal(props) {
+  return <KnowledgeGraphModalComponent {...props} />;
 }
 
 /**

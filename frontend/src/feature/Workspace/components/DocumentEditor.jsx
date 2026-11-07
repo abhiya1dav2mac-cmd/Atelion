@@ -3,6 +3,10 @@ import { Plus, Trash, Sparkles } from './WorkspaceIcons';
 import SlashCommandMenu from './SlashCommandMenu';
 import DatabaseView from './DatabaseView';
 import KatexEquation from './KatexEquation';
+import CodeRunnerBlock from './CodeRunnerBlock';
+import InteractiveMathBlock from './InteractiveMathBlock';
+import EncryptedPageLock from './EncryptedPageLock';
+import { noteVaultService } from '../services/noteVaultService';
 import { PremiumBadge } from './PremiumModals';
 
 export default function DocumentEditor({
@@ -14,10 +18,40 @@ export default function DocumentEditor({
   onOpenPremium,
   onOpenPdfReader,
   onOpenCircleSearch,
+  onOpenFlashcards,
 }) {
   const [slashMenu, setSlashMenu] = useState({ isOpen: false, x: 0, y: 0, targetIndex: null });
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isAiBusy, setIsAiBusy] = useState(false);
+
+  // If page is locked with zero-knowledge AES-256 vault
+  if (page?.vault?.isLocked) {
+    return (
+      <EncryptedPageLock
+        page={page}
+        onUnlockSuccess={(decryptedBlocks) => {
+          onUpdatePage(page.id, {
+            blocks: decryptedBlocks,
+            vault: { ...page.vault, isLocked: false },
+          });
+        }}
+      />
+    );
+  }
+
+  const handleLockPage = async () => {
+    const pin = window.prompt(
+      'Set 4-digit Master PIN to encrypt this note with AES-256-GCM vault:',
+      '1234'
+    );
+    if (!pin) return;
+    try {
+      const encryptedVault = await noteVaultService.encryptBlocks(page.blocks, pin);
+      onUpdatePage(page.id, { vault: encryptedVault });
+    } catch (err) {
+      alert('Encryption failed: ' + err.message);
+    }
+  };
 
   const EMOJI_OPTIONS = ['📈', '🚀', '⚡', '💡', '🎙️', '🎯', '💬', '🪙', '🗄️', '🧪', '🔐', '📊'];
   const COVER_PRESETS = [
@@ -316,11 +350,18 @@ export default function DocumentEditor({
               ☑️ Extract Todos
             </button>
             <button
-              onClick={() => handleAiAction('translate')}
-              disabled={isAiBusy}
-              className="px-2.5 py-1 bg-white hover:bg-amber-100/60 hover:text-amber-900 text-gray-800 border border-amber-200/80 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-xs disabled:opacity-50"
+              onClick={() => onOpenFlashcards && onOpenFlashcards()}
+              className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-xs"
+              title="1-Click AI Flashcards with Spaced Repetition"
             >
-              🌐 Translate (Hindi / Multi)
+              🧠 Study Flashcards
+            </button>
+            <button
+              onClick={handleLockPage}
+              className="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-lg text-[11px] font-semibold transition-all cursor-pointer shadow-xs"
+              title="Lock this note with Biometrics / PIN AES-256 Vault"
+            >
+              🔐 Lock Vault
             </button>
           </div>
         </div>
@@ -420,53 +461,20 @@ export default function DocumentEditor({
                   </div>
                 )}
 
-                {block.type === 'code' && (
-                  <div className="my-3 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 text-slate-100 font-mono text-xs shadow-sm">
-                    <div className="px-3 py-1.5 bg-slate-800/80 text-[10px] text-slate-400 flex items-center justify-between border-b border-slate-700/50">
-                      <span>{block.language || 'javascript'}</span>
-                      <button
-                        onClick={() => navigator.clipboard.writeText(block.content)}
-                        className="hover:text-white cursor-pointer"
-                      >
-                        Copy
-                      </button>
-                    </div>
-                    <textarea
-                      value={block.content}
-                      onChange={(e) => handleBlockChange(idx, e.target.value)}
-                      rows={Math.max(3, block.content.split('\n').length)}
-                      className="w-full p-3 bg-transparent border-none focus:outline-none text-emerald-400 resize-none leading-relaxed"
-                    />
-                  </div>
+                {(block.type === 'code' || block.type === 'code_runner') && (
+                  <CodeRunnerBlock
+                    block={block}
+                    onChangeContent={(val) => handleBlockChange(idx, val)}
+                    onDeleteBlock={() => deleteBlock(idx)}
+                  />
                 )}
 
                 {block.type === 'math' && (
-                  <div className="my-3 p-4 bg-gray-50/80 border border-gray-200 rounded-xl shadow-2xs group/math">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-gray-500 font-bold uppercase tracking-wider">
-                        <span>🧮</span>
-                        <span>LaTeX Math Equation (KaTeX Engine)</span>
-                      </div>
-                      <span className="text-[10px] text-gray-400 font-mono">0ms Real-Time KaTeX</span>
-                    </div>
-
-                    {/* True KaTeX Rendered Mathematical Formula */}
-                    <div className="py-4 px-3 text-center bg-white rounded-lg border border-gray-200 shadow-xs overflow-x-auto min-h-[56px] flex items-center justify-center">
-                      <KatexEquation math={block.content} displayMode={true} />
-                    </div>
-
-                    {/* Formula Source Editor Input */}
-                    <div className="mt-2.5 flex items-center gap-2">
-                      <span className="text-[10px] font-mono text-gray-400 select-none pl-1">LaTeX:</span>
-                      <input
-                        type="text"
-                        value={block.content}
-                        onChange={(e) => handleBlockChange(idx, e.target.value)}
-                        placeholder="Type LaTeX formula (e.g. E = m c^2)..."
-                        className="flex-1 text-xs font-mono text-gray-800 bg-white px-3 py-1.5 rounded-md border border-gray-200 focus:outline-none focus:border-blue-500/80 focus:ring-1 focus:ring-blue-500/20 shadow-2xs"
-                      />
-                    </div>
-                  </div>
+                  <InteractiveMathBlock
+                    block={block}
+                    onChangeContent={(val) => handleBlockChange(idx, val)}
+                    onDeleteBlock={() => deleteBlock(idx)}
+                  />
                 )}
 
                 {block.type === 'database' && (
