@@ -31,22 +31,13 @@ export default function Navbar({ onOpenAuth, user, onLogout, onGoToWorkspace }) 
             </button>
           </>
         ) : (
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onOpenAuth('signin')}
-              className="text-gray-700 hover:text-gray-950 text-xs font-semibold px-3.5 py-2 rounded-full transition-colors cursor-pointer hover:bg-gray-100"
-            >
-              Log In
-            </button>
-            <button
-              type="button"
-              onClick={() => onOpenAuth('signup')}
-              className="btn-blue-pill text-white text-xs font-semibold px-4 py-2 rounded-full inline-flex items-center gap-1.5 cursor-pointer shadow-sm hover:shadow transition-all"
-            >
-              <span>Sign Up Free</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => onOpenAuth('signup')}
+            className="btn-blue-pill text-white text-xs font-semibold px-4 py-2 rounded-full inline-flex items-center gap-1.5 cursor-pointer shadow-sm hover:shadow transition-all"
+          >
+            <span>Sign up / Sign in</span>
+          </button>
         )}
       </div>
     </header>

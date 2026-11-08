@@ -491,6 +491,7 @@ export default function Sidebar({
             </button>
           </div>
         </div>
+<<<<<<< Updated upstream
 
         {/* Dropdown Modals */}
         <WorkspaceSwitcherModal
@@ -507,6 +508,24 @@ export default function Sidebar({
           onClose={() => setIsAppsMenuOpen(false)}
           isLight={isLight}
         />
+=======
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onGoToLanding}
+            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+            title="Go to Landing Page"
+          >
+            <span className="text-xs">🌐</span>
+          </button>
+          <button
+            onClick={onLogout}
+            className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+            title="Log out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+>>>>>>> Stashed changes
       </div>
     </aside>
   );

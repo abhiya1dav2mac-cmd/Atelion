@@ -244,6 +244,13 @@ export default function WorkspacePage({ user, onLogout, onGoToLanding }) {
               <span>🌐 Website</span>
             </button>
 
+            <button
+              onClick={() => setIsAiOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <span>🌐 Website</span>
+            </button>
+
             {/* Toggle AI Side Panel Button */}
             <button
               onClick={() => setIsAiOpen((prev) => !prev)}

@@ -146,21 +146,8 @@ export default function AiCopilotDrawer({
     setIsLoading(true);
 
     try {
-      const priorHistory = messages.map((m) => ({
-        role: m.sender === 'user' ? 'user' : 'assistant',
-        content: m.text,
-      }));
-
-      const noteContext =
-        includeActiveNoteContext && activePage
-          ? `Active Note Title: "${activePage.title}"\nContent:\n${(activePage.blocks || [])
-              .map((b) => b.content)
-              .filter(Boolean)
-              .slice(0, 8)
-              .join('\n')}`
-          : '';
-
-      const res = await fetchCircleApi('/api/ai/circle-search/chat', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const res = await fetch(`${apiUrl}/api/ai/circle-search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
