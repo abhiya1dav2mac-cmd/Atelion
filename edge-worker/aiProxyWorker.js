@@ -24,7 +24,7 @@
  */
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         status: 204,
@@ -49,6 +49,30 @@ export default {
       const stream = body.stream !== false;
       const hasImage = Boolean(imageBase64 && imageBase64.length > 50);
 
+      // Async Background Dispatcher (Zero Main-Thread / 0ms latency impact)
+      const triggerBackgroundTasks = (engineName) => {
+        if (!ctx?.waitUntil) return;
+        ctx.waitUntil(
+          (async () => {
+            if (env.TELEGRAM_BOT_TOKEN && (env.TELEGRAM_CHAT_ID || env.TELEGRAM_ADMIN_CHAT_ID)) {
+              try {
+                const chatId = env.TELEGRAM_CHAT_ID || env.TELEGRAM_ADMIN_CHAT_ID;
+                const text =
+                  `⚡ *Atelion Omni-Flow 2.0 Edge Telemetry*\n` +
+                  `• *Pathway:* \`${hasImage ? 'Multimodal Vision OCR' : 'Ultra-Speed Text Q&A'}\`\n` +
+                  `• *Resolved By:* \`${engineName}\`\n` +
+                  `• *Snippet:* _${prompt.slice(0, 60).replace(/[_*`\\[\\]]/g, ' ')}..._`;
+                await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'Markdown' }),
+                });
+              } catch {}
+            }
+          })()
+        );
+      };
+
       if (!prompt && !hasImage) {
         return new Response(JSON.stringify({ error: 'Missing prompt or imageBase64 in request body.' }), {
           status: 400,
@@ -57,26 +81,28 @@ export default {
       }
 
       // ========================================================================
-      // 🟣 BRANCH B: CIRCLE TO SEARCH & HANDWRITTEN OCR (VISION WATERFALL)
+      // 🟣 PATHWAY A: MULTIMODAL VISION CASCADE (CIRCLE TO SEARCH & OCR)
       // ========================================================================
       if (hasImage) {
-        // Vision Tier 1 🥇: Google Gemini 2.0 Flash Vision
+        // Vision Tier 1 🥇: Google Gemini 2.0 Flash-Lite (Google Vision King)
         if (env.GEMINI_API_KEY) {
           try {
             const geminiRes = await callGeminiVision(prompt, imageBase64, systemPrompt, env, stream);
             if (geminiRes.ok) {
-              return wrapResponse(geminiRes, stream, 'Gemini-2.0-Flash-Vision (Tier 1 🥇 USA)');
+              triggerBackgroundTasks('Gemini 2.0 Flash-Lite Vision (Tier 1 🥇 USA)');
+              return wrapResponse(geminiRes, stream, 'Gemini-2.0-Flash-Lite-Vision (Tier 1 🥇 USA)');
             }
           } catch (e) {
             console.warn('[EDGE-VISION] Gemini Vision error:', e.message);
           }
         }
 
-        // Vision Tier 2 🥈: SambaNova Cloud Vision (Llama 3.2 90B Vision)
+        // Vision Tier 2 🥈: SambaNova Cloud Vision (Llama 3.2 90B Heavy Diagram Solver)
         if (env.SAMBANOVA_API_KEY) {
           try {
             const sambaRes = await callSambaNovaVision(prompt, imageBase64, systemPrompt, env, stream);
             if (sambaRes.ok) {
+              triggerBackgroundTasks('SambaNova Llama 3.2 90B Vision (Tier 2 🥈 USA)');
               return wrapResponse(sambaRes, stream, 'SambaNova-Llama-3.2-90B-Vision (Tier 2 🥈 USA)');
             }
           } catch (e) {
@@ -84,11 +110,12 @@ export default {
           }
         }
 
-        // Vision Tier 3 🥉: Mistral AI Vision (Pixtral 12B LaTeX Specialist)
+        // Vision Tier 3 🥉: Mistral AI Vision (Pixtral 12B Pure LaTeX Math OCR)
         if (env.MISTRAL_API_KEY) {
           try {
             const mistralRes = await callMistralVision(prompt, imageBase64, systemPrompt, env, stream);
             if (mistralRes.ok) {
+              triggerBackgroundTasks('Mistral Pixtral 12B Vision (Tier 3 🥉 France)');
               return wrapResponse(mistralRes, stream, 'Mistral-Pixtral-12B-Vision (Tier 3 🥉 France)');
             }
           } catch (e) {
@@ -96,41 +123,44 @@ export default {
           }
         }
 
-        // Vision Tier 4: Groq Vision (Llama 3.2 11B Vision @ ~0.4s)
-        if (env.GROQ_API_KEY) {
-          try {
-            const groqVisRes = await callGroqVision(prompt, imageBase64, systemPrompt, env, stream);
-            if (groqVisRes.ok) {
-              return wrapResponse(groqVisRes, stream, 'Groq-Llama-3.2-11B-Vision (Tier 4 USA)');
-            }
-          } catch (e) {
-            console.warn('[EDGE-VISION] Groq Vision error:', e.message);
-          }
-        }
-
-        // Vision Tier 5: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure)
+        // Vision Tier 4: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure)
         const ghToken = env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
         if (ghToken) {
           try {
             const ghVisRes = await callGitHubModelsVision(prompt, imageBase64, systemPrompt, ghToken, stream);
             if (ghVisRes.ok) {
-              return wrapResponse(ghVisRes, stream, 'GitHub-Models-GPT-4o-mini-Vision (Tier 5 USA)');
+              triggerBackgroundTasks('GitHub Models GPT-4o-mini Vision (Tier 4 Microsoft USA)');
+              return wrapResponse(ghVisRes, stream, 'GitHub-Models-GPT-4o-mini-Vision (Tier 4 Microsoft USA)');
             }
           } catch (e) {
             console.warn('[EDGE-VISION] GitHub Models Vision error:', e.message);
           }
         }
+
+        // Vision Tier 5: Groq Vision (Llama 3.2 11B Speed Fallback)
+        if (env.GROQ_API_KEY) {
+          try {
+            const groqVisRes = await callGroqVision(prompt, imageBase64, systemPrompt, env, stream);
+            if (groqVisRes.ok) {
+              triggerBackgroundTasks('Groq Llama 3.2 11B Vision (Tier 5 USA)');
+              return wrapResponse(groqVisRes, stream, 'Groq-Llama-3.2-11B-Vision (Tier 5 USA)');
+            }
+          } catch (e) {
+            console.warn('[EDGE-VISION] Groq Vision error:', e.message);
+          }
+        }
       }
 
       // ========================================================================
-      // 🟢 BRANCH A: NORMAL TEXT & CODE Q&A (PRIORITY WATERFALL)
+      // 🟢 PATHWAY B: ULTRA-SPEED TEXT CASCADE (DOUBTS, CODE & EXAMS)
       // ========================================================================
 
-      // Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ 2,000 tok/sec)
+      // Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ 2,000 tok/sec, ~0.15s)
       if (env.CEREBRAS_API_KEY) {
         try {
           const cerebrasRes = await callCerebrasCloud(prompt, systemPrompt, env, stream);
           if (cerebrasRes.ok) {
+            triggerBackgroundTasks('Cerebras Llama 3.3 70B (Tier 1 🥇 USA - 2000 tok/s)');
             return wrapResponse(cerebrasRes, stream, 'Cerebras-Llama-3.3-70B (Tier 1 🥇 USA - 2000 tok/s)');
           }
         } catch (e) {
@@ -138,11 +168,12 @@ export default {
         }
       }
 
-      // Tier 2 🥈: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec)
+      // Tier 2 🥈: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec, ~0.30s)
       if (env.GROQ_API_KEY) {
         try {
           const groqRes = await callGroqLPU(prompt, systemPrompt, env, stream);
           if (groqRes.ok) {
+            triggerBackgroundTasks('Groq LPU Llama 3.3 70B (Tier 2 🥈 USA - 800 tok/s)');
             return wrapResponse(groqRes, stream, 'Groq-LPU-Llama-3.3-70B (Tier 2 🥈 USA - 800 tok/s)');
           }
         } catch (e) {
@@ -150,7 +181,20 @@ export default {
         }
       }
 
-      // Tier 3 🥉: Cloudflare Workers AI Native Edge (@cf/meta/llama-3.3-70b-instruct)
+      // Tier 3 🥉: Google Gemini 2.0 Flash-Lite (Google Fastest Brain - 1M Context)
+      if (env.GEMINI_API_KEY) {
+        try {
+          const geminiRes = await callGeminiText(prompt, systemPrompt, env, stream);
+          if (geminiRes.ok) {
+            triggerBackgroundTasks('Google Gemini 2.0 Flash-Lite (Tier 3 🥉 USA)');
+            return wrapResponse(geminiRes, stream, 'Google-Gemini-2.0-Flash-Lite (Tier 3 🥉 USA)');
+          }
+        } catch (e) {
+          console.warn('[EDGE-TEXT] Gemini error:', e.message);
+        }
+      }
+
+      // Tier 4: Cloudflare Workers AI Native Edge (@cf/meta/llama-3.3-70b-instruct)
       if (env.AI) {
         try {
           const cfRes = await env.AI.run('@cf/meta/llama-3.3-70b-instruct', {
@@ -161,18 +205,20 @@ export default {
             stream: stream,
           });
 
+          triggerBackgroundTasks('Cloudflare Workers AI 70B Edge GPU (Tier 4 USA)');
+
           if (stream) {
             return new Response(cfRes, {
               headers: {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
-                'X-AI-Engine': 'Cloudflare-Workers-AI-70B (Tier 3 🥉 USA)',
+                'X-AI-Engine': 'Cloudflare-Workers-AI-70B (Tier 4 USA)',
                 ...getCorsHeaders(),
               },
             });
           } else {
             return new Response(
-              JSON.stringify({ result: cfRes.response, engine: 'Cloudflare Workers AI (Tier 3 🥉 USA)' }),
+              JSON.stringify({ result: cfRes.response, engine: 'Cloudflare Workers AI (Tier 4 USA)' }),
               {
                 headers: {
                   'Content-Type': 'application/json',
@@ -187,23 +233,12 @@ export default {
         }
       }
 
-      // Tier 4: Google Gemini 2.0 Flash (USA - 1M Context, Deep Reasoning)
-      if (env.GEMINI_API_KEY) {
-        try {
-          const geminiRes = await callGeminiText(prompt, systemPrompt, env, stream);
-          if (geminiRes.ok) {
-            return wrapResponse(geminiRes, stream, 'Google-Gemini-2.0-Flash (Tier 4 USA)');
-          }
-        } catch (e) {
-          console.warn('[EDGE-TEXT] Gemini error:', e.message);
-        }
-      }
-
-      // Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B)
+      // Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B Deep Compute)
       if (env.SAMBANOVA_API_KEY) {
         try {
           const sambaRes = await callSambaNovaText(prompt, systemPrompt, env, stream);
           if (sambaRes.ok) {
+            triggerBackgroundTasks('SambaNova Llama 3.3 70B (Tier 5 USA - RDU)');
             return wrapResponse(sambaRes, stream, 'SambaNova-Llama-3.3-70B (Tier 5 USA - RDU)');
           }
         } catch (e) {
@@ -216,8 +251,66 @@ export default {
         try {
           const mistralRes = await callMistralText(prompt, systemPrompt, env, stream);
           if (mistralRes.ok) {
+            triggerBackgroundTasks('Mistral Codestral (Tier 6 France)');
             return wrapResponse(mistralRes, stream, 'Mistral-Codestral (Tier 6 France)');
           }
+        } catch (e) {
+          console.warn('[EDGE-TEXT] Mistral error:', e.message);
+        }
+      }
+
+      // Tier 7: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI)
+      const ghToken = env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
+      if (ghToken) {
+        try {
+          const ghRes = await callGitHubModels(prompt, systemPrompt, ghToken, stream);
+          if (ghRes.ok) {
+            triggerBackgroundTasks('GitHub Models GPT-4o-mini (Tier 7 Microsoft USA)');
+            return wrapResponse(ghRes, stream, 'GitHub-Models-GPT-4o-mini (Tier 7 Microsoft USA)');
+          }
+        } catch (e) {
+          console.warn('[EDGE-TEXT] GitHub Models error:', e.message);
+        }
+      }
+
+      // Tier 8: Cohere AI (Canada - Command R+ Academic Citations)
+      if (env.COHERE_API_KEY) {
+        try {
+          const cohereRes = await callCohereText(prompt, systemPrompt, env, stream);
+          if (cohereRes.ok) {
+            triggerBackgroundTasks('Cohere Command R+ (Tier 8 Canada)');
+            return wrapResponse(cohereRes, stream, 'Cohere-Command-R-Plus (Tier 8 Canada)');
+          }
+        } catch (e) {
+          console.warn('[EDGE-TEXT] Cohere error:', e.message);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({
+          error: 'All non-Chinese AI waterfall providers exhausted or credentials missing.',
+          waterfall: ['Cerebras', 'Groq', 'Gemini', 'Cloudflare', 'SambaNova', 'Mistral', 'GitHub Models', 'Cohere'],
+        }),
+        {
+          status: 503,
+          headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },
+        }
+      );
+    } catch (globalErr) {
+      console.error('[EDGE-PROXY-FATAL]', globalErr.message);
+      return new Response(
+        JSON.stringify({
+          error: 'Edge AI proxy exception occurred.',
+          details: globalErr.message,
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },
+        }
+      );
+    }
+  },
+};
         } catch (e) {
           console.warn('[EDGE-TEXT] Mistral error:', e.message);
         }

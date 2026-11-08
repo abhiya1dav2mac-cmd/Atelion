@@ -733,26 +733,7 @@ async function queryMultiProviderCascade({
       }
     }
 
-    // Tier 4: Groq Vision (Llama 3.2 11B Vision @ ~0.4s)
-    if (process.env.GROQ_API_KEY) {
-      try {
-        const res = await callGroqVision(effectivePrompt, imageBase64, sys, process.env.GROQ_API_KEY);
-        if (res?.text) {
-          return formatAiOutput({
-            title: extractTitle(res.text, effectivePrompt),
-            text: res.text,
-            provider: res.provider,
-            model: res.model,
-            elapsedMs: Date.now() - startTime,
-            queryType: queryType || 'vision-ocr',
-          });
-        }
-      } catch (e) {
-        console.warn(`[VISION-CASCADE] Groq Vision failed (${e.message}). Escalating to GitHub Models Vision...`);
-      }
-    }
-
-    // Tier 5: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure)
+    // Tier 4: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure)
     const ghToken = process.env.GITHUB_TOKEN || process.env.GH_MODELS_TOKEN;
     if (ghToken) {
       try {
@@ -768,16 +749,35 @@ async function queryMultiProviderCascade({
           });
         }
       } catch (e) {
-        console.warn(`[VISION-CASCADE] GitHub Models Vision failed (${e.message}).`);
+        console.warn(`[VISION-CASCADE] GitHub Models Vision failed (${e.message}). Escalating to Groq Vision...`);
+      }
+    }
+
+    // Tier 5: Groq Vision (Llama 3.2 11B Speed Fallback)
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const res = await callGroqVision(effectivePrompt, imageBase64, sys, process.env.GROQ_API_KEY);
+        if (res?.text) {
+          return formatAiOutput({
+            title: extractTitle(res.text, effectivePrompt),
+            text: res.text,
+            provider: res.provider,
+            model: res.model,
+            elapsedMs: Date.now() - startTime,
+            queryType: queryType || 'vision-ocr',
+          });
+        }
+      } catch (e) {
+        console.warn(`[VISION-CASCADE] Groq Vision failed (${e.message}).`);
       }
     }
   }
 
   // ============================================================================
-  // 🟢 BRANCH A: NORMAL TEXT & CODE Q&A (PRIORITY WATERFALL)
+  // 🟢 BRANCH A: NORMAL TEXT & CODE Q&A (OMNI-FLOW 2.0 PRIORITY WATERFALL)
   // ============================================================================
 
-  // Tier 1 🥇: Cerebras Cloud (USA - 2,000 tok/sec, ~0.15s)
+  // Tier 1 🥇: Cerebras Cloud (USA - 2,000 tok/sec, ~0.15s King of Speed)
   if (process.env.CEREBRAS_API_KEY) {
     try {
       const res = await callCerebrasCloud(effectivePrompt, sys, process.env.CEREBRAS_API_KEY, history);
@@ -796,7 +796,7 @@ async function queryMultiProviderCascade({
     }
   }
 
-  // Tier 2 🥈: Groq LPU (USA - 800 tok/sec, ~0.3s)
+  // Tier 2 🥈: Groq LPU (USA - 800 tok/sec, ~0.30s Fast LPU)
   if (process.env.GROQ_API_KEY) {
     try {
       const res = await callGroqLPU(effectivePrompt, sys, process.env.GROQ_API_KEY, history);
@@ -811,11 +811,30 @@ async function queryMultiProviderCascade({
         });
       }
     } catch (e) {
-      console.warn(`[TEXT-CASCADE] Groq (${e.message}). Escalating to Cloudflare Workers AI...`);
+      console.warn(`[TEXT-CASCADE] Groq (${e.message}). Escalating to Gemini 2.0 Flash-Lite...`);
     }
   }
 
-  // Tier 3 🥉: Cloudflare Workers AI (USA - Edge GPU Llama 3.3 70B / 3.1 8B)
+  // Tier 3 🥉: Google Gemini 2.0 Flash-Lite (Google Fastest Brain - 1M Context)
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const res = await callGeminiText(effectivePrompt, sys, process.env.GEMINI_API_KEY, history);
+      if (res?.text) {
+        return formatAiOutput({
+          title: extractTitle(res.text, effectivePrompt),
+          text: res.text,
+          provider: res.provider,
+          model: res.model,
+          elapsedMs: Date.now() - startTime,
+          queryType,
+        });
+      }
+    } catch (e) {
+      console.warn(`[TEXT-CASCADE] Gemini (${e.message}). Escalating to Cloudflare Workers AI...`);
+    }
+  }
+
+  // Tier 4: Cloudflare Workers AI (USA - Edge GPU Llama 3.3 70B / 3.1 8B)
   if (process.env.CLOUDFLARE_API_KEY && process.env.CLOUDFLARE_ACCOUNT_ID) {
     try {
       const res = await callCloudflareWorkersAI(
@@ -836,26 +855,7 @@ async function queryMultiProviderCascade({
         });
       }
     } catch (e) {
-      console.warn(`[TEXT-CASCADE] Cloudflare AI (${e.message}). Escalating to Gemini 2.0 Flash...`);
-    }
-  }
-
-  // Tier 4: Google Gemini 2.0 Flash (USA - 1M Context, Deep Reasoning)
-  if (process.env.GEMINI_API_KEY) {
-    try {
-      const res = await callGeminiText(effectivePrompt, sys, process.env.GEMINI_API_KEY, history);
-      if (res?.text) {
-        return formatAiOutput({
-          title: extractTitle(res.text, effectivePrompt),
-          text: res.text,
-          provider: res.provider,
-          model: res.model,
-          elapsedMs: Date.now() - startTime,
-          queryType,
-        });
-      }
-    } catch (e) {
-      console.warn(`[TEXT-CASCADE] Gemini (${e.message}). Escalating to SambaNova Cloud...`);
+      console.warn(`[TEXT-CASCADE] Cloudflare AI (${e.message}). Escalating to SambaNova Cloud...`);
     }
   }
 
