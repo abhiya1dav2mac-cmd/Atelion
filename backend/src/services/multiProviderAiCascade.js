@@ -4,18 +4,17 @@
  * 100% Free • Zero Credit Card • Zero Billing Account Required
  * 100% Western / Allied Security: USA 🇺🇸, France 🇫🇷, Canada 🇨🇦
  * 0 Chinese Dependency (Zero DeepSeek, Zero Qwen, Zero Baichuan)
- * 0 Payment Method Required (Removed Mistral & Cohere which require billing/cards)
+ * 0 Payment Method Required (Removed Mistral, Cohere & Cerebras which require billing/cards)
  * 
  * 🟢 Branch A: Normal Text & Code Q&A (100% Zero-Card Waterfall)
  *   - Tier 0: Turso Edge Cache (0ms DB Hash hit)
- *   - Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ ~2,000 tok/sec • 0 Card)
- *   - Tier 2 🥈: Groq LPU (USA - Llama 3.3 70B @ ~800 tok/sec • 0 Card)
- *   - Tier 3 🥉: Google Gemini 2.0 Flash / Flash-Lite (USA - 1M Context • 0 Card)
- *   - Tier 4: Cloudflare Workers AI (USA - Llama 3.1 8B Edge GPU • 0 Card)
- *   - Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
- *   - Tier 6 🐙: GitHub Models / Microsoft (USA - GPT-4o-mini Azure AI • 0 Card)
- *   - Tier 7 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
- *   - Tier 8 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
+ *   - Tier 1 🥇: Groq LPU (USA - Llama 3.3 70B @ ~800 tok/sec, ~0.30s • 0 Card)
+ *   - Tier 2 🥈: Google Gemini 2.0 Flash / Flash-Lite (USA - 1M Context • 0 Card)
+ *   - Tier 3 🥉: Cloudflare Workers AI (USA - Llama 3.1 8B Edge GPU • 0 Card)
+ *   - Tier 4: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
+ *   - Tier 5 🐙: GitHub Models / Microsoft (USA - GPT-4o-mini Azure AI • 0 Card)
+ *   - Tier 6 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+ *   - Tier 7 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
  * 
  * 🟣 Branch B: Circle to Search & Handwritten OCR (Multimodal Vision • 0 Card)
  *   - Tier 1 🥇: Google Gemini 2.0 Flash Vision (USA - Undisputed Vision King • 0 Card)
@@ -78,47 +77,6 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 7000) {
 // 🟢 BRANCH A PROVIDERS: TEXT & CODE Q&A
 // ==============================================================================
 
-/**
- * Tier 1 🥇: Cerebras Cloud (USA) - Llama 3.3 70B @ 2,000 tok/sec
- */
-async function callCerebrasCloud(prompt, systemPrompt, apiKey, history = []) {
-  const messages = buildChatMessages(prompt, systemPrompt, history);
-  const models = ['llama3.3-70b', 'llama-3.3-70b', 'llama3.1-70b'];
-
-  for (const model of models) {
-    try {
-      const res = await fetchWithTimeout(
-        'https://api.cerebras.ai/v1/chat/completions',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model,
-            messages,
-            temperature: 0.5,
-            max_tokens: 1600,
-          }),
-        },
-        5500
-      );
-
-      if (res.status === 429) throw new Error('Cerebras 429 Rate Limit');
-      if (!res.ok) continue;
-
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content || '';
-      if (text) {
-        return { text, model: `cerebras/${model}`, provider: 'Cerebras Cloud (USA - 2,000 tok/s)' };
-      }
-    } catch (err) {
-      if (err.message.includes('429')) throw err;
-    }
-  }
-  throw new Error('Cerebras Cloud failed or unavailable');
-}
 
 /**
  * Tier 2 🥈: Groq LPU (USA) - Llama 3.3 70B @ ~800 tok/sec
@@ -846,26 +804,7 @@ async function queryMultiProviderCascade({
   // 🟢 BRANCH A: NORMAL TEXT & CODE Q&A (OMNI-FLOW 2.0 PRIORITY WATERFALL)
   // ============================================================================
 
-  // Tier 1 🥇: Cerebras Cloud (USA - 2,000 tok/sec, ~0.15s King of Speed)
-  if (process.env.CEREBRAS_API_KEY) {
-    try {
-      const res = await callCerebrasCloud(effectivePrompt, sys, process.env.CEREBRAS_API_KEY, history);
-      if (res?.text) {
-        return formatAiOutput({
-          title: extractTitle(res.text, effectivePrompt),
-          text: res.text,
-          provider: res.provider,
-          model: res.model,
-          elapsedMs: Date.now() - startTime,
-          queryType,
-        });
-      }
-    } catch (e) {
-      console.warn(`[TEXT-CASCADE] Cerebras (${e.message}). Escalating to Groq LPU...`);
-    }
-  }
-
-  // Tier 2 🥈: Groq LPU (USA - 800 tok/sec, ~0.30s Fast LPU)
+  // Tier 1 🥇: Groq LPU (USA - 800 tok/sec, ~0.30s King of Speed • 0 Card)
   if (process.env.GROQ_API_KEY) {
     try {
       const res = await callGroqLPU(effectivePrompt, sys, process.env.GROQ_API_KEY, history);
@@ -1179,7 +1118,6 @@ function formatHeuristicFallback(query, queryType, elapsedMs, { initialContext =
 
 module.exports = {
   queryMultiProviderCascade,
-  callCerebrasCloud,
   callGroqLPU,
   callCloudflareWorkersAI,
   callGeminiText,

@@ -3,17 +3,16 @@
  * ATELION EDGE AI ROUTER - CLOUDFLARE WORKER PROXY
  * 100% Free • Zero Credit Card • Zero Billing Account Required
  * 100% Western / Allied Security: USA 🇺🇸, France 🇫🇷 • Zero Chinese Models
- * 0 Payment Method Required
+ * 0 Payment Method Required (Removed Mistral, Cohere & Cerebras which require billing/cards)
  * 
  * 🟢 Branch A: Normal Text & Code Q&A (100% Free • 0 Card)
- *   - Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ 2,000 tok/sec • 0 Card)
- *   - Tier 2 🥈: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec • 0 Card)
- *   - Tier 3 🥉: Google Gemini 2.0 Flash (USA - 1M Context, High Academic • 0 Card)
- *   - Tier 4: Cloudflare Workers AI Native Edge (@cf/meta/llama-3.3-70b-instruct • 0 Card)
- *   - Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
- *   - Tier 6 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
- *   - Tier 7 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
- *   - Tier 8 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
+ *   - Tier 1 🥇: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec, ~0.30s • 0 Card)
+ *   - Tier 2 🥈: Google Gemini 2.0 Flash (USA - 1M Context, High Academic • 0 Card)
+ *   - Tier 3 🥉: Cloudflare Workers AI Native Edge (@cf/meta/llama-3.3-70b-instruct • 0 Card)
+ *   - Tier 4: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
+ *   - Tier 5 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
+ *   - Tier 6 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+ *   - Tier 7 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
  * 
  * 🟣 Branch B: Circle to Search & Handwritten OCR (Vision Mode • 0 Card)
  *   - Tier 1 🥇: Google Gemini 2.0 Flash Vision (USA • 0 Card)
@@ -171,26 +170,13 @@ export default {
       // 🟢 PATHWAY B: ULTRA-SPEED TEXT CASCADE (DOUBTS, CODE & EXAMS)
       // ========================================================================
 
-      // Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ 2,000 tok/sec, ~0.15s)
-      if (env.CEREBRAS_API_KEY) {
-        try {
-          const cerebrasRes = await callCerebrasCloud(prompt, systemPrompt, env, stream);
-          if (cerebrasRes.ok) {
-            triggerBackgroundTasks('Cerebras Llama 3.3 70B (Tier 1 🥇 USA - 2000 tok/s)');
-            return wrapResponse(cerebrasRes, stream, 'Cerebras-Llama-3.3-70B (Tier 1 🥇 USA - 2000 tok/s)');
-          }
-        } catch (e) {
-          console.warn('[EDGE-TEXT] Cerebras error:', e.message);
-        }
-      }
-
-      // Tier 2 🥈: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec, ~0.30s)
+      // Tier 1 🥇: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec, ~0.30s King of Speed • 0 Card)
       if (env.GROQ_API_KEY) {
         try {
           const groqRes = await callGroqLPU(prompt, systemPrompt, env, stream);
           if (groqRes.ok) {
-            triggerBackgroundTasks('Groq LPU Llama 3.3 70B (Tier 2 🥈 USA - 800 tok/s)');
-            return wrapResponse(groqRes, stream, 'Groq-LPU-Llama-3.3-70B (Tier 2 🥈 USA - 800 tok/s)');
+            triggerBackgroundTasks('Groq LPU Llama 3.3 70B (Tier 1 🥇 USA - 800 tok/s)');
+            return wrapResponse(groqRes, stream, 'Groq-LPU-Llama-3.3-70B (Tier 1 🥇 USA - 800 tok/s)');
           }
         } catch (e) {
           console.warn('[EDGE-TEXT] Groq error:', e.message);
@@ -307,7 +293,6 @@ export default {
         JSON.stringify({
           error: 'All 100% free zero-card AI waterfall providers exhausted or credentials missing.',
           waterfall: [
-            'Cerebras',
             'Groq',
             'Gemini',
             'Cloudflare',
@@ -353,26 +338,6 @@ function wrapResponse(res, stream, engineName) {
 // ==============================================================================
 // PROVIDER IMPLEMENTATIONS FOR CLOUDFLARE EDGE WORKER
 // ==============================================================================
-
-async function callCerebrasCloud(prompt, systemPrompt, env, stream) {
-  return await fetch('https://api.cerebras.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.CEREBRAS_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'llama3.3-70b',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.5,
-      max_tokens: 1800,
-      stream,
-    }),
-  });
-}
 
 async function callGroqLPU(prompt, systemPrompt, env, stream) {
   return await fetch('https://api.groq.com/openai/v1/chat/completions', {

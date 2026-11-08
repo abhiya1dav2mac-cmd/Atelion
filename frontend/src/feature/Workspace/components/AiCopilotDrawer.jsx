@@ -665,8 +665,6 @@ export default function AiCopilotDrawer({
                 onClick={() =>
                   setSelectedModel((prev) =>
                     prev === 'Auto Waterfall'
-                      ? 'Cerebras 2k tok/s'
-                      : prev === 'Cerebras 2k tok/s'
                       ? 'Groq LPU'
                       : prev === 'Groq LPU'
                       ? 'Gemini 2.0'
@@ -682,7 +680,7 @@ export default function AiCopilotDrawer({
                   )
                 }
                 className="text-[10px] text-gray-500 hover:text-gray-900 transition-colors cursor-pointer font-mono"
-                title="Zero-Payment-Method AI Waterfall (Cerebras, Groq, Gemini, Cloudflare, SambaNova, GitHub Models, Hugging Face, OpenRouter - 100% Free • 0 Card)"
+                title="Zero-Payment-Method AI Waterfall (Groq, Gemini, Cloudflare, SambaNova, GitHub Models, Hugging Face, OpenRouter - 100% Free • 0 Card)"
               >
                 {selectedModel} ⌄
               </button>
