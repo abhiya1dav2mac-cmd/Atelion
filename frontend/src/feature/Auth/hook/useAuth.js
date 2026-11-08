@@ -56,16 +56,43 @@ export function useAuth() {
     }
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (credential = null) => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await authService.signInWithGoogle();
-      setUser(res);
-      closeAuth();
+      const res = await authService.signInWithGoogle(credential);
+      if (!res) return null;
+      if (res.requireDetails) {
+        // Return result to AuthModal to show the complete-profile onboarding view
+        return res;
+      }
+      if (res.user) {
+        setUser(res.user);
+        closeAuth();
+        return res;
+      }
       return res;
     } catch (err) {
       setError(err.message || 'Google login failed');
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const completeGoogleProfile = async (payload) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await authService.completeGoogleProfile(payload);
+      if (res.user) {
+        setUser(res.user);
+        closeAuth();
+        return res;
+      }
+      return res;
+    } catch (err) {
+      setError(err.message || 'Profile completion failed');
       throw err;
     } finally {
       setIsLoading(false);
@@ -112,6 +139,7 @@ export function useAuth() {
     login,
     register,
     loginWithGoogle,
+    completeGoogleProfile,
     quickLaunch,
     logout,
   };

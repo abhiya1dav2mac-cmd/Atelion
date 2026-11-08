@@ -23,6 +23,7 @@ export default function LandingPage({ user, onLogout, onGoToWorkspace }) {
     login,
     register,
     loginWithGoogle,
+    completeGoogleProfile,
     quickLaunch,
     isLoading: isAuthLoading,
     error: authError
@@ -63,6 +64,7 @@ export default function LandingPage({ user, onLogout, onGoToWorkspace }) {
         onLogin={login}
         onRegister={register}
         onGoogleLogin={loginWithGoogle}
+        onCompleteGoogleProfile={completeGoogleProfile}
         isLoading={isAuthLoading}
         error={authError}
       />
