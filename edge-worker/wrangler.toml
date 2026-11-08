@@ -5,3 +5,11 @@ compatibility_date = "2024-11-01"
 # Environment Variables & Secrets (Set via: wrangler secret put GROQ_API_KEY)
 [vars]
 ENVIRONMENT = "production"
+
+# ==============================================================================
+# 🌙 MIDNIGHT CRON TRIGGER (0 0 * * *) - ZERO-COST AUTO ARCHIVAL PIPELINE
+# Runs automatically every midnight at 00:00 UTC
+# Flushes warm data to Telegram Vault & purges old DB records (0% Render Load)
+# ==============================================================================
+[triggers]
+crons = ["0 0 * * *"]
