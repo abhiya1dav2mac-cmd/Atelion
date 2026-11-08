@@ -671,12 +671,12 @@ export default function AiCopilotDrawer({
                       : prev === 'Groq LPU'
                       ? 'Gemini 2.0'
                       : prev === 'Gemini 2.0'
-                      ? 'Mistral'
+                      ? 'SambaNova RDU'
                       : 'Auto Waterfall'
                   )
                 }
                 className="text-[10px] text-gray-500 hover:text-gray-900 transition-colors cursor-pointer font-mono"
-                title="8-Tier Non-Chinese AI Waterfall (Cerebras, Groq, Cloudflare, Gemini, SambaNova, Mistral, GitHub Models, Cohere)"
+                title="Zero-Payment-Method AI Waterfall (Cerebras, Groq, Cloudflare, Gemini, SambaNova, GitHub Models)"
               >
                 {selectedModel} ⌄
               </button>

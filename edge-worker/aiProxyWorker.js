@@ -1,25 +1,24 @@
 /**
  * ==============================================================================
  * ATELION EDGE AI ROUTER - CLOUDFLARE WORKER PROXY
- * Full 8-Tier Non-Chinese Waterfall Architecture (0% Chinese Models)
+ * 100% Free • Zero Credit Card • Zero Billing Account Required
  * 100% Western / Allied Security: USA 🇺🇸, France 🇫🇷, Canada 🇨🇦
+ * 0 Chinese Dependency (Zero DeepSeek, Zero Qwen, Zero Baichuan)
+ * 0 Payment Method Required (Removed Mistral & Cohere)
  * 
- * 🟢 Branch A: Normal Text & Code Q&A
- *   - Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ 2,000 tok/sec)
- *   - Tier 2 🥈: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec)
- *   - Tier 3 🥉: Cloudflare Workers AI Native Edge (@cf/meta/llama-3.3-70b-instruct)
- *   - Tier 4: Google Gemini 2.0 Flash (USA - 1M Context, Academic Accuracy)
- *   - Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B)
- *   - Tier 6: Mistral AI (France - Codestral & European Precision)
- *   - Tier 7: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI)
- *   - Tier 8: Cohere AI (Canada - Command R+ Citation Specialist)
+ * 🟢 Branch A: Normal Text & Code Q&A (100% Free • 0 Card)
+ *   - Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ 2,000 tok/sec • 0 Card)
+ *   - Tier 2 🥈: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec • 0 Card)
+ *   - Tier 3 🥉: Google Gemini 2.0 Flash (USA - 1M Context, High Academic • 0 Card)
+ *   - Tier 4: Cloudflare Workers AI Native Edge (@cf/meta/llama-3.3-70b-instruct • 0 Card)
+ *   - Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
+ *   - Tier 6: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
  * 
- * 🟣 Branch B: Circle to Search & Handwritten OCR (Vision Mode)
- *   - Tier 1 🥇: Google Gemini 2.0 Flash Vision (USA)
- *   - Tier 2 🥈: SambaNova Cloud Vision (USA - Llama 3.2 90B Vision)
- *   - Tier 3 🥉: Mistral AI Vision (France - Pixtral 12B LaTeX Specialist)
- *   - Tier 4: Groq Vision (USA - Llama 3.2 11B Vision @ ~0.4s)
- *   - Tier 5: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision)
+ * 🟣 Branch B: Circle to Search & Handwritten OCR (Vision Mode • 0 Card)
+ *   - Tier 1 🥇: Google Gemini 2.0 Flash Vision (USA • 0 Card)
+ *   - Tier 2 🥈: SambaNova Cloud Vision (USA - Llama 3.2 90B Vision • 0 Card)
+ *   - Tier 3 🥉: Groq Vision (USA - Llama 3.2 11B Vision @ ~0.4s • 0 Card)
+ *   - Tier 4: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
  * ==============================================================================
  */
 
@@ -110,20 +109,20 @@ export default {
           }
         }
 
-        // Vision Tier 3 🥉: Mistral AI Vision (Pixtral 12B Pure LaTeX Math OCR)
-        if (env.MISTRAL_API_KEY) {
+        // Vision Tier 3 🥉: Groq Vision (Llama 3.2 11B Speed Fallback @ ~0.4s • 0 Card)
+        if (env.GROQ_API_KEY) {
           try {
-            const mistralRes = await callMistralVision(prompt, imageBase64, systemPrompt, env, stream);
-            if (mistralRes.ok) {
-              triggerBackgroundTasks('Mistral Pixtral 12B Vision (Tier 3 🥉 France)');
-              return wrapResponse(mistralRes, stream, 'Mistral-Pixtral-12B-Vision (Tier 3 🥉 France)');
+            const groqVisRes = await callGroqVision(prompt, imageBase64, systemPrompt, env, stream);
+            if (groqVisRes.ok) {
+              triggerBackgroundTasks('Groq Llama 3.2 11B Vision (Tier 3 🥉 USA)');
+              return wrapResponse(groqVisRes, stream, 'Groq-Llama-3.2-11B-Vision (Tier 3 🥉 USA)');
             }
           } catch (e) {
-            console.warn('[EDGE-VISION] Mistral Vision error:', e.message);
+            console.warn('[EDGE-VISION] Groq Vision error:', e.message);
           }
         }
 
-        // Vision Tier 4: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure)
+        // Vision Tier 4: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure • 0 Card)
         const ghToken = env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
         if (ghToken) {
           try {
@@ -134,19 +133,6 @@ export default {
             }
           } catch (e) {
             console.warn('[EDGE-VISION] GitHub Models Vision error:', e.message);
-          }
-        }
-
-        // Vision Tier 5: Groq Vision (Llama 3.2 11B Speed Fallback)
-        if (env.GROQ_API_KEY) {
-          try {
-            const groqVisRes = await callGroqVision(prompt, imageBase64, systemPrompt, env, stream);
-            if (groqVisRes.ok) {
-              triggerBackgroundTasks('Groq Llama 3.2 11B Vision (Tier 5 USA)');
-              return wrapResponse(groqVisRes, stream, 'Groq-Llama-3.2-11B-Vision (Tier 5 USA)');
-            }
-          } catch (e) {
-            console.warn('[EDGE-VISION] Groq Vision error:', e.message);
           }
         }
       }
@@ -246,105 +232,24 @@ export default {
         }
       }
 
-      // Tier 6: Mistral AI (France - Codestral & European Precision)
-      if (env.MISTRAL_API_KEY) {
-        try {
-          const mistralRes = await callMistralText(prompt, systemPrompt, env, stream);
-          if (mistralRes.ok) {
-            triggerBackgroundTasks('Mistral Codestral (Tier 6 France)');
-            return wrapResponse(mistralRes, stream, 'Mistral-Codestral (Tier 6 France)');
-          }
-        } catch (e) {
-          console.warn('[EDGE-TEXT] Mistral error:', e.message);
-        }
-      }
-
-      // Tier 7: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI)
+      // Tier 6: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
       const ghToken = env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
       if (ghToken) {
         try {
           const ghRes = await callGitHubModels(prompt, systemPrompt, ghToken, stream);
           if (ghRes.ok) {
-            triggerBackgroundTasks('GitHub Models GPT-4o-mini (Tier 7 Microsoft USA)');
-            return wrapResponse(ghRes, stream, 'GitHub-Models-GPT-4o-mini (Tier 7 Microsoft USA)');
+            triggerBackgroundTasks('GitHub Models GPT-4o-mini (Tier 6 Microsoft USA)');
+            return wrapResponse(ghRes, stream, 'GitHub-Models-GPT-4o-mini (Tier 6 Microsoft USA)');
           }
         } catch (e) {
           console.warn('[EDGE-TEXT] GitHub Models error:', e.message);
         }
       }
 
-      // Tier 8: Cohere AI (Canada - Command R+ Academic Citations)
-      if (env.COHERE_API_KEY) {
-        try {
-          const cohereRes = await callCohereText(prompt, systemPrompt, env, stream);
-          if (cohereRes.ok) {
-            triggerBackgroundTasks('Cohere Command R+ (Tier 8 Canada)');
-            return wrapResponse(cohereRes, stream, 'Cohere-Command-R-Plus (Tier 8 Canada)');
-          }
-        } catch (e) {
-          console.warn('[EDGE-TEXT] Cohere error:', e.message);
-        }
-      }
-
       return new Response(
         JSON.stringify({
-          error: 'All non-Chinese AI waterfall providers exhausted or credentials missing.',
-          waterfall: ['Cerebras', 'Groq', 'Gemini', 'Cloudflare', 'SambaNova', 'Mistral', 'GitHub Models', 'Cohere'],
-        }),
-        {
-          status: 503,
-          headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },
-        }
-      );
-    } catch (globalErr) {
-      console.error('[EDGE-PROXY-FATAL]', globalErr.message);
-      return new Response(
-        JSON.stringify({
-          error: 'Edge AI proxy exception occurred.',
-          details: globalErr.message,
-        }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json', ...getCorsHeaders() },
-        }
-      );
-    }
-  },
-};
-        } catch (e) {
-          console.warn('[EDGE-TEXT] Mistral error:', e.message);
-        }
-      }
-
-      // Tier 7: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI)
-      const ghToken = env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
-      if (ghToken) {
-        try {
-          const ghRes = await callGitHubModels(prompt, systemPrompt, ghToken, stream);
-          if (ghRes.ok) {
-            return wrapResponse(ghRes, stream, 'GitHub-Models-GPT-4o-mini (Tier 7 Microsoft USA)');
-          }
-        } catch (e) {
-          console.warn('[EDGE-TEXT] GitHub Models error:', e.message);
-        }
-      }
-
-      // Tier 8: Cohere AI (Canada - Command R+ Academic Citations)
-      if (env.COHERE_API_KEY) {
-        try {
-          const cohereRes = await callCohereText(prompt, systemPrompt, env, stream);
-          if (cohereRes.ok) {
-            return wrapResponse(cohereRes, stream, 'Cohere-Command-R-Plus (Tier 8 Canada)');
-          }
-        } catch (e) {
-          console.warn('[EDGE-TEXT] Cohere error:', e.message);
-        }
-      }
-
-      return new Response(
-        JSON.stringify({
-          error: 'All non-Chinese AI waterfall providers exhausted or credentials missing.',
-          waterfall: ['Cerebras', 'Groq', 'Cloudflare', 'Gemini', 'SambaNova', 'Mistral', 'GitHub Models', 'Cohere'],
+          error: 'All 100% free zero-card AI waterfall providers exhausted or credentials missing.',
+          waterfall: ['Cerebras', 'Groq', 'Gemini', 'Cloudflare', 'SambaNova', 'GitHub Models'],
         }),
         {
           status: 503,
@@ -466,26 +371,6 @@ async function callSambaNovaText(prompt, systemPrompt, env, stream) {
   });
 }
 
-async function callMistralText(prompt, systemPrompt, env, stream) {
-  return await fetch('https://api.mistral.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.MISTRAL_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'codestral-latest',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.4,
-      max_tokens: 1800,
-      stream,
-    }),
-  });
-}
-
 async function callGitHubModels(prompt, systemPrompt, token, stream) {
   return await fetch('https://models.inference.ai.azure.com/chat/completions', {
     method: 'POST',
@@ -501,24 +386,6 @@ async function callGitHubModels(prompt, systemPrompt, token, stream) {
       ],
       temperature: 0.5,
       max_tokens: 1800,
-      stream,
-    }),
-  });
-}
-
-async function callCohereText(prompt, systemPrompt, env, stream) {
-  return await fetch('https://api.cohere.com/v2/chat', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.COHERE_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'command-r-plus-08-2024',
-      messages: [{ role: 'user', content: prompt }],
-      preamble: systemPrompt,
-      temperature: 0.45,
-      max_tokens: 1600,
       stream,
     }),
   });
@@ -565,33 +432,6 @@ async function callSambaNovaVision(prompt, imageBase64, systemPrompt, env, strea
           role: 'user',
           content: [
             { type: 'text', text: prompt || 'Identify and solve this handwritten formula or diagram.' },
-            { type: 'image_url', image_url: { url: dataUrl } },
-          ],
-        },
-      ],
-      temperature: 0.35,
-      max_tokens: 1800,
-      stream,
-    }),
-  });
-}
-
-async function callMistralVision(prompt, imageBase64, systemPrompt, env, stream) {
-  const dataUrl = imageBase64.startsWith('data:image/') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
-  return await fetch('https://api.mistral.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.MISTRAL_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'pixtral-12b-2409',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt || 'Transcribe handwriting to clean LaTeX and explain.' },
             { type: 'image_url', image_url: { url: dataUrl } },
           ],
         },
