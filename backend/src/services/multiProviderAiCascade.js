@@ -4,25 +4,23 @@
  * 100% Free • Zero Credit Card • Zero Billing Account Required
  * 100% Western / Allied Security: USA 🇺🇸, France 🇫🇷, Canada 🇨🇦
  * 0 Chinese Dependency (Zero DeepSeek, Zero Qwen, Zero Baichuan)
- * 0 Payment Method Required (Removed Mistral, Cohere & Cerebras which require billing/cards)
+ * 0 Payment Method Required (Removed Mistral, Cohere, Cerebras & SambaNova which require billing/cards)
  * 
  * 🟢 Branch A: Normal Text & Code Q&A (100% Zero-Card Waterfall)
  *   - Tier 0: Turso Edge Cache (0ms DB Hash hit)
  *   - Tier 1 🥇: Groq LPU (USA - Llama 3.3 70B @ ~800 tok/sec, ~0.30s • 0 Card)
  *   - Tier 2 🥈: Google Gemini 2.0 Flash / Flash-Lite (USA - 1M Context • 0 Card)
  *   - Tier 3 🥉: Cloudflare Workers AI (USA - Llama 3.1 8B Edge GPU • 0 Card)
- *   - Tier 4: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
- *   - Tier 5 🐙: GitHub Models / Microsoft (USA - GPT-4o-mini Azure AI • 0 Card)
- *   - Tier 6 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
- *   - Tier 7 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
+ *   - Tier 4 🐙: GitHub Models / Microsoft (USA - GPT-4o-mini Azure AI • 0 Card)
+ *   - Tier 5 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+ *   - Tier 6 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
  * 
  * 🟣 Branch B: Circle to Search & Handwritten OCR (Multimodal Vision • 0 Card)
  *   - Tier 1 🥇: Google Gemini 2.0 Flash Vision (USA - Undisputed Vision King • 0 Card)
- *   - Tier 2 🥈: SambaNova Cloud Vision (USA - Llama 3.2 90B Vision • 0 Card)
- *   - Tier 3 🥉: Groq Vision (USA - Llama 3.2 11B Vision @ ~0.4s • 0 Card)
- *   - Tier 4 🐙: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
- *   - Tier 5 🤗: Hugging Face Vision (Llama 3.2 11B Vision • 0 Card)
- *   - Tier 6 🌐: OpenRouter Vision (Llama 3.2 11B Vision:free • 0 Card)
+ *   - Tier 2 🥈: Groq Vision (USA - Llama 3.2 11B Vision @ ~0.4s • 0 Card)
+ *   - Tier 3 🥉: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
+ *   - Tier 4 🤗: Hugging Face Vision (Llama 3.2 11B Vision • 0 Card)
+ *   - Tier 5 🌐: OpenRouter Vision (Llama 3.2 11B Vision:free • 0 Card)
  * ==============================================================================
  */
 
@@ -204,44 +202,6 @@ async function callGeminiText(prompt, systemPrompt, apiKey, history = []) {
 }
 
 /**
- * Tier 5: SambaNova Cloud (USA) - Dedicated RDU Llama 3.3 70B
- */
-async function callSambaNovaText(prompt, systemPrompt, apiKey, history = []) {
-  const messages = buildChatMessages(prompt, systemPrompt, history);
-  const models = ['Meta-Llama-3.3-70B-Instruct', 'Meta-Llama-3.1-70B-Instruct'];
-
-  for (const model of models) {
-    try {
-      const res = await fetchWithTimeout(
-        'https://api.sambanova.ai/v1/chat/completions',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model,
-            messages,
-            temperature: 0.5,
-            max_tokens: 1600,
-          }),
-        },
-        6500
-      );
-
-      if (!res.ok) continue;
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content || '';
-      if (text) {
-        return { text, model: `sambanova/${model}`, provider: 'SambaNova Cloud (USA - RDU Accelerator)' };
-      }
-    } catch (err) {}
-  }
-  throw new Error('SambaNova Text failed');
-}
-
-/**
  * Tier 6: GitHub Models (Microsoft / USA) - GPT-4o-mini (100% Free, 0 Card)
  */
 async function callGitHubModels(prompt, systemPrompt, apiKey, history = []) {
@@ -418,53 +378,6 @@ async function callGeminiVision(prompt, imageBase64, systemPrompt, apiKey, histo
     } catch (err) {}
   }
   throw new Error('Gemini Vision failed');
-}
-
-/**
- * Vision Tier 2 🥈: SambaNova Cloud Vision (USA) - Llama 3.2 90B Vision
- */
-async function callSambaNovaVision(prompt, imageBase64, systemPrompt, apiKey) {
-  const dataUrl = normalizeImageDataUrl(imageBase64);
-  const models = ['Llama-3.2-90B-Vision-Instruct', 'Llama-3.2-11B-Vision-Instruct'];
-
-  for (const model of models) {
-    try {
-      const res = await fetchWithTimeout(
-        'https://api.sambanova.ai/v1/chat/completions',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: 'system', content: systemPrompt || DEFAULT_SYSTEM_PROMPT },
-              {
-                role: 'user',
-                content: [
-                  { type: 'text', text: prompt || 'Analyze this diagram/handwriting and solve with LaTeX.' },
-                  { type: 'image_url', image_url: { url: dataUrl } },
-                ],
-              },
-            ],
-            temperature: 0.35,
-            max_tokens: 1600,
-          }),
-        },
-        7500
-      );
-
-      if (!res.ok) continue;
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content || '';
-      if (text) {
-        return { text, model: `sambanova/${model}`, provider: 'SambaNova Cloud Vision (USA 🥈)' };
-      }
-    } catch (err) {}
-  }
-  throw new Error('SambaNova Vision failed');
 }
 
 /**
@@ -698,30 +611,11 @@ async function queryMultiProviderCascade({
           });
         }
       } catch (e) {
-        console.warn(`[VISION-CASCADE] Gemini Vision failed (${e.message}). Escalating to SambaNova Vision...`);
+        console.warn(`[VISION-CASCADE] Gemini Vision failed (${e.message}). Escalating to Groq Vision...`);
       }
     }
 
-    // Tier 2 🥈: SambaNova Cloud Vision (Llama 3.2 90B Vision)
-    if (process.env.SAMBANOVA_API_KEY) {
-      try {
-        const res = await callSambaNovaVision(effectivePrompt, imageBase64, sys, process.env.SAMBANOVA_API_KEY);
-        if (res?.text) {
-          return formatAiOutput({
-            title: extractTitle(res.text, effectivePrompt),
-            text: res.text,
-            provider: res.provider,
-            model: res.model,
-            elapsedMs: Date.now() - startTime,
-            queryType: queryType || 'vision-ocr',
-          });
-        }
-      } catch (e) {
-        console.warn(`[VISION-CASCADE] SambaNova Vision failed (${e.message}). Escalating to Groq Vision...`);
-      }
-    }
-
-    // Tier 3 🥉: Groq Vision (USA - Llama 3.2 11B Speed Fallback @ ~0.4s • 0 Card)
+    // Tier 2 🥈: Groq Vision (USA - Llama 3.2 11B Speed Fallback @ ~0.4s • 0 Card)
     if (process.env.GROQ_API_KEY) {
       try {
         const res = await callGroqVision(effectivePrompt, imageBase64, sys, process.env.GROQ_API_KEY);
@@ -740,7 +634,7 @@ async function queryMultiProviderCascade({
       }
     }
 
-    // Tier 4 🐙: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure • 0 Card)
+    // Tier 3 🥉: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure • 0 Card)
     const ghToken = process.env.GITHUB_MODELS_TOKEN || process.env.GITHUB_TOKEN || process.env.GH_MODELS_TOKEN;
     if (ghToken) {
       try {
@@ -863,30 +757,11 @@ async function queryMultiProviderCascade({
         });
       }
     } catch (e) {
-      console.warn(`[TEXT-CASCADE] Cloudflare AI (${e.message}). Escalating to SambaNova Cloud...`);
+      console.warn(`[TEXT-CASCADE] Cloudflare AI (${e.message}). Escalating to GitHub Models...`);
     }
   }
 
-  // Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B)
-  if (process.env.SAMBANOVA_API_KEY) {
-    try {
-      const res = await callSambaNovaText(effectivePrompt, sys, process.env.SAMBANOVA_API_KEY, history);
-      if (res?.text) {
-        return formatAiOutput({
-          title: extractTitle(res.text, effectivePrompt),
-          text: res.text,
-          provider: res.provider,
-          model: res.model,
-          elapsedMs: Date.now() - startTime,
-          queryType,
-        });
-      }
-    } catch (e) {
-      console.warn(`[TEXT-CASCADE] SambaNova (${e.message}). Escalating to GitHub Models...`);
-    }
-  }
-
-  // Tier 6 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
+  // Tier 4 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
   const ghToken = process.env.GITHUB_MODELS_TOKEN || process.env.GITHUB_TOKEN || process.env.GH_MODELS_TOKEN;
   if (ghToken) {
     try {
@@ -906,7 +781,7 @@ async function queryMultiProviderCascade({
     }
   }
 
-  // Tier 7 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+  // Tier 5 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
   const hfKey = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
   if (hfKey) {
     try {
@@ -926,7 +801,7 @@ async function queryMultiProviderCascade({
     }
   }
 
-  // Tier 8 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
+  // Tier 6 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
   if (process.env.OPENROUTER_API_KEY) {
     try {
       const res = await callOpenRouterText(effectivePrompt, sys, process.env.OPENROUTER_API_KEY, history);
@@ -1121,12 +996,10 @@ module.exports = {
   callGroqLPU,
   callCloudflareWorkersAI,
   callGeminiText,
-  callSambaNovaText,
   callGitHubModels,
   callHuggingFaceText,
   callOpenRouterText,
   callGeminiVision,
-  callSambaNovaVision,
   callGroqVision,
   callGitHubModelsVision,
   callHuggingFaceVision,

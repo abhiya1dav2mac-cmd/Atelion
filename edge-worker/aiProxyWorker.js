@@ -3,24 +3,22 @@
  * ATELION EDGE AI ROUTER - CLOUDFLARE WORKER PROXY
  * 100% Free • Zero Credit Card • Zero Billing Account Required
  * 100% Western / Allied Security: USA 🇺🇸, France 🇫🇷 • Zero Chinese Models
- * 0 Payment Method Required (Removed Mistral, Cohere & Cerebras which require billing/cards)
+ * 0 Payment Method Required (Removed Mistral, Cohere, Cerebras & SambaNova which require billing/cards)
  * 
  * 🟢 Branch A: Normal Text & Code Q&A (100% Free • 0 Card)
  *   - Tier 1 🥇: Groq LPU (USA - Llama 3.3 70B @ 800 tok/sec, ~0.30s • 0 Card)
  *   - Tier 2 🥈: Google Gemini 2.0 Flash (USA - 1M Context, High Academic • 0 Card)
  *   - Tier 3 🥉: Cloudflare Workers AI Native Edge (@cf/meta/llama-3.3-70b-instruct • 0 Card)
- *   - Tier 4: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
- *   - Tier 5 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
- *   - Tier 6 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
- *   - Tier 7 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
+ *   - Tier 4 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
+ *   - Tier 5 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+ *   - Tier 6 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
  * 
  * 🟣 Branch B: Circle to Search & Handwritten OCR (Vision Mode • 0 Card)
  *   - Tier 1 🥇: Google Gemini 2.0 Flash Vision (USA • 0 Card)
- *   - Tier 2 🥈: SambaNova Cloud Vision (USA - Llama 3.2 90B Vision • 0 Card)
- *   - Tier 3 🥉: Groq Vision (USA - Llama 3.2 11B Vision @ ~0.4s • 0 Card)
- *   - Tier 4 🐙: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
- *   - Tier 5 🤗: Hugging Face Vision (Llama 3.2 11B Vision • 0 Card)
- *   - Tier 6 🌐: OpenRouter Vision (Llama 3.2 11B Vision:free • 0 Card)
+ *   - Tier 2 🥈: Groq Vision (USA - Llama 3.2 11B Vision @ ~0.4s • 0 Card)
+ *   - Tier 3 🥉: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
+ *   - Tier 4 🤗: Hugging Face Vision (Llama 3.2 11B Vision • 0 Card)
+ *   - Tier 5 🌐: OpenRouter Vision (Llama 3.2 11B Vision:free • 0 Card)
  * ==============================================================================
  */
 
@@ -98,26 +96,13 @@ export default {
           }
         }
 
-        // Vision Tier 2 🥈: SambaNova Cloud Vision (Llama 3.2 90B Heavy Diagram Solver)
-        if (env.SAMBANOVA_API_KEY) {
-          try {
-            const sambaRes = await callSambaNovaVision(prompt, imageBase64, systemPrompt, env, stream);
-            if (sambaRes.ok) {
-              triggerBackgroundTasks('SambaNova Llama 3.2 90B Vision (Tier 2 🥈 USA)');
-              return wrapResponse(sambaRes, stream, 'SambaNova-Llama-3.2-90B-Vision (Tier 2 🥈 USA)');
-            }
-          } catch (e) {
-            console.warn('[EDGE-VISION] SambaNova Vision error:', e.message);
-          }
-        }
-
-        // Vision Tier 3 🥉: Groq Vision (Llama 3.2 11B Speed Fallback @ ~0.4s • 0 Card)
+        // Vision Tier 2 🥈: Groq Vision (Llama 3.2 11B Speed Fallback @ ~0.4s • 0 Card)
         if (env.GROQ_API_KEY) {
           try {
             const groqVisRes = await callGroqVision(prompt, imageBase64, systemPrompt, env, stream);
             if (groqVisRes.ok) {
-              triggerBackgroundTasks('Groq Llama 3.2 11B Vision (Tier 3 🥉 USA)');
-              return wrapResponse(groqVisRes, stream, 'Groq-Llama-3.2-11B-Vision (Tier 3 🥉 USA)');
+              triggerBackgroundTasks('Groq Llama 3.2 11B Vision (Tier 2 🥈 USA)');
+              return wrapResponse(groqVisRes, stream, 'Groq-Llama-3.2-11B-Vision (Tier 2 🥈 USA)');
             }
           } catch (e) {
             console.warn('[EDGE-VISION] Groq Vision error:', e.message);
@@ -235,48 +220,35 @@ export default {
         }
       }
 
-      // Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B Deep Compute)
-      if (env.SAMBANOVA_API_KEY) {
-        try {
-          const sambaRes = await callSambaNovaText(prompt, systemPrompt, env, stream);
-          if (sambaRes.ok) {
-            triggerBackgroundTasks('SambaNova Llama 3.3 70B (Tier 5 USA - RDU)');
-            return wrapResponse(sambaRes, stream, 'SambaNova-Llama-3.3-70B (Tier 5 USA - RDU)');
-          }
-        } catch (e) {
-          console.warn('[EDGE-TEXT] SambaNova error:', e.message);
-        }
-      }
-
-      // Tier 6 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
+      // Tier 4 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
       const ghToken = env.GITHUB_MODELS_TOKEN || env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
       if (ghToken) {
         try {
           const ghRes = await callGitHubModels(prompt, systemPrompt, ghToken, stream);
           if (ghRes.ok) {
-            triggerBackgroundTasks('GitHub Models GPT-4o-mini (Tier 6 Microsoft USA 🐙)');
-            return wrapResponse(ghRes, stream, 'GitHub-Models-GPT-4o-mini (Tier 6 Microsoft USA 🐙)');
+            triggerBackgroundTasks('GitHub Models GPT-4o-mini (Tier 4 Microsoft USA 🐙)');
+            return wrapResponse(ghRes, stream, 'GitHub-Models-GPT-4o-mini (Tier 4 Microsoft USA 🐙)');
           }
         } catch (e) {
           console.warn('[EDGE-TEXT] GitHub Models error:', e.message);
         }
       }
 
-      // Tier 7 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+      // Tier 5 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
       const hfKey = env.HUGGINGFACE_API_KEY || env.HF_TOKEN;
       if (hfKey) {
         try {
           const hfRes = await callHuggingFaceText(prompt, systemPrompt, hfKey, stream);
           if (hfRes.ok) {
-            triggerBackgroundTasks('Hugging Face Llama 3.3 70B (Tier 7 🤗)');
-            return wrapResponse(hfRes, stream, 'Hugging-Face-Llama-3.3-70B (Tier 7 🤗)');
+            triggerBackgroundTasks('Hugging Face Llama 3.3 70B (Tier 5 🤗)');
+            return wrapResponse(hfRes, stream, 'Hugging-Face-Llama-3.3-70B (Tier 5 🤗)');
           }
         } catch (e) {
           console.warn('[EDGE-TEXT] Hugging Face error:', e.message);
         }
       }
 
-      // Tier 8 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
+      // Tier 6 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
       if (env.OPENROUTER_API_KEY) {
         try {
           const orRes = await callOpenRouterText(prompt, systemPrompt, env.OPENROUTER_API_KEY, stream);
@@ -296,7 +268,6 @@ export default {
             'Groq',
             'Gemini',
             'Cloudflare',
-            'SambaNova',
             'GitHub Models',
             'Hugging Face',
             'OpenRouter',
@@ -382,26 +353,6 @@ async function callGeminiText(prompt, systemPrompt, env, stream) {
   throw new Error('Gemini text calls failed');
 }
 
-async function callSambaNovaText(prompt, systemPrompt, env, stream) {
-  return await fetch('https://api.sambanova.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.SAMBANOVA_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'Meta-Llama-3.3-70B-Instruct',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.5,
-      max_tokens: 1800,
-      stream,
-    }),
-  });
-}
-
 async function callGitHubModels(prompt, systemPrompt, token, stream) {
   return await fetch('https://models.inference.ai.azure.com/chat/completions', {
     method: 'POST',
@@ -485,33 +436,6 @@ async function callGeminiVision(prompt, imageBase64, systemPrompt, env, stream) 
         },
       ],
       generationConfig: { temperature: 0.35, maxOutputTokens: 2048 },
-    }),
-  });
-}
-
-async function callSambaNovaVision(prompt, imageBase64, systemPrompt, env, stream) {
-  const dataUrl = imageBase64.startsWith('data:image/') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
-  return await fetch('https://api.sambanova.ai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.SAMBANOVA_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'Llama-3.2-90B-Vision-Instruct',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        {
-          role: 'user',
-          content: [
-            { type: 'text', text: prompt || 'Identify and solve this handwritten formula or diagram.' },
-            { type: 'image_url', image_url: { url: dataUrl } },
-          ],
-        },
-      ],
-      temperature: 0.35,
-      max_tokens: 1800,
-      stream,
     }),
   });
 }
