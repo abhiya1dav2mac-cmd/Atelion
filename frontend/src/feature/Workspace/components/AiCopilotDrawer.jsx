@@ -41,7 +41,7 @@ export default function AiCopilotDrawer({
   const [messages, setMessages] = useState([]);
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedModel, setSelectedModel] = useState('Auto');
+  const [selectedModel, setSelectedModel] = useState('Auto Waterfall');
   const [isWide, setIsWide] = useState(false);
   const [localPinned, setLocalPinned] = useState(true);
   const [includeActiveNoteContext, setIncludeActiveNoteContext] = useState(true);
@@ -664,11 +664,19 @@ export default function AiCopilotDrawer({
                 type="button"
                 onClick={() =>
                   setSelectedModel((prev) =>
-                    prev === 'Auto' ? 'Groq LPU' : prev === 'Groq LPU' ? 'Gemini Vision' : 'Auto'
+                    prev === 'Auto Waterfall'
+                      ? 'Cerebras 2k tok/s'
+                      : prev === 'Cerebras 2k tok/s'
+                      ? 'Groq LPU'
+                      : prev === 'Groq LPU'
+                      ? 'Gemini 2.0'
+                      : prev === 'Gemini 2.0'
+                      ? 'Mistral'
+                      : 'Auto Waterfall'
                   )
                 }
                 className="text-[10px] text-gray-500 hover:text-gray-900 transition-colors cursor-pointer font-mono"
-                title="AI Cascade Engine"
+                title="8-Tier Non-Chinese AI Waterfall (Cerebras, Groq, Cloudflare, Gemini, SambaNova, Mistral, GitHub Models, Cohere)"
               >
                 {selectedModel} ⌄
               </button>
