@@ -10,16 +10,20 @@
  *   - Tier 0: Turso Edge Cache (0ms DB Hash hit)
  *   - Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ ~2,000 tok/sec • 0 Card)
  *   - Tier 2 🥈: Groq LPU (USA - Llama 3.3 70B @ ~800 tok/sec • 0 Card)
- *   - Tier 3 🥉: Google Gemini 2.0 Flash (USA - 1M Context, High Academic • 0 Card)
+ *   - Tier 3 🥉: Google Gemini 2.0 Flash / Flash-Lite (USA - 1M Context • 0 Card)
  *   - Tier 4: Cloudflare Workers AI (USA - Llama 3.1 8B Edge GPU • 0 Card)
  *   - Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
- *   - Tier 6: GitHub Models / Microsoft (USA - GPT-4o-mini Azure AI • 0 Card)
+ *   - Tier 6 🐙: GitHub Models / Microsoft (USA - GPT-4o-mini Azure AI • 0 Card)
+ *   - Tier 7 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+ *   - Tier 8 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
  * 
- * 🟣 Branch B: Circle to Search & Handwritten OCR (Multimodal Vision)
+ * 🟣 Branch B: Circle to Search & Handwritten OCR (Multimodal Vision • 0 Card)
  *   - Tier 1 🥇: Google Gemini 2.0 Flash Vision (USA - Undisputed Vision King • 0 Card)
  *   - Tier 2 🥈: SambaNova Cloud Vision (USA - Llama 3.2 90B Vision • 0 Card)
  *   - Tier 3 🥉: Groq Vision (USA - Llama 3.2 11B Vision @ ~0.4s • 0 Card)
- *   - Tier 4: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
+ *   - Tier 4 🐙: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
+ *   - Tier 5 🤗: Hugging Face Vision (Llama 3.2 11B Vision • 0 Card)
+ *   - Tier 6 🌐: OpenRouter Vision (Llama 3.2 11B Vision:free • 0 Card)
  * ==============================================================================
  */
 
@@ -308,11 +312,93 @@ async function callGitHubModels(prompt, systemPrompt, apiKey, history = []) {
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content || '';
     if (text) {
-      return { text, model: 'openai/gpt-4o-mini', provider: 'GitHub Models (Microsoft/OpenAI USA)' };
+      return { text, model: 'openai/gpt-4o-mini', provider: 'GitHub Models (Microsoft/OpenAI USA 🐙)' };
     }
   } catch (err) {
     throw new Error('GitHub Models failed');
   }
+}
+
+/**
+ * Tier 7 🤗: Hugging Face Serverless Router (USA/France) - Llama 3.3 70B (100% Free, 0 Card)
+ */
+async function callHuggingFaceText(prompt, systemPrompt, apiKey, history = []) {
+  const messages = buildChatMessages(prompt, systemPrompt, history);
+  const models = ['meta-llama/Llama-3.3-70B-Instruct', 'meta-llama/Llama-3.1-8B-Instruct'];
+
+  for (const model of models) {
+    try {
+      const res = await fetchWithTimeout(
+        'https://router.huggingface.co/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages,
+            temperature: 0.45,
+            max_tokens: 1600,
+          }),
+        },
+        7000
+      );
+
+      if (!res.ok) continue;
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || '';
+      if (text) {
+        return { text, model: `hf/${model}`, provider: 'Hugging Face Serverless (Free Router 🤗)' };
+      }
+    } catch (err) {}
+  }
+  throw new Error('Hugging Face Text failed');
+}
+
+/**
+ * Tier 8 🌐: OpenRouter Free Tier (USA) - Llama 3.3 70B:free (100% Free, 0 Card)
+ */
+async function callOpenRouterText(prompt, systemPrompt, apiKey, history = []) {
+  const messages = buildChatMessages(prompt, systemPrompt, history);
+  const models = [
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'meta-llama/llama-3.1-8b-instruct:free',
+    'google/gemini-2.0-flash-exp:free',
+  ];
+
+  for (const model of models) {
+    try {
+      const res = await fetchWithTimeout(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'HTTP-Referer': 'https://atelion.ai',
+            'X-Title': 'Atelion AI',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages,
+            temperature: 0.45,
+            max_tokens: 1600,
+          }),
+        },
+        7000
+      );
+
+      if (!res.ok) continue;
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || '';
+      if (text) {
+        return { text, model: `openrouter/${model}`, provider: 'OpenRouter Free Tier (Unified Multi-DC 🌐)' };
+      }
+    } catch (err) {}
+  }
+  throw new Error('OpenRouter Text failed');
 }
 
 // ==============================================================================
@@ -508,11 +594,110 @@ async function callGitHubModelsVision(prompt, imageBase64, systemPrompt, apiKey)
     const data = await res.json();
     const text = data.choices?.[0]?.message?.content || '';
     if (text) {
-      return { text, model: 'openai/gpt-4o-mini', provider: 'GitHub Models Vision (Microsoft/OpenAI USA)' };
+      return { text, model: 'openai/gpt-4o-mini', provider: 'GitHub Models Vision (Microsoft/OpenAI USA 🐙)' };
     }
   } catch (err) {
     throw new Error('GitHub Models Vision failed');
   }
+}
+
+/**
+ * Vision Tier 5 🤗: Hugging Face Serverless Vision (Llama 3.2 11B Vision • 0 Card)
+ */
+async function callHuggingFaceVision(prompt, imageBase64, systemPrompt, apiKey) {
+  const dataUrl = normalizeImageDataUrl(imageBase64);
+  const models = ['meta-llama/Llama-3.2-11B-Vision-Instruct'];
+
+  for (const model of models) {
+    try {
+      const res = await fetchWithTimeout(
+        'https://router.huggingface.co/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt || DEFAULT_SYSTEM_PROMPT },
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: prompt || 'Analyze this handwritten selection and output LaTeX.' },
+                  { type: 'image_url', image_url: { url: dataUrl } },
+                ],
+              },
+            ],
+            temperature: 0.35,
+            max_tokens: 1600,
+          }),
+        },
+        7500
+      );
+
+      if (!res.ok) continue;
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || '';
+      if (text) {
+        return { text, model: `hf/${model}`, provider: 'Hugging Face Serverless Vision (Tier 5 🤗)' };
+      }
+    } catch (err) {}
+  }
+  throw new Error('Hugging Face Vision failed');
+}
+
+/**
+ * Vision Tier 6 🌐: OpenRouter Free Vision (Llama 3.2 11B Vision:free • 0 Card)
+ */
+async function callOpenRouterVision(prompt, imageBase64, systemPrompt, apiKey) {
+  const dataUrl = normalizeImageDataUrl(imageBase64);
+  const models = [
+    'meta-llama/llama-3.2-11b-vision-instruct:free',
+    'google/gemini-2.0-flash-exp:free',
+  ];
+
+  for (const model of models) {
+    try {
+      const res = await fetchWithTimeout(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'HTTP-Referer': 'https://atelion.ai',
+            'X-Title': 'Atelion AI',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: 'system', content: systemPrompt || DEFAULT_SYSTEM_PROMPT },
+              {
+                role: 'user',
+                content: [
+                  { type: 'text', text: prompt || 'Identify and solve this handwritten formula or diagram.' },
+                  { type: 'image_url', image_url: { url: dataUrl } },
+                ],
+              },
+            ],
+            temperature: 0.35,
+            max_tokens: 1600,
+          }),
+        },
+        7500
+      );
+
+      if (!res.ok) continue;
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || '';
+      if (text) {
+        return { text, model: `openrouter/${model}`, provider: 'OpenRouter Free Vision (Tier 6 🌐)' };
+      }
+    } catch (err) {}
+  }
+  throw new Error('OpenRouter Vision failed');
 }
 
 // ==============================================================================
@@ -597,8 +782,8 @@ async function queryMultiProviderCascade({
       }
     }
 
-    // Tier 4: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure • 0 Card)
-    const ghToken = process.env.GITHUB_TOKEN || process.env.GH_MODELS_TOKEN;
+    // Tier 4 🐙: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure • 0 Card)
+    const ghToken = process.env.GITHUB_MODELS_TOKEN || process.env.GITHUB_TOKEN || process.env.GH_MODELS_TOKEN;
     if (ghToken) {
       try {
         const res = await callGitHubModelsVision(effectivePrompt, imageBase64, sys, ghToken);
@@ -613,7 +798,46 @@ async function queryMultiProviderCascade({
           });
         }
       } catch (e) {
-        console.warn(`[VISION-CASCADE] GitHub Models Vision failed (${e.message}).`);
+        console.warn(`[VISION-CASCADE] GitHub Models Vision failed (${e.message}). Escalating to Hugging Face Vision...`);
+      }
+    }
+
+    // Tier 5 🤗: Hugging Face Serverless Vision (Llama 3.2 11B Vision • 0 Card)
+    const hfKey = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
+    if (hfKey) {
+      try {
+        const res = await callHuggingFaceVision(effectivePrompt, imageBase64, sys, hfKey);
+        if (res?.text) {
+          return formatAiOutput({
+            title: extractTitle(res.text, effectivePrompt),
+            text: res.text,
+            provider: res.provider,
+            model: res.model,
+            elapsedMs: Date.now() - startTime,
+            queryType: queryType || 'vision-ocr',
+          });
+        }
+      } catch (e) {
+        console.warn(`[VISION-CASCADE] Hugging Face Vision failed (${e.message}). Escalating to OpenRouter Vision...`);
+      }
+    }
+
+    // Tier 6 🌐: OpenRouter Free Vision (Llama 3.2 11B Vision:free • 0 Card)
+    if (process.env.OPENROUTER_API_KEY) {
+      try {
+        const res = await callOpenRouterVision(effectivePrompt, imageBase64, sys, process.env.OPENROUTER_API_KEY);
+        if (res?.text) {
+          return formatAiOutput({
+            title: extractTitle(res.text, effectivePrompt),
+            text: res.text,
+            provider: res.provider,
+            model: res.model,
+            elapsedMs: Date.now() - startTime,
+            queryType: queryType || 'vision-ocr',
+          });
+        }
+      } catch (e) {
+        console.warn(`[VISION-CASCADE] OpenRouter Vision failed (${e.message}).`);
       }
     }
   }
@@ -723,8 +947,8 @@ async function queryMultiProviderCascade({
     }
   }
 
-  // Tier 6: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
-  const ghToken = process.env.GITHUB_TOKEN || process.env.GH_MODELS_TOKEN;
+  // Tier 6 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
+  const ghToken = process.env.GITHUB_MODELS_TOKEN || process.env.GITHUB_TOKEN || process.env.GH_MODELS_TOKEN;
   if (ghToken) {
     try {
       const res = await callGitHubModels(effectivePrompt, sys, ghToken, history);
@@ -739,7 +963,46 @@ async function queryMultiProviderCascade({
         });
       }
     } catch (e) {
-      console.warn(`[TEXT-CASCADE] GitHub Models (${e.message}). Falling back to local academic engine...`);
+      console.warn(`[TEXT-CASCADE] GitHub Models (${e.message}). Escalating to Hugging Face...`);
+    }
+  }
+
+  // Tier 7 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+  const hfKey = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
+  if (hfKey) {
+    try {
+      const res = await callHuggingFaceText(effectivePrompt, sys, hfKey, history);
+      if (res?.text) {
+        return formatAiOutput({
+          title: extractTitle(res.text, effectivePrompt),
+          text: res.text,
+          provider: res.provider,
+          model: res.model,
+          elapsedMs: Date.now() - startTime,
+          queryType,
+        });
+      }
+    } catch (e) {
+      console.warn(`[TEXT-CASCADE] Hugging Face (${e.message}). Escalating to OpenRouter Free...`);
+    }
+  }
+
+  // Tier 8 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
+  if (process.env.OPENROUTER_API_KEY) {
+    try {
+      const res = await callOpenRouterText(effectivePrompt, sys, process.env.OPENROUTER_API_KEY, history);
+      if (res?.text) {
+        return formatAiOutput({
+          title: extractTitle(res.text, effectivePrompt),
+          text: res.text,
+          provider: res.provider,
+          model: res.model,
+          elapsedMs: Date.now() - startTime,
+          queryType,
+        });
+      }
+    } catch (e) {
+      console.warn(`[TEXT-CASCADE] OpenRouter (${e.message}). Falling back to local academic engine...`);
     }
   }
 
@@ -922,8 +1185,12 @@ module.exports = {
   callGeminiText,
   callSambaNovaText,
   callGitHubModels,
+  callHuggingFaceText,
+  callOpenRouterText,
   callGeminiVision,
   callSambaNovaVision,
   callGroqVision,
   callGitHubModelsVision,
+  callHuggingFaceVision,
+  callOpenRouterVision,
 };

@@ -672,11 +672,17 @@ export default function AiCopilotDrawer({
                       ? 'Gemini 2.0'
                       : prev === 'Gemini 2.0'
                       ? 'SambaNova RDU'
+                      : prev === 'SambaNova RDU'
+                      ? 'GitHub Models'
+                      : prev === 'GitHub Models'
+                      ? 'Hugging Face'
+                      : prev === 'Hugging Face'
+                      ? 'OpenRouter Free'
                       : 'Auto Waterfall'
                   )
                 }
                 className="text-[10px] text-gray-500 hover:text-gray-900 transition-colors cursor-pointer font-mono"
-                title="Zero-Payment-Method AI Waterfall (Cerebras, Groq, Cloudflare, Gemini, SambaNova, GitHub Models)"
+                title="Zero-Payment-Method AI Waterfall (Cerebras, Groq, Gemini, Cloudflare, SambaNova, GitHub Models, Hugging Face, OpenRouter - 100% Free • 0 Card)"
               >
                 {selectedModel} ⌄
               </button>

@@ -2,9 +2,8 @@
  * ==============================================================================
  * ATELION EDGE AI ROUTER - CLOUDFLARE WORKER PROXY
  * 100% Free • Zero Credit Card • Zero Billing Account Required
- * 100% Western / Allied Security: USA 🇺🇸, France 🇫🇷, Canada 🇨🇦
- * 0 Chinese Dependency (Zero DeepSeek, Zero Qwen, Zero Baichuan)
- * 0 Payment Method Required (Removed Mistral & Cohere)
+ * 100% Western / Allied Security: USA 🇺🇸, France 🇫🇷 • Zero Chinese Models
+ * 0 Payment Method Required
  * 
  * 🟢 Branch A: Normal Text & Code Q&A (100% Free • 0 Card)
  *   - Tier 1 🥇: Cerebras Cloud (USA - Llama 3.3 70B @ 2,000 tok/sec • 0 Card)
@@ -12,13 +11,17 @@
  *   - Tier 3 🥉: Google Gemini 2.0 Flash (USA - 1M Context, High Academic • 0 Card)
  *   - Tier 4: Cloudflare Workers AI Native Edge (@cf/meta/llama-3.3-70b-instruct • 0 Card)
  *   - Tier 5: SambaNova Cloud (USA - Dedicated RDU Llama 3.3 70B • 0 Card)
- *   - Tier 6: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
+ *   - Tier 6 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
+ *   - Tier 7 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+ *   - Tier 8 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
  * 
  * 🟣 Branch B: Circle to Search & Handwritten OCR (Vision Mode • 0 Card)
  *   - Tier 1 🥇: Google Gemini 2.0 Flash Vision (USA • 0 Card)
  *   - Tier 2 🥈: SambaNova Cloud Vision (USA - Llama 3.2 90B Vision • 0 Card)
  *   - Tier 3 🥉: Groq Vision (USA - Llama 3.2 11B Vision @ ~0.4s • 0 Card)
- *   - Tier 4: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
+ *   - Tier 4 🐙: GitHub Models Vision (USA/Microsoft - GPT-4o-mini Vision • 0 Card)
+ *   - Tier 5 🤗: Hugging Face Vision (Llama 3.2 11B Vision • 0 Card)
+ *   - Tier 6 🌐: OpenRouter Vision (Llama 3.2 11B Vision:free • 0 Card)
  * ==============================================================================
  */
 
@@ -122,17 +125,44 @@ export default {
           }
         }
 
-        // Vision Tier 4: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure • 0 Card)
-        const ghToken = env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
+        // Vision Tier 4 🐙: GitHub Models Vision (GPT-4o-mini Vision via Microsoft Azure • 0 Card)
+        const ghToken = env.GITHUB_MODELS_TOKEN || env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
         if (ghToken) {
           try {
             const ghVisRes = await callGitHubModelsVision(prompt, imageBase64, systemPrompt, ghToken, stream);
             if (ghVisRes.ok) {
               triggerBackgroundTasks('GitHub Models GPT-4o-mini Vision (Tier 4 Microsoft USA)');
-              return wrapResponse(ghVisRes, stream, 'GitHub-Models-GPT-4o-mini-Vision (Tier 4 Microsoft USA)');
+              return wrapResponse(ghVisRes, stream, 'GitHub-Models-GPT-4o-mini-Vision (Tier 4 Microsoft USA 🐙)');
             }
           } catch (e) {
             console.warn('[EDGE-VISION] GitHub Models Vision error:', e.message);
+          }
+        }
+
+        // Vision Tier 5 🤗: Hugging Face Serverless Vision (Llama 3.2 11B Vision • 0 Card)
+        const hfKey = env.HUGGINGFACE_API_KEY || env.HF_TOKEN;
+        if (hfKey) {
+          try {
+            const hfVisRes = await callHuggingFaceVision(prompt, imageBase64, systemPrompt, hfKey, stream);
+            if (hfVisRes.ok) {
+              triggerBackgroundTasks('Hugging Face Llama 3.2 11B Vision (Tier 5 🤗)');
+              return wrapResponse(hfVisRes, stream, 'Hugging-Face-Llama-3.2-11B-Vision (Tier 5 🤗)');
+            }
+          } catch (e) {
+            console.warn('[EDGE-VISION] Hugging Face Vision error:', e.message);
+          }
+        }
+
+        // Vision Tier 6 🌐: OpenRouter Free Vision (Llama 3.2 11B Vision:free • 0 Card)
+        if (env.OPENROUTER_API_KEY) {
+          try {
+            const orVisRes = await callOpenRouterVision(prompt, imageBase64, systemPrompt, env.OPENROUTER_API_KEY, stream);
+            if (orVisRes.ok) {
+              triggerBackgroundTasks('OpenRouter Free Vision (Tier 6 🌐)');
+              return wrapResponse(orVisRes, stream, 'OpenRouter-Free-Vision (Tier 6 🌐)');
+            }
+          } catch (e) {
+            console.warn('[EDGE-VISION] OpenRouter Vision error:', e.message);
           }
         }
       }
@@ -232,24 +262,60 @@ export default {
         }
       }
 
-      // Tier 6: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
-      const ghToken = env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
+      // Tier 6 🐙: GitHub Models (USA/Microsoft - GPT-4o-mini Azure AI • 0 Card)
+      const ghToken = env.GITHUB_MODELS_TOKEN || env.GITHUB_TOKEN || env.GH_MODELS_TOKEN;
       if (ghToken) {
         try {
           const ghRes = await callGitHubModels(prompt, systemPrompt, ghToken, stream);
           if (ghRes.ok) {
-            triggerBackgroundTasks('GitHub Models GPT-4o-mini (Tier 6 Microsoft USA)');
-            return wrapResponse(ghRes, stream, 'GitHub-Models-GPT-4o-mini (Tier 6 Microsoft USA)');
+            triggerBackgroundTasks('GitHub Models GPT-4o-mini (Tier 6 Microsoft USA 🐙)');
+            return wrapResponse(ghRes, stream, 'GitHub-Models-GPT-4o-mini (Tier 6 Microsoft USA 🐙)');
           }
         } catch (e) {
           console.warn('[EDGE-TEXT] GitHub Models error:', e.message);
         }
       }
 
+      // Tier 7 🤗: Hugging Face Serverless Router (USA/France - Llama 3.3 70B • 0 Card)
+      const hfKey = env.HUGGINGFACE_API_KEY || env.HF_TOKEN;
+      if (hfKey) {
+        try {
+          const hfRes = await callHuggingFaceText(prompt, systemPrompt, hfKey, stream);
+          if (hfRes.ok) {
+            triggerBackgroundTasks('Hugging Face Llama 3.3 70B (Tier 7 🤗)');
+            return wrapResponse(hfRes, stream, 'Hugging-Face-Llama-3.3-70B (Tier 7 🤗)');
+          }
+        } catch (e) {
+          console.warn('[EDGE-TEXT] Hugging Face error:', e.message);
+        }
+      }
+
+      // Tier 8 🌐: OpenRouter Free Tier (USA - Llama 3.3 70B:free • 0 Card)
+      if (env.OPENROUTER_API_KEY) {
+        try {
+          const orRes = await callOpenRouterText(prompt, systemPrompt, env.OPENROUTER_API_KEY, stream);
+          if (orRes.ok) {
+            triggerBackgroundTasks('OpenRouter Free Tier Llama 3.3 70B (Tier 8 🌐)');
+            return wrapResponse(orRes, stream, 'OpenRouter-Free-Tier (Tier 8 🌐)');
+          }
+        } catch (e) {
+          console.warn('[EDGE-TEXT] OpenRouter error:', e.message);
+        }
+      }
+
       return new Response(
         JSON.stringify({
           error: 'All 100% free zero-card AI waterfall providers exhausted or credentials missing.',
-          waterfall: ['Cerebras', 'Groq', 'Gemini', 'Cloudflare', 'SambaNova', 'GitHub Models'],
+          waterfall: [
+            'Cerebras',
+            'Groq',
+            'Gemini',
+            'Cloudflare',
+            'SambaNova',
+            'GitHub Models',
+            'Hugging Face',
+            'OpenRouter',
+          ],
         }),
         {
           status: 503,
@@ -391,6 +457,48 @@ async function callGitHubModels(prompt, systemPrompt, token, stream) {
   });
 }
 
+async function callHuggingFaceText(prompt, systemPrompt, apiKey, stream) {
+  return await fetch('https://router.huggingface.co/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'meta-llama/Llama-3.3-70B-Instruct',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.45,
+      max_tokens: 1600,
+      stream,
+    }),
+  });
+}
+
+async function callOpenRouterText(prompt, systemPrompt, apiKey, stream) {
+  return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://atelion.ai',
+      'X-Title': 'Atelion AI',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'meta-llama/llama-3.3-70b-instruct:free',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt },
+      ],
+      temperature: 0.45,
+      max_tokens: 1600,
+      stream,
+    }),
+  });
+}
+
 // Vision Callers
 async function callGeminiVision(prompt, imageBase64, systemPrompt, env, stream) {
   const cleanB64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
@@ -486,6 +594,62 @@ async function callGitHubModelsVision(prompt, imageBase64, systemPrompt, token, 
           role: 'user',
           content: [
             { type: 'text', text: prompt || 'Transcribe handwritten math and explain.' },
+            { type: 'image_url', image_url: { url: dataUrl } },
+          ],
+        },
+      ],
+      temperature: 0.4,
+      max_tokens: 1800,
+      stream,
+    }),
+  });
+}
+
+async function callHuggingFaceVision(prompt, imageBase64, systemPrompt, apiKey, stream) {
+  const dataUrl = imageBase64.startsWith('data:image/') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
+  return await fetch('https://router.huggingface.co/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'meta-llama/Llama-3.2-11B-Vision-Instruct',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt || 'Analyze this handwritten selection and output LaTeX.' },
+            { type: 'image_url', image_url: { url: dataUrl } },
+          ],
+        },
+      ],
+      temperature: 0.35,
+      max_tokens: 1800,
+      stream,
+    }),
+  });
+}
+
+async function callOpenRouterVision(prompt, imageBase64, systemPrompt, apiKey, stream) {
+  const dataUrl = imageBase64.startsWith('data:image/') ? imageBase64 : `data:image/png;base64,${imageBase64}`;
+  return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://atelion.ai',
+      'X-Title': 'Atelion AI',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'meta-llama/llama-3.2-11b-vision-instruct:free',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt || 'Analyze this image and explain in LaTeX.' },
             { type: 'image_url', image_url: { url: dataUrl } },
           ],
         },
